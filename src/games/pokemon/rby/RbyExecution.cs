@@ -81,6 +81,10 @@ public partial class Rby {
         throw new NotImplementedException();
     }
 
+    public virtual bool SelectBall(int ballSlot = 0) {
+        throw new NotImplementedException();
+    }
+
     public void PickupItem() {
         Inject(Joypad.A);
         Hold(Joypad.A, SYM["PlaySound"]);

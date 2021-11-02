@@ -276,7 +276,17 @@ public class RedBlue : Rby {
 
     public override bool Yoloball(int ballSlot = 0) {
         ClearText();
+        // ClearText(Joypad.B);
         Press(Joypad.A | Joypad.Down, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down | Joypad.Right));
+        return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
+    }
+
+    public override bool SelectBall(int ballSlot = 0) {
+        ClearText();
+        // Hold(Joypad.B, SYM["ManualTextScroll"]);
+        // Press(Joypad.A);
+        // Hold(Joypad.B, SYM["PlayCry"]);
+        Press(Joypad.Down | Joypad.A, Joypad.Select, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down));
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }
 }

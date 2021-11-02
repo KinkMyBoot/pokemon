@@ -8,7 +8,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
     // todo fix edge case: yellow pidgey manip picks up item after yoloball on last tile
     // flag for verbosity
 
-    class IGTResult {
+    public class IGTResult {
         public RbyPokemon Mon;
         public RbyMap Map;
         public RbyTile Tile;
@@ -19,24 +19,24 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         }
         public byte IGTSec;
         public byte IGTFrame;
+        public string Info;
     }
 
-    public static List<(byte, byte, byte)> Empty = new List<(byte, byte, byte)>();
+    public static List<(int, byte, byte)> Empty = new List<(int, byte, byte)>();
 
-    public static void CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke, List<(byte, byte, byte)> itemPickups, bool check3600, bool checkDV) {
+    public static void CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke, bool check3600 = false, bool checkDV = false,
+                                List<(int, byte, byte)> itemPickups = null, bool selectball = false, int numThreads = 15, bool verbose = true) {
         byte[] state = File.ReadAllBytes(statePath);
 
-        int numThreads = 32;
-        bool verbose = false;
-
-        bool[] threadsRunning = new bool[numThreads];
-        Thread[] threads = new Thread[numThreads];
+        if(itemPickups==null)
+            itemPickups=Empty;
 
         Gb[] gbs = MultiThread.MakeThreads<Gb>(numThreads);
 
         gbs[0].LoadState(state);
         gbs[0].HardReset();
-        // gbs[0].Record("test");
+        if(numThreads==1)
+            gbs[0].Record("test");
         intro.ExecuteUntilIGT(gbs[0]);
         byte[] igtState = gbs[0].SaveState();
 
@@ -54,6 +54,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
                 gb.LoadState(igtState);
                 res.IGTSec = (byte)(igtCount / 60);
                 res.IGTFrame = (byte)(igtCount % 60);
+                // gb.CpuWrite("wPlayTimeMinutes", 5);
                 gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
                 gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
                 igtCount++;
@@ -62,7 +63,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
             intro.ExecuteAfterIGT(gb);
             int ret = 0;
-            foreach(string step in spacePath(path).Split()) {
+            foreach(string step in SpacePath(path).Split()) {
                 ret = gb.Execute(step);
                 if(itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
                     gb.PickupItem();
@@ -70,7 +71,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             }
 
             if(ret == gb.SYM["CalcStats"]) {
-                res.Yoloball = gb.Yoloball();
+                res.Yoloball = selectball ? gb.SelectBall() : gb.Yoloball();
                 res.Mon = gb.EnemyMon;
             }
             res.Tile = gb.Tile;
@@ -95,9 +96,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             }
             string summary;
             if(item.Mon != null) {
-                summary = $", Tile: {item.Map.Id}#{item.Tile.ToString()}, Yoloball: {item.Yoloball}";
+                summary = $", Tile: {item.Tile.ToString()}, Yoloball: {item.Yoloball}";
                 summary = checkDV ? item.Mon + summary : "L" + item.Mon.Level + " " + item.Mon.Species.Name + summary;
-                // summary = checkDV ? item.Mon + ", Tile: " + item.Map.Id.ToString() + " " + item.Tile.ToString() + ", Yoloball: " + item.Yoloball.ToString() : item.Mon.Species.Name + ", Tile: " + item.Tile.ToString() + ", Yoloball: " + item.Yoloball.ToString();
             } else {
                 summary = "No Encounter";
             }
@@ -115,15 +115,18 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         Console.WriteLine("Success: {0}/{1}", success, seconds * 60);
     }
 
-    public static string spacePath(string path) {
+    public static string SpacePath(string path) {
         string output = "";
 
-        string[] validActions = new string[] { "A", "U", "D", "L", "R", "S_B" };
+        string[] validActions = new string[] { "A", "U", "D", "L", "R", "S", "S_B" };
         while(path.Length > 0) {
             if (validActions.Any(path.StartsWith)) {
-                if (path.StartsWith("S")) {
+                if (path.StartsWith("S_B")) {
                     output += "S_B";
                     path = path.Remove(0, 3);
+                } else if(path.StartsWith("S")) {
+                    output += "S_B";
+                    path = path.Remove(0, 1);
                 } else {
                     output += path[0];
                     path = path.Remove(0, 1);
