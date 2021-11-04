@@ -94,8 +94,10 @@ public abstract class Tile<M, T> where M : Map<M, T>
         if(!Edges.ContainsKey(edgeSet)) {
             Edges[edgeSet] = new List<Edge<M, T>>();
         }
-        Edges[edgeSet].Add(edge);
-        Edges[edgeSet].Sort();
+        if(GetEdge(edgeSet, edge.Action) == null) {
+            Edges[edgeSet].Add(edge);
+            Edges[edgeSet].Sort();
+        }
     }
 
     public Edge<M, T> GetEdge(int edgeSet, Action action) {

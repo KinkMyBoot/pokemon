@@ -42,7 +42,7 @@ public static class YellowMoonBackup {
         DFParameters<Yellow, RbyMap, RbyTile> parameters = new DFParameters<Yellow, RbyMap, RbyTile>() {
             PruneAlreadySeenStates = true,
             MaxCost = 20,
-            NoEncounterSS = 60,
+            SuccessSS = 60,
             RNGSS = 56,
             EndTiles = new RbyTile[] { map2[12, 9], },
             FoundCallback = state => writer.WriteLine(state.Log),

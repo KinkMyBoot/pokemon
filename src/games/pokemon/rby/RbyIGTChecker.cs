@@ -14,8 +14,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public RbyTile Tile;
         public bool Yoloball;
 
-        public override string ToString() {
-            return String.Format("[{0}] [{1}]: {2} on {3}, Yoloball: {4}", IGTSec, IGTFrame, Mon, Tile, Yoloball);
+        public string ToString(bool dvs=false) {
+            return $"[{IGTSec}] [{IGTFrame}]: " + (Mon!=null ? (dvs ? Mon.ToString() : $"L{Mon.Level} {Mon.Species.Name}")+$" on {Tile}, Yoloball: {Yoloball}" : "");
         }
         public byte IGTSec;
         public byte IGTFrame;
@@ -58,7 +58,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
                 gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
                 gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
                 igtCount++;
-                if(verbose) Console.WriteLine(igtCount);
+                if(verbose && igtCount%100==0) Console.WriteLine(igtCount);
             }
 
             intro.ExecuteAfterIGT(gb);
@@ -89,7 +89,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         });
 
         foreach(var item in manipResults) {
-            if(verbose) Console.WriteLine(item);
+            if(verbose) Console.WriteLine(item.ToString(checkDV));
             if((String.IsNullOrEmpty(targetPoke) && item.Mon == null) ||
                 (item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
                 success++;

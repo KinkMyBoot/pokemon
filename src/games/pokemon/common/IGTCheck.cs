@@ -24,6 +24,8 @@ public class IGTState {
         get { return (HRA + HRS) & 0xff; }
     }
 
+    public IGTState() {}
+
     public IGTState(GameBoy gb, bool success, int igtStamp) {
         IGTStamp = igtStamp;
         Success = success;
@@ -55,20 +57,24 @@ public class IGTResults {
         get { return IGTs.Where(x => x != null && x.Success).Count(); }
     }
 
+    public int TotalOverworld {
+        get { return IGTs.Where(x => x != null && x.State != null).Count(); }
+    }
+
     public int TotalFailures {
         get { return IGTs.Where(x => x == null || !x.Success).Count(); }
     }
 
     public int MostCommonHRA {
-        get { return IGTs.Where(x => x != null).GroupBy(x => x.HRA).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.HRA).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public int MostCommonHRS {
-        get { return IGTs.Where(x => x != null).GroupBy(x => x.HRS).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.HRS).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public int MostCommonDivider {
-        get { return IGTs.Where(x => x != null).GroupBy(x => x.Divider).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.Divider).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public byte[] FirstState {
@@ -90,7 +96,8 @@ public class IGTResults {
     public Dictionary<(int, int), int> RNGBands(int range) {
         Dictionary<(int, int), int> ret = new Dictionary<(int, int), int>();
         foreach(IGTState igt in IGTs) {
-            if(igt.Success) {
+            // if(igt.Success) {
+            if(igt.State != null) {
                 bool foundBand = false;
                 for(int j = 0; j < ret.Count; j++) {
                     (int hra, int hrs) key = ret.ElementAt(j).Key;

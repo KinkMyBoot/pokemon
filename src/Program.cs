@@ -25,7 +25,7 @@ class Program {
         // string nido = "LLLULLLAULADULLLADLLDADDADLALUAUU"; //alt2
         // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; //alt3
         // string nido = "LLLULULLLARLALLLADLDALDADLADLUUAU"; //alt4
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", true, true);
     }
 
@@ -33,7 +33,7 @@ class Program {
     {
         string poy = "DDDDDDDDDDDARRRRRRRRRRRRRRRRD";
         poy+= "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", true, false, null, true);
         // RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, null, true);
     }
@@ -80,7 +80,7 @@ class Program {
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDDADLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//5 1 late
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLALLLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//6 1 early
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLLALLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//6 1 late
-        RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
+        RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
         RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", true, false, items);
     }
 
@@ -105,16 +105,8 @@ class Program {
         entrMoon += "DADRARD";
         entrMoon += "DADDRRDDDDDDDDDRRRRRRRRRRRRRR";
         entrMoon += "RRUUURARRRDDRRRRRRUURRARDDDDDDDDLLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUAUUU";
-        RbyIntroSequence entrMoonIntro = new RbyIntroSequence(RbyStrat.NoPalAB, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
+        RbyIntroSequence entrMoonIntro = new RbyIntroSequence(RbyStrat.NoPalAB);
         RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", false, false, items, true);
-    }
-
-    static void SimplePidgey()
-    {
-        string simplepidgey = "UUAUUUUUUAUUUUU"+"UUUAUUURU"+"UUUUARRRRR";
-        // string simplepidgey = "UUAUUUUUUAUUUUU"+"UUUAUUURU"+"UUUURARRRUUUUUR";
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/simplepidgey.gqs", intro, simplepidgey, "PIDGEY");
     }
 
     static void NidoFrame33Backup()
@@ -197,6 +189,8 @@ class Program {
     static void Main(string[] args) {
         // Tests.RunAllTests();
 
-        NidoFrame33Backup();
+        PidgeyBackup.Search(15, 60, 57);
+        // PidgeyBackup.Search(10, 10, 7);
+        // PidgeyBackup.Check();
     }
 }

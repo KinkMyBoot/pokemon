@@ -197,7 +197,7 @@ public static class Totodile {
                                                         if(introCost > MaxCost) break;
                                                         gb.Hold(Joypad.A, "OWPlayerInput");
                                                         DFParameters<Gold, GscMap, GscTile> parameters = new DFParameters<Gold, GscMap, GscTile>() {
-                                                            NoEncounterSS = 1,
+                                                            SuccessSS = 1,
                                                             PruneAlreadySeenStates = false,
                                                             MaxCost = MaxCost - introCost,
                                                             LogStart = string.Format("(x={0}, y={1}, h={2}, m={3}, momStep={4}, audio={5:x02}, frameType={6}, menuAccount={7}, igt={8}, mmback={9}, fsback={10}, delay={11}) ",
