@@ -14,7 +14,9 @@ class Program {
     static void Main(string[] args) {
         // Tests.RunAllTests();
 
-        CheckIGT.NidoFrame33Backup();
+        new Extended();
+
+        // CheckIGT.NidoFrame33Backup();
 
         // PidgeyBackup.Search(15, 60, 57);
         // PidgeyBackup.Search(10, 10, 7);

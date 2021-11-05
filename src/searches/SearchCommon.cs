@@ -20,7 +20,7 @@ class SearchCommon
         return Profile("elapsed", fn);
     }
 
-    public struct Display { public string path; public int s, t, a; };
+    public struct Display { public string Path; public int S, T, A; };
     public static int TurnCount(string path)
     {
         path = Regex.Replace(path, "[AS_B]", "");
