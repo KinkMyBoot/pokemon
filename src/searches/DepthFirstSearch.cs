@@ -48,9 +48,9 @@ public class DFState<M, T> where M : Map<M, T>
 
 public static class DepthFirstSearch {
 
-    public static void StartSearch<Gb, M, T>(Gb[] gbs, DFParameters<Gb, M, T> parameters, T startTile, int startEdgeSet, IGTResults initialState) where Gb : PokemonGame
-                                                                                                                                                  where M : Map<M, T>
-                                                                                                                                                  where T : Tile<M, T> {
+    public static void StartSearch<Gb, M, T>(Gb[] gbs, DFParameters<Gb, M, T> parameters, T startTile, int startEdgeSet, IGTResults initialState, int initAPress = 1) where Gb : PokemonGame
+                                                                                                                                                                      where M : Map<M, T>
+                                                                                                                                                                      where T : Tile<M, T> {
         if(parameters.FoundCallback == null)
             parameters.FoundCallback = state => Console.WriteLine(state.Log);
         wildEncounterAddress = gbs[0].SYM["CalcStats"];
@@ -60,7 +60,7 @@ public static class DepthFirstSearch {
             EdgeSet = startEdgeSet,
             WastedFrames = 0,
             Log = parameters.LogStart,
-            APressCounter = 1,
+            APressCounter = initAPress,
             IGT = initialState,
         }, new HashSet<int>());
     }

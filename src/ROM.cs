@@ -159,6 +159,7 @@ public class ROM {
 }
 
 public class SYM : BiDictionary<string, int> {
+    public static bool AddEveryAddress = false;
 
     public SYM(string file) : base() {
         string[] lines = File.ReadAllLines(file);
@@ -177,7 +178,7 @@ public class SYM : BiDictionary<string, int> {
             string label = match.Groups[3].Value;
             Add(label, bank << 16 | addr);
 
-            if(previousBank != -1) {
+            if(AddEveryAddress && previousBank != -1) {
                 for(int newAddr = previousAddr + 1; newAddr < addr && newAddr <= 0x8000; newAddr++) {
                     int offset = (newAddr - previousAddr);
                     int newAddress = previousBank << 16 | newAddr;

@@ -17,9 +17,7 @@ class Program {
         new Extended();
 
         // CheckIGT.NidoFrame33Backup();
-
-        // PidgeyBackup.Search(15, 60, 57);
-        // PidgeyBackup.Search(10, 10, 7);
+        // PidgeyBackup.Search();
         // PidgeyBackup.Check();
     }
 }
