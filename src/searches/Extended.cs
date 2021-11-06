@@ -169,10 +169,34 @@ class Extended
         PersistentGbs = null;
     }
 
+    class RedCb : Red
+    {
+        int Address;
+        Action<RedCb> Callback = null;
+        public RedCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { }
+        public void SetCallback(int address, Action<RedCb> callback)
+        {
+            Address = address;
+            Callback = callback;
+        }
+        public unsafe override int Hold(Joypad joypad, params int[] addrs)
+        {
+            if(Callback != null)
+                addrs = addrs.Append(Address).ToArray();
+            int ret;
+            while((ret = base.Hold(joypad, addrs)) == Address)
+            {
+                Callback(this);
+                RunFor(1);
+            }
+            return ret;
+        }
+    }
+
     static List<IGTResult> CheckIGT(int framesToWait, string path, int numThreads = 12, bool verbose = false, int maxframe = 60)
     {
-        numThreads = 1;
-        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        // numThreads = 1;
+        RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if (numThreads == 1)
             gbs[0].Record("test");
         List<IGTResult> results = new List<IGTResult>();
@@ -193,29 +217,28 @@ class Extended
             gb.Press(Joypad.Start);
 
             Dictionary<int, string> npcMovement = new Dictionary<int, string>();
-            // gb.AddInterrupt(gb.SYM["TryWalking"] + 25, (gb) =>
-            // {
-            //     if (gb.GetMap().Id != 1)
-            //         return;
-            //     string movement;
-            //     Registers reg = gb.Registers;
-            //     switch (reg.B)
-            //     {
-            //         case 1: movement = "r"; break;
-            //         case 2: movement = "l"; break;
-            //         case 4: movement = "d"; break;
-            //         case 8: movement = "u"; break;
-            //         default: movement = ""; break;
-            //     }
-            //     if ((reg.F & 0x10) == 0)
-            //         movement = movement.ToUpper();
-            //     int npc = gb.CpuRead(0xffda) / 16;
+            gb.SetCallback(gb.SYM["TryWalking"] + 25, (gb) =>
+            {
+                if (gb.Map.Id != 1)
+                    return;
+                string movement;
+                Registers reg = gb.Registers;
+                switch (reg.B)
+                {
+                    case 1: movement = "r"; break;
+                    case 2: movement = "l"; break;
+                    case 4: movement = "d"; break;
+                    case 8: movement = "u"; break;
+                    default: movement = ""; break;
+                }
+                if ((reg.F & 0x10) == 0)
+                    movement = movement.ToUpper();
+                int npc = gb.CpuRead(0xffda) / 16;
 
-            //     string log = npcMovement.GetValueOrDefault(npc);
-            //     if (log == null || log.Last().ToString().ToLower() != movement)
-            //         npcMovement[npc] = log + movement;
-            //     // Console.WriteLine("npc "+npc+" move "+movement+" B="+reg.B+" F="+reg.F);
-            // });
+                string log = npcMovement.GetValueOrDefault(npc);
+                if (log == null || log.Last().ToString().ToLower() != movement)
+                    npcMovement[npc] = log + movement;
+            });
 
             int ret = gb.Execute(SpacePath(path));
 
