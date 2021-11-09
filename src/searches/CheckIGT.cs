@@ -195,4 +195,54 @@ class CheckIGT {
             Trace.WriteLine(", Yoloball2: " + yoloball);
         }
     }
+
+    public static void ForestPath3()
+    {
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
+        Red gb = new Red();
+        // gb.Record("test");
+
+        gb.LoadState("basesaves/red/manip/nido.gqs");
+        gb.HardReset();
+        intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeMinutes", 0);
+        gb.CpuWrite("wPlayTimeSeconds", 0);
+        gb.CpuWrite("wPlayTimeFrames",  32);
+        intro.ExecuteAfterIGT(gb);
+        byte[] state = gb.SaveState();
+
+        for (byte maxhp = 21; maxhp <= 23; ++maxhp)
+        for (byte hp = 10; hp <= maxhp; ++hp)
+        {
+            gb.LoadState(state);
+            gb.CpuWriteBE<ushort>("wPartyMon1HP",      hp );
+            gb.CpuWriteBE<ushort>("wPartyMon1MaxHP",   maxhp );
+            Trace.Write(gb.CpuReadBE<ushort>("wPartyMon1HP")+"/"+gb.CpuReadBE<ushort>("wPartyMon1MaxHP")+" ");
+
+            gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"));
+            gb.Yoloball();
+
+            gb.ClearText(Joypad.B);
+            gb.Press(Joypad.A);
+            gb.RunUntil("_Joypad");
+            gb.AdvanceFrames(5); // 0 1 2 2 3
+
+            gb.Press(Joypad.A, Joypad.Start);
+
+            gb.Execute(SpacePath("DRRUUURRRRRRRRRRRRRRRRRRRRRURUUUUUURAUUUUUUUUUUUUUUUUUUUULUAUULLLUUUUUUUUUURRRARU"));
+            gb.Yoloball();
+
+            gb.ClearText(Joypad.A);
+            gb.Press(Joypad.B);
+
+            int adr = gb.Execute(SpacePath("UUUAULLLLLU" + "RUUUUUUU" + "UUURURRURRRRRUAUUUUUUUUUUUUUUUUUUAUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLUAUU"), (gb.Maps[51][25,12], gb.PickupItem));
+            if(adr == gb.SYM["CalcStats"])
+                Trace.WriteLine(gb.EnemyMon.Species.Name + " " + gb.EnemyMon.Level);
+            else
+                Trace.WriteLine("No encounter");
+        }
+
+        gb.AdvanceFrames(300);
+        gb.Dispose();
+    }
 }
