@@ -12,12 +12,11 @@ using System.Numerics;
 class Program {
 
     static void Main(string[] args) {
+        Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText("log.txt")));
+        Trace.AutoFlush = true;
+
         // Tests.RunAllTests();
 
         new Extended();
-
-        // CheckIGT.NidoFrame33Backup();
-        // PidgeyBackup.Search();
-        // PidgeyBackup.Check();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using static RbyIGTChecker<Red>;
 
@@ -103,7 +104,7 @@ class CheckIGT {
 
     public static void NidoFrame33Backup()
     {
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal, RbyStrat.GfSkip, RbyStrat.Hop0, RbyStrat.Title0, RbyStrat.Continue, RbyStrat.Continue);
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         Red gb = new Red();
         const Joypad PLD=Joypad.B, PLD_ball=Joypad.A;
 
@@ -132,23 +133,23 @@ class CheckIGT {
             // gb.CpuWriteBE<ushort>("wPartyMon1Defense", def );
             // gb.CpuWriteBE<ushort>("wPartyMon1Speed",   spd );
             // gb.CpuWriteBE<ushort>("wPartyMon1Special", spc );
-            // Console.Write(gb.CpuReadBE<ushort>("wPartyMon1HP")+"/"+gb.CpuReadBE<ushort>("wPartyMon1MaxHP")+" "+gb.CpuReadBE<ushort>("wPartyMon1Attack")+" "+gb.CpuReadBE<ushort>("wPartyMon1Defense")+" "+gb.CpuReadBE<ushort>("wPartyMon1Speed")+" "+gb.CpuReadBE<ushort>("wPartyMon1Special"));
+            // Trace.Write(gb.CpuReadBE<ushort>("wPartyMon1HP")+"/"+gb.CpuReadBE<ushort>("wPartyMon1MaxHP")+" "+gb.CpuReadBE<ushort>("wPartyMon1Attack")+" "+gb.CpuReadBE<ushort>("wPartyMon1Defense")+" "+gb.CpuReadBE<ushort>("wPartyMon1Speed")+" "+gb.CpuReadBE<ushort>("wPartyMon1Special"));
 
             const string nidopath = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
             int addr;
             addr = gb.Execute(SpacePath(nidopath));
 
-            Console.Write($"{s,2} 33,  ");
+            Trace.Write($"{s,2} 33,  ");
 
             if (addr != gb.SYM["CalcStats"])
             {
-                Console.WriteLine("No enc");
+                Trace.WriteLine("No enc");
                 continue;
             }
 
             if (gb.EnemyMon.Species.Name != "NIDORANM")
             {
-                Console.WriteLine(gb.EnemyMon.Species.Name);
+                Trace.WriteLine(gb.EnemyMon.Species.Name);
                 continue;
             }
 
@@ -160,10 +161,10 @@ class CheckIGT {
             gb.Hold(PLD, gb.SYM["PlayCry"]);
             gb.Press(Joypad.Down | Joypad.A, Joypad.A | Joypad.Left); // yoloball 1
             yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
-            Console.Write("Yoloball1: " + yoloball);
+            Trace.Write("Yoloball1: " + yoloball);
             if(yoloball)
             {
-                Console.WriteLine();
+                Trace.WriteLine("");
                 continue;
             }
 
@@ -173,14 +174,14 @@ class CheckIGT {
             addr=gb.RunUntil(gb.SYM["MoveMissed"], gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]); // get move info
             byte move=gb.CpuRead(gb.SYM["wEnemySelectedMove"]);
             if(move > 0) {
-                Console.Write(", Move: " + gb.Moves[move].Name);
+                Trace.Write(", Move: " + gb.Moves[move].Name);
             }
             if(addr == gb.SYM["MoveMissed"]) {
-                Console.Write(" Miss");
+                Trace.Write(" Miss");
                 addr=gb.RunUntil(gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]);
             }
             if(gb.CpuRead(gb.SYM["wCriticalHitOrOHKO"]) > 0) {
-                Console.Write(" Crit");
+                Trace.Write(" Crit");
             }
 
             if(addr==gb.SYM["ManualTextScroll"]) { // crit / status
@@ -191,7 +192,7 @@ class CheckIGT {
             gb.Press(Joypad.A, Joypad.A | Joypad.Right); // yoloball 2
             // gb.Press(Joypad.A, Joypad.Select, Joypad.A); // select
             yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
-            Console.WriteLine(", Yoloball2: " + yoloball);
+            Trace.WriteLine(", Yoloball2: " + yoloball);
         }
     }
 }

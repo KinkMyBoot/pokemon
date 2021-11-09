@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 using System.IO;
 
 public static class RbyIGTChecker<Gb> where Gb : Rby {
@@ -20,6 +21,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public byte IGTSec;
         public byte IGTFrame;
         public string Info;
+        public IGTResult Extended;
     }
 
     public static List<(int, byte, byte)> Empty = new List<(int, byte, byte)>();
@@ -89,7 +91,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         });
 
         foreach(var item in manipResults) {
-            if(verbose) Console.WriteLine(item.ToString(checkDV));
+            if(verbose) Trace.WriteLine(item.ToString(checkDV));
             if((String.IsNullOrEmpty(targetPoke) && item.Mon == null) ||
                 (item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
                 success++;
@@ -109,10 +111,10 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         }
 
         foreach(var item in manipSummary) {
-            Console.WriteLine("{0}, {1}/{2}", item.Key, item.Value, seconds * 60);
+            Trace.WriteLine($"{item.Key}, {item.Value}/{seconds * 60}");
         }
 
-        Console.WriteLine("Success: {0}/{1}", success, seconds * 60);
+        Trace.WriteLine($"Success: {success}/{seconds * 60}");
     }
 
     public static string SpacePath(string path) {

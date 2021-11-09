@@ -1,5 +1,6 @@
 using System.Linq;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 using static SearchCommon;
@@ -92,7 +93,7 @@ class PidgeyBackup
             FoundCallback = state =>
             {
                 results.Add(state);
-                Console.WriteLine(tile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(tile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             }
         };
 
