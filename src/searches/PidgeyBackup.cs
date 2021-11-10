@@ -17,7 +17,7 @@ class PidgeyBackup
         string pidgeybackup = "UUUUUUUUUUUUU"+"UAUUUUAURU"+"UUUURR"+"RRRRSLLUUUUU"; // 3594/3600
         // string pidgeybackup = "UUUUUUUUUUUUU"+"URUAUUAUUU"+"UUUURR";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/pidgey13.gqs", intro, pidgeybackup, "PIDGEY", true);
+        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/pidgey13.gqs", intro, pidgeybackup, "PIDGEY", 3600);
         // 14
         // string pidgeybackup = "UUUUUUUUUUUUUU"+"URUAUUAUUU"+"UUAUUAR"+"RRDRRUUUUUURUUUDDDLLLLRR"; // 3595/3600
         // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);

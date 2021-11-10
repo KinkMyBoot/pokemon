@@ -275,8 +275,8 @@ public class Yellow : Rby {
         ListScroll(target, Joypad.Select | direction, true);
     }
 
-    public override bool Yoloball(int ballSlot = 0) {
-        ClearText();
+    public override bool Yoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
+        ClearText(hold);
         Press(Joypad.Down, Joypad.A, Joypad.A | Joypad.B);
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }

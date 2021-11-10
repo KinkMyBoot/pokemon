@@ -274,14 +274,14 @@ public class RedBlue : Rby {
         ListScroll(target, Joypad.Select | direction, true);
     }
 
-    public override bool Yoloball(int ballSlot = 0) {
-        ClearText(Joypad.B);
+    public override bool Yoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
+        ClearText(hold);
         Press(Joypad.A | Joypad.Down, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down | Joypad.Right));
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }
 
-    public override bool SelectBall(int ballSlot = 0) {
-        ClearText(Joypad.B);
+    public override bool SelectBall(int ballSlot = 0, Joypad hold = Joypad.None) {
+        ClearText(hold);
         Press(Joypad.Down | Joypad.A, Joypad.Select, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down));
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }

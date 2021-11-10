@@ -19,7 +19,7 @@ class Extended
         if (res.Mon.Species.Name != pokename)
             return false;
 
-        res.Yoloball = gb.Yoloball();
+        res.Yoloball = gb.Yoloball(0, Joypad.B);
         return res.Yoloball;
     }
     static bool CheckNoEncounter(int address, Red gb, IGTResult res)
@@ -33,19 +33,22 @@ class Extended
 
     static void BuildStates()
     {
+        const int numThreads = 16;
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        Red gb = new Red();
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+        // if (numThreads == 1) gb.Record("test");
 
         gb.LoadState("basesaves/red/manip/nido.gqs");
         gb.HardReset();
         intro.ExecuteUntilIGT(gb);
         byte[] igtState = gb.SaveState();
 
-        const int maxframe = 60;
-        for (int f = 0; f < maxframe; ++f)
+        const int numFrames = 3598;
+        MultiThread.For(numFrames, gbs, (gb, f) =>
         {
-            if (IgnoredFrames.Contains(f))
-                continue;
+            if (IgnoredFrames.Contains(f % 60))
+                return;
 
             gb.LoadState(igtState);
             byte sec = (byte)(f / 60);
@@ -60,7 +63,7 @@ class Extended
             ret = gb.Execute(SpacePath(nidopath));
 
             if (!CheckEncounter(ret, gb, "NIDORANM", new IGTResult()))
-                continue;
+                return;
 
             gb.ClearText(Joypad.B);
             gb.Press(Joypad.A);
@@ -68,9 +71,9 @@ class Extended
             gb.AdvanceFrame();
             gb.SaveState("basesaves/red/manip/ext/nido_" + sec + "_" + frame + ".gqs");
 
-            if (f % 10 == 0)
-                Console.WriteLine(f + "/" + maxframe);
-        }
+            if (f % 100 == 0)
+                Console.WriteLine(f + "/" + numFrames);
+        });
     }
 
     class IGTStateResult : IGTResult
@@ -204,11 +207,11 @@ class Extended
         }
     }
 
-    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int minFrame = 0, bool verbose = false)
+    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = false)
     {
-        return CheckIGT(framesToWait, path, null, numFrames, numThreads, minFrame, verbose);
+        return CheckIGT(framesToWait, path, null, numFrames, numThreads, startFrame, verbose);
     }
-    static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int minFrame = 0, bool verbose = false)
+    static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = false)
     {
         RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if (numThreads == 1)
@@ -217,7 +220,7 @@ class Extended
 
         MultiThread.For(numFrames, gbs, (gb, f) =>
         {
-            f += minFrame;
+            f += startFrame;
             if (IgnoredFrames.Contains(f % 60))
                 return;
 
@@ -261,6 +264,7 @@ class Extended
             // });
 
             int address = gb.Execute(SpacePath(path));
+            // address = DecideMovement(gb, res, npcMovement);
 
             CheckEncounter(address, gb, "PIDGEY", res);
 
@@ -295,11 +299,62 @@ class Extended
 
         return results;
     }
+    static int DecideMovement(Red gb, IGTResult res, Dictionary<(int, int), string> npcMovement)
+    {
+        res.Info=" path";
+        int address;
+        string npc1,npc2;
+        npc1=npcMovement.GetValueOrDefault((1, 1));
+        if(npc1=="dD")
+            gb.Execute(SpacePath("RUUUUUU"));
+        else
+            gb.Execute(SpacePath("UUUUUUR"));
+        npc1=npcMovement.GetValueOrDefault((1, 1));
+        if(npc1=="uL")
+            gb.Execute(SpacePath("UUAUU"));
+        else if(npc1=="rL" || npc1=="rD")
+            gb.Execute(SpacePath("AUUUU"));
+        else
+            gb.Execute(SpacePath("UUUU"));
+        npc1=npcMovement.GetValueOrDefault((1, 1));
+        npc2=npcMovement.GetValueOrDefault((1, 7));
+        if(npc1=="r" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[1].Substring(40)));
+        else if(npc1=="uL" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[2].Substring(41)));
+        else if((npc1=="rL" || npc1=="rD") && npc2=="L")
+            address = gb.Execute(SpacePath(Paths[3].Substring(41)));
+        else if(npc1=="uU" && npc2=="L")
+            address = gb.Execute(SpacePath(Paths[4].Substring(40)));
+        else if(npc1=="d" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[5].Substring(40)));
+        else if(npc1=="d" && npc2=="L")
+            address = gb.Execute(SpacePath(Paths[6].Substring(40)));
+        else if(npc1=="dUR" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[7].Substring(40)));
+        else if(npc1=="dD" && npc2=="R")
+            address = gb.Execute(SpacePath("LUUUUUUUUUUUUUUUUUUUUULLLUUUUURRRRUUUAU"));
+        else if(npc1=="r" && npc2=="L")
+            address = gb.Execute(SpacePath(Paths[8].Substring(40)));
+        else if(npc1=="dr" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[9].Substring(40)));
+        else if(npc1=="u" && npc2=="R")
+            address = gb.Execute(SpacePath(Paths[10].Substring(40)));
+        else
+        {
+            res.Info="";
+            if(npc2.Contains("R"))
+                address = gb.Execute(SpacePath("LUUUUUUU"));
+            else
+                address = gb.Execute(SpacePath("UUUUUUU"));
+        }
+        return address;
+    }
 
     enum PrintFlags
     {
         None = 0,
-        PrintAll = 1,
+        List = 1,
         Level = 2,
         Tile = 4,
         Info = 8,
@@ -349,20 +404,20 @@ class Extended
         foreach (IGTResult res in results)
         {
             string line = ResultInfo(res, flags);
-            if ((flags & PrintFlags.PrintAll) != 0)
+            if ((flags & PrintFlags.List) != 0)
                 Trace.WriteLine((results.Count > 60 ? $"{res.IGTSec,2} " : "") + $"{res.IGTFrame,2} " + line);
             if (!summary.ContainsKey(line))
                 summary.Add(line, 1);
             else
                 summary[line]++;
         }
-        if ((flags & PrintFlags.PrintAll) != 0)
+        if ((flags & PrintFlags.List) != 0)
             Trace.WriteLine("");
 
         return summary;
     }
 
-    static void DisplayIGTResults(List<IGTResult> results, int frame = -1, PrintFlags flags = PrintFlags.PrintAll | PrintFlags.Level | PrintFlags.Tile | PrintFlags.Info)
+    static void DisplayIGTResults(List<IGTResult> results, int frame = -1, PrintFlags flags = PrintFlags.List | PrintFlags.Level | PrintFlags.Tile | PrintFlags.Info)
     {
         if (frame >= 0)
             Trace.WriteLine("PATH " + FramePath(frame) + " (frame " + frame + ")");
@@ -503,6 +558,7 @@ class Extended
         "UUUUULLLLLU" + "UUUUUURU" + "UUUURURRRRRRRAUUUAUUUAUUUUUUUUUUUUUUUAUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDADDADDADDDDDDDDDDLLLLLAUUU",// 4
         "UUUULLLLLU" + "UUUURUUU" + "UUUURRRRRRRURAUUUUUAUUUUUUAUUUUUUUUUUUUUUUUUAUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLAUUU",    // 5
         "UUUULALLLLUUU" + "RUUUUUUU" + "UUURURRRRRRRUUUUUUUAUUUUAUUUUUUUUUUUUUAUUUAUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDLDLLLLUUU",  // 6
+        "","","",""
     };
     static SortedSet<int> IgnoredFrames = new SortedSet<int> { 33, 36, 37 };
 
@@ -550,13 +606,12 @@ class Extended
         }
         IgnoredFrames.Add(34);
     }
-    static void PathMovements(bool withA = true)
+    static void PathUnknownMovements()
     {
-        for(int frame=1; frame<=10; ++frame) {
+        for(int frame=1; frame<=11; ++frame) {
             List<IGTResult> res;
-            if(withA) res = CheckIGT(frame, Paths[frame]);
-            else res = CheckIGT(frame, Paths[frame].Replace("A","").Substring(0,50));
-            DisplayIGTResults(res, frame);
+            res = CheckIGT(frame, BasePath, 60);
+            DisplayIGTResults(res, frame, PrintFlags.Info);
             Trace.WriteLine("");
         }
     }

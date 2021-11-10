@@ -26,8 +26,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
     public static List<(int, byte, byte)> Empty = new List<(int, byte, byte)>();
 
-    public static void CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke, bool check3600 = false, bool checkDV = false,
-                                List<(int, byte, byte)> itemPickups = null, bool selectball = false, int numThreads = 15, bool verbose = true) {
+    public static void CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke, int numFrames = 60, bool checkDV = false,
+                                List<(int, byte, byte)> itemPickups = null, bool selectball = false, int startFrame = 0, int stepFrame = 1, int numThreads = 16, bool verbose = true) {
         byte[] state = File.ReadAllBytes(statePath);
 
         if(itemPickups==null)
@@ -44,24 +44,24 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
         List<IGTResult> manipResults = new List<IGTResult>();
         Dictionary<string, int> manipSummary = new Dictionary<string, int>();
-        byte seconds = check3600 ? (byte) 60 : (byte) 1;
 
         object frameLock = new object();
         object writeLock = new object();
-        int igtCount = 0;
+        int igtCount = startFrame;
 
-        MultiThread.For(seconds*60, gbs, (gb, iterator) => {
+        MultiThread.For(numFrames, gbs, (gb, iterator) => {
             IGTResult res = new IGTResult();
             lock(frameLock) {
-                gb.LoadState(igtState);
                 res.IGTSec = (byte)(igtCount / 60);
                 res.IGTFrame = (byte)(igtCount % 60);
-                // gb.CpuWrite("wPlayTimeMinutes", 5);
-                gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
-                gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
-                igtCount++;
+                igtCount += stepFrame;
                 if(verbose && igtCount%100==0) Console.WriteLine(igtCount);
             }
+            gb.LoadState(igtState);
+            // Console.WriteLine(res.IGTSec + " " + res.IGTFrame);
+            // gb.CpuWrite("wPlayTimeMinutes", 5);
+            gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
+            gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
 
             intro.ExecuteAfterIGT(gb);
             int ret = 0;
@@ -109,12 +109,13 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
                 manipSummary[summary]++;
             }
         }
+        if(verbose) Trace.WriteLine("");
 
         foreach(var item in manipSummary) {
-            Trace.WriteLine($"{item.Key}, {item.Value}/{seconds * 60}");
+            Trace.WriteLine($"{item.Key}, {item.Value}/{numFrames}");
         }
 
-        Trace.WriteLine($"Success: {success}/{seconds * 60}");
+        Trace.WriteLine($"Success: {success}/{numFrames}");
     }
 
     public static string SpacePath(string path) {

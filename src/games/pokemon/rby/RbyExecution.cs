@@ -77,11 +77,11 @@ public partial class Rby {
         return ret;
     }
 
-    public virtual bool Yoloball(int ballSlot = 0) {
+    public virtual bool Yoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
         throw new NotImplementedException();
     }
 
-    public virtual bool SelectBall(int ballSlot = 0) {
+    public virtual bool SelectBall(int ballSlot = 0, Joypad hold = Joypad.None) {
         throw new NotImplementedException();
     }
 
@@ -247,8 +247,8 @@ public partial class Rby {
 
     public IGTState MakeIGTState(RbyIntroSequence intro, byte[] initialState, int igt) {
         LoadState(initialState);
-        CpuWrite("wPlayTimeSeconds", (byte) (igt % 60));
-        CpuWrite("wPlayTimeFrames", (byte) igt);
+        CpuWrite("wPlayTimeSeconds", (byte) (igt / 60));
+        CpuWrite("wPlayTimeFrames", (byte) (igt % 60));
         intro.ExecuteAfterIGT(this);
         return new IGTState(this, true, igt);
     }

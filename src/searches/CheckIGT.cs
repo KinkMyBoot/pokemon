@@ -19,16 +19,16 @@ class CheckIGT {
         // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; //alt3
         // string nido = "LLLULULLLARLALLLADLDALDADLADLUUAU"; //alt4
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", true, true);
+        CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", 3600, true);
     }
 
     public static void Poy()
     {
         string poy = "DDDDDDDDDDDARRRRRRRRRRRRRRRRD";
-        poy+= "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
+        poy += "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", true, false, null, true);
-        // RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, null, true);
+        CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", 3600, false, null, true);
+        // CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, null, true);
     }
 
     public static void Rt3Moon()
@@ -48,33 +48,65 @@ class CheckIGT {
         rt3Moon += "LALLALLALLALDD";
         rt3Moon += "RRRUUULAUR";
         rt3Moon += "DDADLALLAD";
-        // rt3Moon += "DDADDALLAL"; //alt post mp
+        // rt3Moon += "DDADDALLAL"; // alt post mp
         rt3Moon += "RARRARRARRARUU";
         rt3Moon += "DDLDDDDLLLLLLLULUUUUULUUUUUUUULLLUL";
         rt3Moon += "DADDRAR";
         rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRDR";
-        // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRRD"; //slayer
-        // rt3Moon += "DRRDDDDDDDDDADRRRRRRRRRRRRRDR"; //4 early
-        // rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; //3 early
-        // rt3Moon += "DRRDDDDDDDDDDRARRRRRRRRRRRRDR"; //2 early
-        // rt3Moon += "DRRDDDDDDDDDDRRARRRRRRRRRRRDR"; //1 early
-        // rt3Moon += "DRRDDDDDDDDDDRRRRARRRRRRRRRDR"; //1 late
-        // rt3Moon += "DRRDDDDDDDDDDRRRRRARRRRRRRRDR"; //2 late
-        // rt3Moon += "DRRDDDDDDDDDDRRRRRRARRRRRRRDR"; //3 late
-        // rt3Moon += "DRRDDDDDDDDDDRRRRRRRARRRRRRDR"; //4 late
+        // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRRD"; // slayer
+        // rt3Moon += "DRRDDDDDDDDDADRRRRRRRRRRRRRDR"; // 4 early
+        // rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; // 3 early
+        // rt3Moon += "DRRDDDDDDDDDDRARRRRRRRRRRRRDR"; // 2 early
+        // rt3Moon += "DRRDDDDDDDDDDRRARRRRRRRRRRRDR"; // 1 early
+        // rt3Moon += "DRRDDDDDDDDDDRRRRARRRRRRRRRDR"; // 1 late
+        // rt3Moon += "DRRDDDDDDDDDDRRRRRARRRRRRRRDR"; // 2 late
+        // rt3Moon += "DRRDDDDDDDDDDRRRRRRARRRRRRRDR"; // 3 late
+        // rt3Moon += "DRRDDDDDDDDDDRRRRRRRARRRRRRDR"; // 4 late
         rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";
-        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; //alt b2f
-        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; //alt b2f v2
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLALLLLLUUUUAUUALUUUUUUUU";//7 1 late
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLALLLLUUUUAUUALUUUUUUUU";//7 2 late
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLLALLLUUUUAUUALUUUUUUUU";//7 3 late
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLALLLLLLLUUUUAUUALUUUUUUUU";//7 1 early
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//5 1 early
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDDADLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//5 1 late
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLALLLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//6 1 early
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLLALLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";//6 1 late
+        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f
+        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f v2
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLALLLLLUUUUAUUALUUUUUUUU"; // 7 1 late
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLALLLLUUUUAUUALUUUUUUUU"; // 7 2 late
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLLALLLUUUUAUUALUUUUUUUU"; // 7 3 late
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLALLLLLLLUUUUAUUALUUUUUUUU"; // 7 1 early
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 5 1 early
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDDADLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 5 1 late
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLALLLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 6 1 early
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLLALLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 6 1 late
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", true, false, items);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 3600, false, items);
+    }
+
+    public static void Rt3MoonBackups()
+    {
+        int frame = 36;
+        var items = new List<(int, byte, byte)> {
+            (59, 34, 31), // candy
+            (59, 35, 23), // rope
+            (59, 3, 2), // moon stone
+            (59, 5, 31), // wg
+            (61, 28, 5), // mp
+        };
+        string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
+        rt3Moon += "UUUUUULLLLLLLLLDD";
+        // rt3Moon += "RRRRUURRRRRUUUUUUURRRRRRURUUUUUURRRDDDDDDDDDRDDDDDDDDRRRRRRRRURUUUUUUUURULUUUUUUUUUUUULLULUUUUUULLDLLLLDDDLLLLLLLLDDDD";
+        rt3Moon += "RRRRUURRRRRUUUUUUURRRRRRURUUUUUURRRDDDDDDDDDRDDDDDDDDRRRRRRRRURUUUUUUUURULUUUUUUUUUUUULLULUUUUUULLLLLLDDDDLLLLLLLLDDDD"; // alt
+        rt3Moon += "LALLLLLLLDD";
+        rt3Moon += "RARRAUUULUR";
+        rt3Moon += "DDDDLLL";
+        rt3Moon += "RRRRRRRRUU";
+        rt3Moon += "DDDDDDLLLLLLUUAUUAUUUUUUUUUUULALLALLLLL";
+        rt3Moon += "DADDRAR";
+        rt3Moon += "DDDDDDDDDDDDRRRRRRRRRRRRRRRR";
+        // if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDDDLLALLDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU";
+        // if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDDDLLLLADDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
+        // if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDLLLLADDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
+        if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDALLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
+
+        if(frame == 37) rt3Moon += "UUURRRRRRDDARRRRARRUURRRDDDDDDDDLLLLDDDDDADDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUU";
+        RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, false, frame, 60, 16, false);
+        CheckIGT("basesaves/red/manip/rt3moon_redbar.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, false);
     }
 
     public static void EntrMoon()
@@ -99,7 +131,18 @@ class CheckIGT {
         entrMoon += "DADDRRDDDDDDDDDRRRRRRRRRRRRRR";
         entrMoon += "RRUUURARRRDDRRRRRRUURRARDDDDDDDDLLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUAUUU";
         RbyIntroSequence entrMoonIntro = new RbyIntroSequence(RbyStrat.NoPalAB);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", false, false, items, true);
+        CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", 3600, false, items, true);
+    }
+
+    public static void ParasBackup()
+    {
+        // string parasbackup = "LLLLLLLLLLDDDADDRAR" + "RRRD"; // sf - 3300 & 3299
+        // string parasbackup = "LLLLLLLLLLDDDADRRAD" + "RRR"; // hw - 3359 & 3358
+        // string parasbackup = "LLLLLLLLLLDDDADRARD" + "RRR"; // 3359 3358
+        string parasbackup = "LLLLLLLLLLDDDDARRAD" + "RRR"; // 3359 3358
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
+        CheckIGT("basesaves/red/manip/parasbackup.gqs", intro, parasbackup, "PARAS", 3600);
+        CheckIGT("basesaves/red/manip/parasbackup_redbar.gqs", intro, parasbackup, "PARAS", 3600);
     }
 
     public static void NidoFrame33Backup()
@@ -244,5 +287,62 @@ class CheckIGT {
 
         gb.AdvanceFrames(300);
         gb.Dispose();
+    }
+
+    public static void Cans()
+    {
+        // string path = "DALLLAURUUUUUA"; // 58 cans - 3477/3600
+        // string path = "DLALLAURUUUUUA"; // alt
+        // string path = "DLLLURUUUUUA"; // 57 cans - 3420/3600
+        // string path = "SDLALLAURUAUUUUA"; // 60 cans - 3596/3600
+        string path = "SDALLLAURAUUUUUA"; // alt
+        // string path = "DLLLU"+"RUUUUULUUUUUUURDA"; // xd
+        // string path = "DDLLLUURUUUUUA"; // fail 57 - 3419
+        // string path = "DDALLLUURUUUUUA"; // fail 58 - 3361
+        // string path = "DDLALLUURUUUUUA"; // fail 58 - 3361
+        int numFrames = 3600;
+        int numThreads = 16;
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
+        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold); // + 57 cans
+
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+
+        gb.LoadState("basesaves/red/manip/cans.gqs");
+        gb.HardReset();
+        if(numThreads==1)
+            gb.Record("test");
+        intro.ExecuteUntilIGT(gb);
+        byte[] igtState = gb.SaveState();
+
+        var full = new List<string>();
+        var results = new Dictionary<(byte,byte),int>();
+
+        MultiThread.For(numFrames, gbs, (gb, f) => {
+            gb.LoadState(igtState);
+            gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
+            gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
+            // gb.CpuWrite("wPlayTimeMinutes", (byte)(f % 60));
+            // gb.CpuWrite("wPlayTimeSeconds", 57);
+            // gb.CpuWrite("wPlayTimeFrames", 36);
+
+            intro.ExecuteAfterIGT(gb);
+            gb.Execute(SpacePath(path));
+
+            (byte, byte) cans = (gb.CpuRead("wFirstLockTrashCanIndex"), gb.CpuRead("wSecondLockTrashCanIndex"));
+            lock(results) {
+                full.Add($"{f/60,2} {f%60,2}: {cans.Item1},{cans.Item2}");
+                if (!results.ContainsKey(cans))
+                    results.Add(cans, 1);
+                else
+                    results[cans]++;
+            }
+        });
+        full.Sort();
+        foreach(string line in full)
+            Trace.WriteLine(line);
+        Trace.WriteLine("");
+        foreach(var cans in results)
+            Trace.WriteLine(cans.Key.Item1 + "," + cans.Key.Item2 + ": " + cans.Value);
     }
 }
