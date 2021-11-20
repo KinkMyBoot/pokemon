@@ -8,16 +8,17 @@ class CheckIGT {
 
     public static void AltNidos()
     {
-        string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU"; //standard
-        // string nido = "LLLULLUAULALDLDLLADDADDLALLALUUAU"; //turn-a
-        // string nido = "LLLULLUAULALDLDLLADDDADLALLALUUAU"; //both
-        // string nido = "LLLULLUAULALDLDLLDADDDLALLALUUAU"; //igt
-        // string nido = "LDUALLULLLLAULLLLLADDADDLADLAUUAU"; //palette1
-        // string nido = "LDUALLULLLLAULLLLDADDADLLADLAUUAU"; //palette2
-        // string nido = "LLLULLLLAUDAULLLADLADDDADLALLUAUU"; //alt1
-        // string nido = "LLLULLLAULADULLLADLLDADDADLALUAUU"; //alt2
-        // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; //alt3
-        // string nido = "LLLULULLLARLALLLADLDALDADLADLUUAU"; //alt4
+        string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU"; // standard
+        // string nido = "LLLULLUAULALDLDLLADDADDLALLALUUAU"; // turn-a
+        // string nido = "LLLULLUAULALDLDLLADDDADLALLALUUAU"; // both
+        // string nido = "LLLULLUAULALDLDLLDADDDLALLALUUAU"; // igt
+        // string nido = "LDUALLULLLLAULLLLLADDADDLADLAUUAU"; // palette1
+        // string nido = "LDUALLULLLLAULLLLDADDADLLADLAUUAU"; // palette2
+        // string nido = "LLLULLLLAUDAULLLADLADDDADLALLUAUU"; // alt1
+        // string nido = "LLLULLLAULADULLLADLLDADDADLALUAUU"; // alt2
+        // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; // alt3
+        // string nido = "LLLULULLLARLALLLADLDALDADLADLUUAU"; // alt4
+        // string nido = "ULLLLLUAUDALLLDLLADDDADLALLALUUAU"; // weird alt
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", 3600, true);
     }

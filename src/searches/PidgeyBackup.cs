@@ -67,13 +67,13 @@ class PidgeyBackup
         RbyMap forest = gb.Maps[51];
         RbyMap entrance = gb.Maps[47];
         RbyMap route2 = gb.Maps[13];
-        Action action=Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
+        Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
         RbyTile[] endTiles = { route2[8, 7] };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), action);
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, entrance[5, 1], action);
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, forest[1, 0], action);
-        forest[1, 1].GetEdge(0, Action.Up).NextTile=entrance[4, 7];
-        entrance[4, 7].GetEdge(0, Action.Right).Cost=0;
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions);
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, entrance[5, 1], actions);
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, forest[1, 0], actions);
+        forest[1, 1].GetEdge(0, Action.Up).NextTile = entrance[4, 7];
+        entrance[4, 7].GetEdge(0, Action.Right).Cost = 0;
         entrance[5, 1].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = route2[3, 11], NextEdgeset = 0, Cost = 0 });
         // Pathfinding.DebugDrawEdges(gb, route2, 0);
 

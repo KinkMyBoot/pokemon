@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.IO;
 
 public static class RbyIGTChecker<Gb> where Gb : Rby {
-    // todo fix edge case: yellow pidgey manip picks up item after yoloball on last tile
-    // flag for verbosity
 
     public class IGTResult {
         public RbyPokemon Mon;
@@ -34,32 +32,27 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             itemPickups=Empty;
 
         Gb[] gbs = MultiThread.MakeThreads<Gb>(numThreads);
+        Gb gb = gbs[0];
 
-        gbs[0].LoadState(state);
-        gbs[0].HardReset();
+        gb.LoadState(state);
+        gb.HardReset();
         if(numThreads==1)
-            gbs[0].Record("test");
-        intro.ExecuteUntilIGT(gbs[0]);
-        byte[] igtState = gbs[0].SaveState();
+            gb.Record("test");
+        intro.ExecuteUntilIGT(gb);
+        byte[] igtState = gb.SaveState();
 
         List<IGTResult> manipResults = new List<IGTResult>();
         Dictionary<string, int> manipSummary = new Dictionary<string, int>();
 
-        object frameLock = new object();
-        object writeLock = new object();
-        int igtCount = startFrame;
-
         MultiThread.For(numFrames, gbs, (gb, iterator) => {
             IGTResult res = new IGTResult();
-            lock(frameLock) {
-                res.IGTSec = (byte)(igtCount / 60);
-                res.IGTFrame = (byte)(igtCount % 60);
-                igtCount += stepFrame;
-                if(verbose && igtCount%100==0) Console.WriteLine(igtCount);
-            }
+
+            int igt = startFrame + iterator * stepFrame;
+            res.IGTSec = (byte)(igt / 60);
+            res.IGTFrame = (byte)(igt % 60);
+            if(verbose && (igt * 100) % numFrames == 0) Console.WriteLine("%");
+
             gb.LoadState(igtState);
-            // Console.WriteLine(res.IGTSec + " " + res.IGTFrame);
-            // gb.CpuWrite("wPlayTimeMinutes", 5);
             gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
             gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
 
@@ -79,7 +72,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             res.Tile = gb.Tile;
             res.Map = gb.Map;
 
-            lock(writeLock) {
+            lock(manipResults) {
                 manipResults.Add(res);
             }
         });

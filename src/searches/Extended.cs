@@ -71,9 +71,79 @@ class Extended
             gb.AdvanceFrame();
             gb.SaveState("basesaves/red/manip/ext/nido_" + sec + "_" + frame + ".gqs");
 
-            if (f % 100 == 0)
-                Console.WriteLine(f + "/" + numFrames);
+            if(f % (numFrames / 100) == 0) Console.WriteLine("%");
         });
+    }
+
+    static void LogRNG()
+    {
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
+        RedCb gb = new RedCb();
+        gb.Record("test");
+
+        gb.LoadState("basesaves/red/manip/nido.gqs");
+        gb.HardReset();
+        intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeMinutes", 4);
+        gb.CpuWrite("wPlayTimeSeconds", 58);
+        gb.CpuWrite("wPlayTimeFrames", 0);
+        intro.ExecuteAfterIGT(gb);
+        gb.SetCallback(gb.SYM["VBlank"], (gb) =>
+        {
+            Trace.WriteLine($"{gb.CpuRead("wPlayTimeMinutes"):d2}:{gb.CpuRead("wPlayTimeSeconds"):d2}.{gb.CpuRead("wPlayTimeFrames"):d2} {gb.CpuRead("hRandomAdd"):x2}{gb.CpuRead("hRandomSub"):x2}");
+        });
+        gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"));
+        gb.Yoloball(0, Joypad.B);
+        gb.Hold(Joypad.B, "ManualTextScroll"); // all right
+        // gb.AdvanceFrame(); // all right late
+            // Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText("allrightlate.txt"), "allrightlate.txt"));
+        gb.ClearText(Joypad.B, 2);
+        gb.Hold(Joypad.B, "ManualTextScroll"); // will be
+        // gb.AdvanceFrame(); // will be late
+        gb.ClearText(Joypad.B, 4);
+        gb.Hold(Joypad.B, "ManualTextScroll"); // give a
+        gb.ClearText(Joypad.B, 1);
+        // gb.AdvanceFrame(); // yesno late
+        gb.ClearText(Joypad.B, 1); // yesno
+        gb.Press(Joypad.A);
+        gb.RunUntil("_Joypad");
+            // Trace.Listeners.Remove("allrightlate.txt");
+        byte[] state = gb.SaveState();
+        // return;
+
+        // for(int f = -2; f <= 11; ++f)
+        for(int f = -2; f <= 10; ++f)
+        {
+            // int p = FramePath(f);
+            // string name = "path" + p + (f==3?"b":"") + ".txt";
+            int p = f>=2 ? f : (f+1);
+            string name = "path" + p + (f==2?"c":"b") + ".txt";
+            Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText(name), name));
+            gb.LoadState(state);
+            if(f < 0)
+                gb.AdvanceFrames(f + 2);
+            else
+            {
+                gb.AdvanceFrames(f + 1);
+                gb.Press(Joypad.A);
+            }
+            gb.Press(Joypad.Start);
+            string path;
+            if(p < 1)
+                path = BasePathToGirl;
+            else
+                path = Paths[p];
+            gb.Execute(SpacePath(path));
+            if(p >= 1)
+                gb.Yoloball(0, Joypad.B);
+            if(p >= 1 && p <= 6)
+            {
+                gb.ClearText(Joypad.A);
+                gb.Press(Joypad.B);
+                gb.Execute(SpacePath(Forest[p]), (gb.Maps[51][25,12], gb.PickupItem));
+            }
+            Trace.Listeners.Remove(name);
+        }
     }
 
     class IGTStateResult : IGTResult
@@ -207,11 +277,11 @@ class Extended
         }
     }
 
-    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = false)
+    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
     {
         return CheckIGT(framesToWait, path, null, numFrames, numThreads, startFrame, verbose);
     }
-    static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = false)
+    static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
     {
         RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if (numThreads == 1)
@@ -258,10 +328,6 @@ class Extended
                 if (log == null || log.Last().ToString().ToLower() != movement)
                     npcMovement[npc] = log + movement;
             });
-            // gb.SetCallback(gb.SYM["VBlank"], (gb) =>
-            // {
-            //     Trace.WriteLine($"{gb.CpuRead("wPlayTimeMinutes"):d2}:{gb.CpuRead("wPlayTimeSeconds"):d2}.{gb.CpuRead("wPlayTimeFrames"):d2} {gb.CpuRead("hRandomAdd"):x2}{gb.CpuRead("hRandomSub"):x2}");
-            // });
 
             int address = gb.Execute(SpacePath(path));
             // address = DecideMovement(gb, res, npcMovement);
@@ -290,8 +356,7 @@ class Extended
             lock (results)
                 results.Add(res);
 
-            if (verbose && f % 100 == 0)
-                Console.WriteLine(f + "/" + numFrames);
+            if(verbose && (f * 100) % numFrames == 0) Console.WriteLine("%");
         });
         gbs[0].Dispose();
         if (verbose)
@@ -299,6 +364,7 @@ class Extended
 
         return results;
     }
+
     static int DecideMovement(Red gb, IGTResult res, Dictionary<(int, int), string> npcMovement)
     {
         res.Info=" path";
@@ -532,7 +598,8 @@ class Extended
         BasePath + "UUUUUURAUUUUUUUUUUUUUUUUUUUULUAUULLLUUUUUUUUUURRRARU",       // 3
         BasePath + "UUUUUURUUUUUUUUUULAUUUUAUUUUAUUUAUULLLUUUUUUUUAURRRRU",      // 4
         BasePath + "UUUUUURUUUULUUUUUUAUUUUUUUUAUUUAUULLLUUUUUUAUURRUUAURR",     // 5
-        BasePath + "UUUUUURUUUUUUUUUULAUUUUUUUUUUUUUULLLUUAUUUAURRRRAUU",        // 6
+     // BasePath + "UUUUUURUUUUUUUUUULAUUUUUUUUUUUUUULLLUUAUUUAURRRRAUU",        // 6
+        BasePath + "UUUUUURUUUUUUUUUULAUUUUUUUUUUUUULLLAUUUUUUUARRRRAUU",        // 6 "normal turn"
      // BasePath + "UUUUUURUUUULUUUUUUAUUUUUUUUUUUAUULLLUUUUUUUURRRRU",          // 7 dUR "2A"
      // BasePath + "UUUUUURUUUULUUUAUUUUUUUUUUUUUUUULLLUUUUUUUARRRRUAUU",        // 7 dUR "fence"
      // BasePath + "UUUUUURUULUUUUUAUUUUUUUUUUUUUUAUULLLUUUUUUURRRRUAUU",        // 7 dUR "girl turn"
@@ -665,7 +732,7 @@ class Extended
         IgnoreNpcIgts(path);
 
         DisplayIGTResults(
-            CheckIGT(frame, p, f, 3600),
+            CheckIGT(frame, p, f, 60),
             frame
             );
     }
