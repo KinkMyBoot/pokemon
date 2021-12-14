@@ -18,6 +18,7 @@ public class DFParameters<Gb, M, T> where Gb : PokemonGame
     public Func<Gb, bool> EncounterCallback = null;
     public Action<DFState<M, T>> FoundCallback;
     public Action<SingleState<M, T>, Gb> SingleCallback;
+    public (Tile<M, T>, System.Action) TileCallback;
 }
 
 public class DFState<M, T> where M : Map<M, T>
@@ -127,7 +128,11 @@ public static class DepthFirstSearch {
                     gb.LoadState(prev.State);
                     int ret = gb.Execute(edge.Action);
                     if(ret == gb.OverworldLoopAddress)
+					{
+                        if(edge.NextTile == parameters.TileCallback.Item1)
+                            parameters.TileCallback.Item2();
                         igt = new IGTState(gb, prev.Success, prev.IGTStamp);
+					}
                     else
                     {
                         igt = new IGTState();

@@ -569,6 +569,89 @@ class Extended
         return new List<DFState<RbyMap,RbyTile>>(results.OrderByDescending((dfs) => dfs.IGT.TotalSuccesses).OrderBy((dfs) => APressCount(dfs.Log)).OrderBy((dfs) => TurnCount(dfs.Log)));
     }
 
+    static List<DFState<RbyMap,RbyTile>> SearchForest(int framesToWait, string pidgeypath, string forestpath, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
+    {
+        Red[] gbs = {};
+        Red gb = null;
+
+        Profile("threads", () =>
+        {
+            gbs = MultiThread.MakeThreads<Red>(numThreads);
+            gb = gbs[0];
+            if (numThreads == 1)
+                gb.Record("test");
+        });
+
+        IGTResults states = new IGTResults(numFrames);
+
+        Profile("states", () =>
+        {
+            MultiThread.For(states.Length, gbs, (gb, i) =>
+            {
+                int f = i;
+                for(int s=0; s<60; ++s)
+                    foreach (int skip in IgnoredFrames)
+                        if (f >= skip + 60*s)
+                            ++f;
+
+                gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
+
+                gb.AdvanceFrames(framesToWait);
+                gb.Press(Joypad.A);
+                gb.Press(Joypad.Start);
+
+                int ret = gb.Execute(SpacePath(pidgeypath));
+
+                CheckEncounter(ret, gb, "PIDGEY", new IGTResult());
+                gb.ClearText(Joypad.A);
+                gb.Press(Joypad.B);
+
+                if(forestpath != null)
+                    ret = gb.Execute(SpacePath(forestpath), (gb.Maps[51][25,12], gb.PickupItem));
+
+                states[i]=new IGTState(gb, false, f);
+            });
+        });
+
+        RbyMap route2 = gb.Maps[13];
+        RbyMap gate = gb.Maps[50];
+        RbyMap forest = gb.Maps[51];
+        // forest.Sprites.Remove(25, 11); //?
+        RbyTile[] endTiles = { forest[1, 19] };
+        RbyTile[] blockedTiles = { forest[16, 10], forest[18, 10], forest[16, 15], forest[18, 15], forest[11, 15], forest[13, 15], forest[11, 6], forest[13, 6], forest[6, 6], forest[8, 6], forest[6, 15], forest[8, 15], forest[2, 19] };
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB, blockedTiles);
+        Pathfinding.DebugDrawEdges(gb, route2, 0);
+        // Pathfinding.DebugDrawEdges(gb, gate, 0);
+        // Pathfinding.DebugDrawEdges(gb, forest, 0);
+
+        RbyTile tile = gb.Tile;
+
+        List<DFState<RbyMap,RbyTile>> results = new List<DFState<RbyMap,RbyTile>>();
+
+        DFParameters<Red,RbyMap,RbyTile> parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        {
+            MaxCost = maxcost,
+            SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),
+            // EndTiles = endTiles,
+            EncounterCallback = gb =>
+            {
+                return gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
+            },
+            FoundCallback = state =>
+            {
+                results.Add(state);
+                Trace.WriteLine(tile.PokeworldLink + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+            }
+        };
+
+        Profile("dfs", () =>
+        {
+            DepthFirstSearch.StartSearch(gbs, parameters, tile, 0, states, 0);
+        });
+
+        return new List<DFState<RbyMap,RbyTile>>(results.OrderByDescending((dfs) => dfs.IGT.TotalSuccesses).OrderBy((dfs) => APressCount(dfs.Log)).OrderBy((dfs) => TurnCount(dfs.Log)));
+    }
+
     const string BasePath = "DRRUUURRRRRRRRRRRRRRRRRRRRRUR";
     const string BasePathToGirl = BasePath + "UUUUUUR";
     const string BasePathToSignL = BasePathToGirl + "UUUULUUUUUU";
