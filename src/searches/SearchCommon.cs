@@ -20,7 +20,37 @@ class SearchCommon
         return Profile("elapsed", fn);
     }
 
-    public struct Display { public string Path; public int S, T, A; };
+    public struct Display {
+        public string Path;
+        public int SS, C, T, A, S;
+        public Display(string path, int success = 0, int cost = 0)
+        {
+            Path = path;
+            SS = success;
+            C = cost;
+            T = TurnCount(path);
+            A = APressCount(path);
+            S = StartCount(path);
+        }
+        public override string ToString()
+        {
+            string str = Path;
+            if(SS > 0)
+                str += " " + SS;
+            if(C > 0)
+                str += " C:" + C;
+            if(S > 0)
+                str += " S:" + S;
+            str += " T:" + T;
+            str += " A:" + A;
+            return str;
+        }
+        static public void PrintAll(List<Display> list, string prefix = "")
+        {
+            foreach (Display d in list.OrderByDescending((d) => d.SS).ThenBy((d) => d.C).ThenBy((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
+                System.Diagnostics.Trace.WriteLine(prefix + d);
+        }
+    };
     public static int TurnCount(string path)
     {
         path = Regex.Replace(path, "[AS_B]", "");
@@ -34,5 +64,9 @@ class SearchCommon
     public static int APressCount(string path)
     {
         return path.Count(c => c == 'A');
+    }
+    public static int StartCount(string path)
+    {
+        return path.Count(c => c == 'S');
     }
 }

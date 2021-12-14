@@ -50,7 +50,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             int igt = startFrame + iterator * stepFrame;
             res.IGTSec = (byte)(igt / 60);
             res.IGTFrame = (byte)(igt % 60);
-            if(verbose && (igt * 100) % numFrames == 0) Console.WriteLine("%");
+            if(verbose && numFrames >= 100 && (igt * 100) % numFrames == 0) Console.WriteLine("%");
 
             gb.LoadState(igtState);
             gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);

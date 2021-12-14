@@ -290,6 +290,7 @@ public class RedBlue : Rby {
 public class Red : RedBlue {
 
     public Red(string savFile = null, bool speedup = true) : base("roms/pokered.gbc", savFile, speedup) { }
+    public Red() : base("roms/pokered.gbc", null, true) { }
 
     public override byte[][] BGPalette() {
         return new byte[][] {
