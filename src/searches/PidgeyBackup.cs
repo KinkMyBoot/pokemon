@@ -7,7 +7,7 @@ using static SearchCommon;
 
 class PidgeyBackup
 {
-    static void Check()
+    public static void Check()
     {
         // 13
         // string pidgeybackup = "UUAUUUUUUAUUUUU"+"UUUAUUURU"+"UUUUARRRRR";
@@ -26,48 +26,42 @@ class PidgeyBackup
 
     public static List<DFState<RbyMap,RbyTile>> Search(int numThreads = 15, int numFrames = 60, int success = -1)
     {
+        StartWatch();
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        Red[] gbs = {};
-        Red gb = null;
 
-        Profile("threads", () =>
-        {
-            gbs = MultiThread.MakeThreads<Red>(numThreads);
-            gb = gbs[0];
-            if(numThreads == 1)
-                gb.Record("test");
-        });
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+        if(numThreads == 1) gb.Record("test");
+        Elapsed("threads");
 
         IGTResults states = new IGTResults(numFrames);
+        gb.LoadState("basesaves/red/manip/pidgey14.gqs");
+        gb.HardReset();
+        intro.ExecuteUntilIGT(gb);
+        byte[] igtState = gb.SaveState();
 
-        Profile("states", () =>
+        MultiThread.For(states.Length, gbs, (gb, f) =>
         {
-            gb.LoadState("basesaves/red/manip/pidgey14.gqs");
-            gb.HardReset();
-            intro.ExecuteUntilIGT(gb);
-            byte[] igtState = gb.SaveState();
+            gb.LoadState(igtState);
+            gb.CpuWrite("wPlayTimeMinutes", 8);
+            gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
+            gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
+            // gb.CpuWrite("wPlayTimeSeconds", (byte)(f % 60));
+            // gb.CpuWrite("wPlayTimeFrames", (byte)((f & 1) != 0 ? 37 : 17));
+            // gb.CpuWrite("wPlayTimeFrames", (byte)((f & 1) != 0 ? 59 : 36));
+            intro.ExecuteAfterIGT(gb);
+            // gb.Execute(SpacePath("UUUUUUUUUUUUU"+"UAUUUUAURU"+"UUUURR"+"RR"));//p13
+            // gb.Execute(SpacePath("UUUUUUUUUUUUUU"+"URUAUUAUUU"+"UUAUUAR"+"RR"));//p14
 
-            MultiThread.For(states.Length, gbs, (gb, f) =>
-            {
-                gb.LoadState(igtState);
-                gb.CpuWrite("wPlayTimeMinutes", 8);
-                gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
-                gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
-                // gb.CpuWrite("wPlayTimeSeconds", (byte)(f % 60));
-                // gb.CpuWrite("wPlayTimeFrames", (byte)((f & 1) != 0 ? 37 : 17));
-                // gb.CpuWrite("wPlayTimeFrames", (byte)((f & 1) != 0 ? 59 : 36));
-                intro.ExecuteAfterIGT(gb);
-                // gb.Execute(SpacePath("UUUUUUUUUUUUU"+"UAUUUUAURU"+"UUUURR"+"RR"));//p13
-                // gb.Execute(SpacePath("UUUUUUUUUUUUUU"+"URUAUUAUUU"+"UUAUUAR"+"RR"));//p14
-
-                states[f]=new IGTState(gb, false, f);
-            });
+            states[f]=new IGTState(gb, false, f);
         });
+        Elapsed("states");
 
         RbyMap forest = gb.Maps[51];
         RbyMap entrance = gb.Maps[47];
         RbyMap route2 = gb.Maps[13];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
+        RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route2[8, 7] };
         Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions);
         Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, entrance[5, 1], actions);
@@ -77,14 +71,11 @@ class PidgeyBackup
         entrance[5, 1].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = route2[3, 11], NextEdgeset = 0, Cost = 0 });
         // Pathfinding.DebugDrawEdges(gb, route2, 0);
 
-        RbyTile tile = gb.Tile;
-
         var results = new List<DFState<RbyMap,RbyTile>>();
-
         var parameters = new DFParameters<Red,RbyMap,RbyTile>()
         {
             MaxCost = 4,
-            SuccessSS = success > 0 ? success : Math.Max(1, states.Length - 5),// amount of yoloball success for found
+            SuccessSS = success > 0 ? success : Math.Max(1, states.Length - 5),
             EndTiles = endTiles,
             EncounterCallback = gb =>
             {
@@ -93,15 +84,13 @@ class PidgeyBackup
             FoundCallback = state =>
             {
                 results.Add(state);
-                Trace.WriteLine(tile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             }
         };
 
-        Profile("dfs", () =>
-        {
-            DepthFirstSearch.StartSearch(gbs, parameters, tile, 0, states);
-        });
+        DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states);
+        Elapsed("search");
 
-        return new List<DFState<RbyMap,RbyTile>>(results.OrderByDescending((dfs) => dfs.IGT.TotalSuccesses).OrderBy((dfs) => APressCount(dfs.Log)).OrderBy((dfs) => TurnCount(dfs.Log)));
+        return results;
     }
 }

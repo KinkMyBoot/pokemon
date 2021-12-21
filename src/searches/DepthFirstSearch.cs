@@ -18,7 +18,7 @@ public class DFParameters<Gb, M, T> where Gb : PokemonGame
     public Func<Gb, bool> EncounterCallback = null;
     public Action<DFState<M, T>> FoundCallback;
     public Action<SingleState<M, T>, Gb> SingleCallback;
-    public (Tile<M, T>, System.Action) TileCallback;
+    public (Tile<M, T>, Action<Gb>) TileCallback;
 }
 
 public class DFState<M, T> where M : Map<M, T>
@@ -130,7 +130,7 @@ public static class DepthFirstSearch {
                     if(ret == gb.OverworldLoopAddress)
 					{
                         if(edge.NextTile == parameters.TileCallback.Item1)
-                            parameters.TileCallback.Item2();
+                            parameters.TileCallback.Item2(gb);
                         igt = new IGTState(gb, prev.Success, prev.IGTStamp);
 					}
                     else
@@ -140,7 +140,7 @@ public static class DepthFirstSearch {
                         if(ret == wildEncounterAddress) {
                             igt.Success = parameters.EncounterCallback(gb);
                         } else {
-                            Console.WriteLine("Movement failed on frame " + f);
+                            Console.WriteLine("Movement failed on frame " + f + " on tile " + state.Tile);
                         }
                     }
                 }

@@ -47,6 +47,8 @@ class Extended
         const int numFrames = 3598;
         MultiThread.For(numFrames, gbs, (gb, f) =>
         {
+            if((f + 1) * 100 / numFrames > f * 100 / numFrames) Console.WriteLine("%");
+
             if (IgnoredFrames.Contains(f % 60))
                 return;
 
@@ -70,8 +72,6 @@ class Extended
             gb.RunUntil("_Joypad");
             gb.AdvanceFrame();
             gb.SaveState("basesaves/red/manip/ext/nido_" + sec + "_" + frame + ".gqs");
-
-            if(f % (numFrames / 100) == 0) Console.WriteLine("%");
         });
     }
 
@@ -153,7 +153,7 @@ class Extended
     static Dictionary<string, IGTStateResult[]> PersistentStates;
     static Red[] PersistentGbs;
 
-    static List<IGTResult> CheckIGTPersistent(int framesToWait, string path, int numFrames = 60, int numThreads = 16)
+    static List<IGTResult> CheckIGTPersistent(int framesToWait, string path, bool extended = false, int numFrames = 60, int numThreads = 16)
     {
         if (PersistentGbs == null)
         {
@@ -193,7 +193,10 @@ class Extended
             });
             PersistentStates[""] = results;
         }
+        if (numThreads == 1)
+            gbs[0].Record("test");
 
+        path = path.Replace("_B", "");
         int step = path.Length;
         while (!PersistentStates.ContainsKey(path.Substring(0, step)))
             --step;
@@ -220,22 +223,25 @@ class Extended
                     else
                     {
                         string action = path[curstep].ToString().Replace("S", "S_B");
-                        if (action != "_" && action != "B")
-                        {
-                            IGTStateResult res = PersistentStates[curpath][f] = new IGTStateResult();
+                        IGTStateResult res = PersistentStates[curpath][f] = new IGTStateResult();
 
-                            res.IGTSec = prev.IGTSec;
-                            res.IGTFrame = prev.IGTFrame;
+                        res.IGTSec = prev.IGTSec;
+                        res.IGTFrame = prev.IGTFrame;
 
-                            int address = gb.Execute(action);
-                            if (address == gb.OverworldLoopAddress)
+                        // int address = gb.Execute(action);
+                        int address = gb.Execute(action, (gb.Maps[51][25,12], gb.PickupItem));
+                        if (address == gb.OverworldLoopAddress)
+                            res.State = gb.SaveState();
+                        else
+                            if(CheckEncounter(address, gb, "PIDGEY", res) && extended)
+                            {
+                                gb.ClearText(Joypad.A);
+                                gb.Press(Joypad.B);
                                 res.State = gb.SaveState();
-                            else
-                                CheckEncounter(address, gb, "PIDGEY", res);
-                            res.Tile = gb.Tile;
-                            res.Map = gb.Map;
-                            prev = res;
-                        }
+                            }
+                        res.Tile = gb.Tile;
+                        res.Map = gb.Map;
+                        prev = res;
                     }
                     ++curstep;
                 }
@@ -290,6 +296,8 @@ class Extended
 
         MultiThread.For(numFrames, gbs, (gb, f) =>
         {
+            if(verbose && numFrames >= 100 && (f + 1) * 100 / numFrames > f * 100 / numFrames) Console.WriteLine("%");
+
             f += startFrame;
             if (IgnoredFrames.Contains(f % 60))
                 return;
@@ -355,8 +363,6 @@ class Extended
 
             lock (results)
                 results.Add(res);
-
-            if(verbose && (f * 100) % numFrames == 0) Console.WriteLine("%");
         });
         gbs[0].Dispose();
         if (verbose)
@@ -498,54 +504,46 @@ class Extended
 
     static List<DFState<RbyMap,RbyTile>> Search(int framesToWait, string path, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
-        Red[] gbs = {};
-        Red gb = null;
+        StartWatch();
 
-        Profile("threads", () =>
-        {
-            gbs = MultiThread.MakeThreads<Red>(numThreads);
-            gb = gbs[0];
-            if (numThreads == 1)
-                gb.Record("test");
-        });
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+        if (numThreads == 1)
+            gb.Record("test");
+        Elapsed("threads");
 
         IGTResults states = new IGTResults(numFrames);
-
-        Profile("states", () =>
+        MultiThread.For(states.Length, gbs, (gb, i) =>
         {
-            MultiThread.For(states.Length, gbs, (gb, i) =>
-            {
-                int f = i;
-                for(int s=0; s<60; ++s)
-                    foreach (int skip in IgnoredFrames)
-                        if (f >= skip + 60*s)
-                            ++f;
+            int f = i;
+            for(int s=0; s<60; ++s)
+                foreach (int skip in IgnoredFrames)
+                    if (f >= skip + 60*s)
+                        ++f;
 
-                gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
+            gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
 
-                gb.AdvanceFrames(framesToWait);
-                gb.Press(Joypad.A);
-                gb.Press(Joypad.Start);
+            gb.AdvanceFrames(framesToWait);
+            gb.Press(Joypad.A);
+            gb.Press(Joypad.Start);
 
-                int ret = gb.Execute(SpacePath(path));
-                states[i]=new IGTState(gb, false, f);
-            });
+            int ret = gb.Execute(SpacePath(path));
+            states[i]=new IGTState(gb, false, f);
         });
+        Elapsed("states");
 
         RbyMap viridian = gb.Maps[1];
         RbyMap route2 = gb.Maps[13];
         viridian.Sprites.Remove(18, 9);
         viridian.Sprites.Remove(17, 5);
+        RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route2[8, 48] };
+        RbyTile[] encounterTiles = { route2[6, 48], route2[7, 48], route2[8, 48], route2[7, 49], route2[8, 49], route2[8, 50] };
         Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB);
         // Pathfinding.DebugDrawEdges(gb, viridian, 0);
 
-        RbyTile[] encounterTiles = { route2[6, 48], route2[7, 48], route2[8, 48], route2[7, 49], route2[8, 49], route2[8, 50] };
-        RbyTile tile = gb.Tile;
-
-        List<DFState<RbyMap,RbyTile>> results = new List<DFState<RbyMap,RbyTile>>();
-
-        DFParameters<Red,RbyMap,RbyTile> parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        var results = new List<DFState<RbyMap,RbyTile>>();
+        var parameters = new DFParameters<Red,RbyMap,RbyTile>()
         {
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),// amount of yoloball success for found
@@ -557,99 +555,109 @@ class Extended
             FoundCallback = state =>
             {
                 results.Add(state);
-                Trace.WriteLine(tile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             }
         };
 
-        Profile("dfs", () =>
-        {
-            DepthFirstSearch.StartSearch(gbs, parameters, tile, 0, states, 0);
-        });
+        DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states, 0);
+        Elapsed("search");
 
-        return new List<DFState<RbyMap,RbyTile>>(results.OrderByDescending((dfs) => dfs.IGT.TotalSuccesses).OrderBy((dfs) => APressCount(dfs.Log)).OrderBy((dfs) => TurnCount(dfs.Log)));
+        return results;
     }
 
     static List<DFState<RbyMap,RbyTile>> SearchForest(int framesToWait, string pidgeypath, string forestpath, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
-        Red[] gbs = {};
-        Red gb = null;
+        StartWatch();
 
-        Profile("threads", () =>
-        {
-            gbs = MultiThread.MakeThreads<Red>(numThreads);
-            gb = gbs[0];
-            if (numThreads == 1)
-                gb.Record("test");
-        });
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+        if (numThreads == 1)
+            gb.Record("test");
+        Elapsed("threads");
 
         IGTResults states = new IGTResults(numFrames);
-
-        Profile("states", () =>
+        MultiThread.For(states.Length, gbs, (gb, i) =>
         {
-            MultiThread.For(states.Length, gbs, (gb, i) =>
-            {
-                int f = i;
-                for(int s=0; s<60; ++s)
-                    foreach (int skip in IgnoredFrames)
-                        if (f >= skip + 60*s)
-                            ++f;
+            int f = i;
+            for(int s=0; s<60; ++s)
+                foreach (int skip in IgnoredFrames)
+                    if (f >= skip + 60*s)
+                        ++f;
 
-                gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
+            gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
 
-                gb.AdvanceFrames(framesToWait);
-                gb.Press(Joypad.A);
-                gb.Press(Joypad.Start);
+            gb.AdvanceFrames(framesToWait);
+            gb.Press(Joypad.A);
+            gb.Press(Joypad.Start);
 
-                int ret = gb.Execute(SpacePath(pidgeypath));
+            int ret = gb.Execute(SpacePath(pidgeypath));
 
-                CheckEncounter(ret, gb, "PIDGEY", new IGTResult());
-                gb.ClearText(Joypad.A);
-                gb.Press(Joypad.B);
+            CheckEncounter(ret, gb, "PIDGEY", new IGTResult());
+            gb.ClearText(Joypad.A);
+            gb.Press(Joypad.B);
 
-                if(forestpath != null)
-                    ret = gb.Execute(SpacePath(forestpath), (gb.Maps[51][25,12], gb.PickupItem));
+            if(forestpath != null)
+                ret = gb.Execute(SpacePath(forestpath), (gb.Maps[51][25,12], gb.PickupItem));
 
-                states[i]=new IGTState(gb, false, f);
-            });
+            states[i]=new IGTState(gb, false, f);
         });
+        Elapsed("states");
 
         RbyMap route2 = gb.Maps[13];
         RbyMap gate = gb.Maps[50];
         RbyMap forest = gb.Maps[51];
-        // forest.Sprites.Remove(25, 11); //?
+        forest.Sprites.Remove(25, 11);
+        Action actions = Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB;
+        RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { forest[1, 19] };
-        RbyTile[] blockedTiles = { forest[16, 10], forest[18, 10], forest[16, 15], forest[18, 15], forest[11, 15], forest[13, 15], forest[11, 6], forest[13, 6], forest[6, 6], forest[8, 6], forest[6, 15], forest[8, 15], forest[2, 19] };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB, blockedTiles);
-        Pathfinding.DebugDrawEdges(gb, route2, 0);
+        RbyTile[] blockedTiles = { forest[26, 12],
+            forest[16, 10], forest[18, 10],
+            forest[16, 15], forest[18, 15],
+            forest[11, 15], forest[12, 15],
+            forest[11, 6], forest[12, 6],
+            // forest[6, 6], forest[8, 6],
+            // forest[6, 15], forest[8, 15],
+            forest[2, 19], forest[1, 18]
+        };
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions, blockedTiles);
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, gate[5, 1], actions, blockedTiles);
+        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, route2[3, 44], actions, blockedTiles);
+        route2[3, 44].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = gate[4, 7], NextEdgeset = 0, Cost = 0 });
+        gate[4, 7].GetEdge(0, Action.Right).Cost = 0;
+        gate[5, 1].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = forest[17, 47], NextEdgeset = 0, Cost = 0 });
+        forest[1, 19].RemoveEdge(0, Action.A);
+        forest[25, 12].RemoveEdge(0, Action.A);
+        forest[25, 13].RemoveEdge(0, Action.A);
+        // Pathfinding.DebugDrawEdges(gb, route2, 0);
         // Pathfinding.DebugDrawEdges(gb, gate, 0);
         // Pathfinding.DebugDrawEdges(gb, forest, 0);
 
-        RbyTile tile = gb.Tile;
-
-        List<DFState<RbyMap,RbyTile>> results = new List<DFState<RbyMap,RbyTile>>();
-
-        DFParameters<Red,RbyMap,RbyTile> parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        var results = new List<DFState<RbyMap,RbyTile>>();
+        var parameters = new DFParameters<Red,RbyMap,RbyTile>()
         {
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),
-            // EndTiles = endTiles,
+            EndTiles = endTiles,
+            TileCallback = (forest[25, 12], gb =>
+            {
+                gb.PickupItem();
+            }),
             EncounterCallback = gb =>
             {
-                return gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
+                // return gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
+                return gb.EnemyMon.Species.Name == "CATERPIE";
             },
             FoundCallback = state =>
             {
                 results.Add(state);
-                Trace.WriteLine(tile.PokeworldLink + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             }
         };
 
-        Profile("dfs", () =>
-        {
-            DepthFirstSearch.StartSearch(gbs, parameters, tile, 0, states, 0);
-        });
+        DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states, 0);
+        Elapsed("search");
 
-        return new List<DFState<RbyMap,RbyTile>>(results.OrderByDescending((dfs) => dfs.IGT.TotalSuccesses).OrderBy((dfs) => APressCount(dfs.Log)).OrderBy((dfs) => TurnCount(dfs.Log)));
+        return results;
     }
 
     const string BasePath = "DRRUUURRRRRRRRRRRRRRRRRRRRRUR";
@@ -792,19 +800,30 @@ class Extended
                 Trace.WriteLine("f" + i + ": " + x.Value[i]);
         }
     }
-    static void CheckPathsInFile(int frame, string basepath)
+    static void CheckPathsInFile(int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
     {
-        string[] pathstocheck=File.ReadAllLines("basesaves/paths.txt");
+        string[] lines=File.ReadAllLines("paths.txt");
         List<Display> display = new List<Display>();
-        foreach (var path in pathstocheck)
+        foreach (string line in lines)
         {
-            if(!path.Contains('S')) continue;
-            List<IGTResult> igt = CheckIGTPersistent(frame, basepath + path);
-            int success = GetIGTSummary(igt).GetValueOrDefault("PIDGEY captured");
-            display.Add(new Display { Path = path, S = success, T = TurnCount(path), A = APressCount(path) });
+            string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
+            List<IGTResult> igt = CheckIGTPersistent(frame, basepath + path, extended, numFrames);
+            int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
+            display.Add(new Display(path, success));
         }
-        foreach (Display d in display.OrderByDescending((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
-            Trace.WriteLine(Link[basepath] + d.Path + " " + d.S + " t:" + d.T + " a:" + d.A);
+        Display.PrintAll(display, prefix);
+    }
+    static void ResultsIGT(List<DFState<RbyMap,RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
+    {
+        List<Display> display = new List<Display>();
+        foreach (var res in results)
+        {
+            List<IGTResult> igt = CheckIGTPersistent(frame, basepath + res.Log, extended, numFrames);
+            int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
+            display.Add(new Display(res.Log, success));
+        }
+        Display.PrintAll(display, prefix);
+        Elapsed("igt");
     }
 
     public static void Check(int path)
@@ -826,23 +845,22 @@ class Extended
         string basepath = BasePathToGirl;
         IgnoreNpcIgts(path);
 
-        Profile("search + igt", () => {
-            List<DFState<RbyMap,RbyTile>> results = null;
+        var results = Search(frame, basepath, 4, 4, 4, 2);
+        ResultsIGT(results, frame, basepath, false, 60*2, "PIDGEY captured", Link[basepath]);
 
-        Profile("search", () => {
-            results = Search(frame, basepath, 4, 4, 4, 8);
+        ElapsedTotal("search + igt");
+    }
 
-        }); Profile("igt", () => {
-            List<Display> display = new List<Display>();
-            foreach (var res in results)
-            {
-                List<IGTResult> igt = CheckIGTPersistent(frame, basepath + res.Log, 60*2);
-                int success = GetIGTSummary(igt).GetValueOrDefault("PIDGEY captured");
-                display.Add(new Display { Path = res.Log, S = success, T = TurnCount(res.Log), A = APressCount(res.Log) });
-            }
-            foreach (Display d in display.OrderByDescending((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
-                Trace.WriteLine(Link[basepath] + d.Path + " " + d.S + " T:" + d.T + " A:" + d.A);
-        }); });
+    public static void SearchForest(int path)
+    {
+        int frame = PathFrame(path);
+        string basepath = Forest[path].Substring(0,105);
+        IgnoreNpcIgts(path);
+
+        var results = SearchForest(frame, Paths[path], basepath, 10, 10, 7, 8);
+        ResultsIGT(results, frame, Paths[path] + basepath, true, 60, "CATERPIE", "https://gunnermaniac.com/pokeworld?local=51#7/3/");
+
+        ElapsedTotal("search + igt");
     }
 
     public Extended()

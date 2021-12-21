@@ -126,27 +126,24 @@ class NidoFrame36
         Display.PrintAll(display, "https://gunnermaniac.com/pokeworld?local=33#33/8/");
     }
 
-    public static List<DFState<RbyMap,RbyTile>> Search(int numThreads = 10)
+    public void Search(int numThreads = 10)
     {
+        StartWatch();
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         Red gb = new Red();
 
-        IGTState state = null;
+        gb.LoadState("basesaves/red/manip/nido.gqs");
+        gb.HardReset();
+        intro.ExecuteUntilIGT(gb);
 
-        Profile("states", () =>
-        {
-            gb.LoadState("basesaves/red/manip/nido.gqs");
-            gb.HardReset();
-            intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeMinutes", 5);
+        gb.CpuWrite("wPlayTimeSeconds", 0);
+        gb.CpuWrite("wPlayTimeFrames", 36);
+        intro.ExecuteAfterIGT(gb);
+        gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"+"UUU")); //UUUALLUUUURRUULLL
 
-            gb.CpuWrite("wPlayTimeMinutes", 5);
-            gb.CpuWrite("wPlayTimeSeconds", 0);
-            gb.CpuWrite("wPlayTimeFrames", 36);
-            intro.ExecuteAfterIGT(gb);
-            gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"+"UUU")); //UUUALLUUUURRUULLL
-
-            state=new IGTState(gb, false, 36);
-        });
+        IGTState state=new IGTState(gb, false, 36);
+        Elapsed("states");
 
         RbyMap route22 = gb.Maps[33];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
@@ -155,8 +152,6 @@ class NidoFrame36
         Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions);
         route22[30, 4].RemoveEdge(0, Action.Left);
         route22[30, 5].RemoveEdge(0, Action.Left);
-
-        var results = new List<DFState<RbyMap,RbyTile>>();
 
         var parameters = new DFParameters<Red,RbyMap,RbyTile>()
         {
@@ -172,11 +167,7 @@ class NidoFrame36
             }
         };
 
-        Profile("dfs", () =>
-        {
-            DepthFirstSearch.SingleSearch(gb, parameters, startTile, 0, state, 2);
-        });
-
-        return results;
+        DepthFirstSearch.SingleSearch(gb, parameters, startTile, 0, state, 2);
+        Elapsed("search");
     }
 }

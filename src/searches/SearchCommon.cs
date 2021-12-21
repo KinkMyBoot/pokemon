@@ -19,6 +19,23 @@ class SearchCommon
     {
         return Profile("elapsed", fn);
     }
+    static System.Diagnostics.Stopwatch Watch;
+    static long LastMs = 0;
+    public static void StartWatch()
+    {
+        Watch = System.Diagnostics.Stopwatch.StartNew();
+    }
+    public static float Elapsed(string title = "elapsed", bool total = false)
+    {
+        float t = (Watch.ElapsedMilliseconds - (total ? 0 : LastMs)) / 1000.0f;
+        LastMs = Watch.ElapsedMilliseconds;
+        Console.WriteLine(title + ": " + t + "s");
+        return t;
+    }
+    public static float ElapsedTotal(string title = "elapsed")
+    {
+        return Elapsed(title, true);
+    }
 
     public struct Display {
         public string Path;

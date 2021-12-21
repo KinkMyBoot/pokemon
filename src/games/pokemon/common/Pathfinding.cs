@@ -156,7 +156,7 @@ public static class Pathfinding {
                     neighborTile = sourceTile.GetNeighbor(action);
                 }
 
-                if(neighborTile == null) continue;
+                if(neighborTile == null || (additionallyBlockedTiles != null && Array.IndexOf(additionallyBlockedTiles, neighborTile) != -1)) continue;
 
                 T ledgeHopDest = neighborTile.GetNeighbor(action);
                 bool isLedgeHop = ledgeHopDest != null && ledgeHopDest.LedgeCheck(neighborTile, action.Opposite());
