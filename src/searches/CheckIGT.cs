@@ -53,21 +53,21 @@ class CheckIGT {
         rt3Moon += "RARRARRARRARUU";
         rt3Moon += "DDLDDDDLLLLLLLULUUUUULUUUUUUUULLLUL";
         rt3Moon += "DADDRAR";
-        rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRDR";
+        // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRDR";
         // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRRD"; // slayer
         // rt3Moon += "DRRDDDDDDDDDADRRRRRRRRRRRRRDR"; // 4 early
-        // rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; // 3 early
+        rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; // 3 early
         // rt3Moon += "DRRDDDDDDDDDDRARRRRRRRRRRRRDR"; // 2 early
         // rt3Moon += "DRRDDDDDDDDDDRRARRRRRRRRRRRDR"; // 1 early
         // rt3Moon += "DRRDDDDDDDDDDRRRRARRRRRRRRRDR"; // 1 late
         // rt3Moon += "DRRDDDDDDDDDDRRRRRARRRRRRRRDR"; // 2 late
         // rt3Moon += "DRRDDDDDDDDDDRRRRRRARRRRRRRDR"; // 3 late
         // rt3Moon += "DRRDDDDDDDDDDRRRRRRRARRRRRRDR"; // 4 late
-        rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";
-        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f
-        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f v2
+        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU";
+        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f bad (3025)
+        // rt3Moon += "RRUUURARRRDDRRRRRUAURRARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // alt b2f good (3213)
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLALLLLLUUUUAUUALUUUUUUUU"; // 7 1 late
-        // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLALLLLUUUUAUUALUUUUUUUU"; // 7 2 late
+        rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLALLLLUUUUAUUALUUUUUUUU"; // 7 2 late
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLLALLLUUUUAUUALUUUUUUUU"; // 7 3 late
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLALLLLLLLUUUUAUUALUUUUUUUU"; // 7 1 early
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDADDDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 5 1 early
@@ -296,16 +296,20 @@ class CheckIGT {
         // string path = "DALLLAURUUUUUA"; // 58 cans - 3477/3600
         // string path = "DLALLAURUUUUUA"; // alt
         // string path = "DLLLURUUUUUA"; // 57 cans - 3420/3600
-        // string path = "SDLALLAURUAUUUUA"; // 60 cans - 3596/3600
-        string path = "SDALLLAURAUUUUUA"; // alt
+        string path = "SDALLLAURAUUUUUA"; // 60 cans - 3596/3600
+        // string path = "SDLALLAURUAUUUUA"; // alt
         // string path = "DLLLU"+"RUUUUULUUUUUUURDA"; // xd
         // string path = "DDLLLUURUUUUUA"; // fail 57 - 3419
         // string path = "DDALLLUURUUUUUA"; // fail 58 - 3361
         // string path = "DDLALLUURUUUUUA"; // fail 58 - 3361
+        // string path = "DLLLURRRRRUUUUUA"; // 60 igt + PalAB
         int numFrames = 3600;
+        // int numFrames = 4;
         int numThreads = 16;
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold); // + 57 cans
+        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPalAB, RbyStrat.GfSkip, RbyStrat.Hop0, 1); // + 57 cans
+        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalAB); // + right can
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
@@ -325,8 +329,8 @@ class CheckIGT {
             gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
             gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
             // gb.CpuWrite("wPlayTimeMinutes", (byte)(f % 60));
-            // gb.CpuWrite("wPlayTimeSeconds", 57);
-            // gb.CpuWrite("wPlayTimeFrames", 36);
+            // gb.CpuWrite("wPlayTimeSeconds", (byte)(54 + 3*(f/2)));
+            // gb.CpuWrite("wPlayTimeFrames", (byte)(36 + f%2));
 
             intro.ExecuteAfterIGT(gb);
             gb.Execute(SpacePath(path));

@@ -9,27 +9,27 @@ class Clefairy
 {
     public static void Check()
     {
-        string path = "S_BS_BDDDDDS_BUUUS_BUU"; //1 3299 119
-        // string path = "S_BS_BDDDDUS_BUUUS_BLR"; //2 3239 119 (62 00f0)
-        // string path = "S_BDDDDDUUS_BS_BUS_BUU"; //3 3299 119
-        // string path = "DDS_BDDDUUS_BS_BUS_BUU"; //4 3299 119
-        // string path = "S_BLLDDDUUS_BS_BUS_BRR"; //5 3299 119
-        // string path = "DDS_BDDUUUS_BS_BUS_BLR"; //6 3299 119
-        // string path = "S_BS_BLS_BLRRDDDUUS_BU"; //7 3239 119 (60 feee)
-        // string path = "S_BS_BLS_BLRRDDUULS_BR"; //8 3239 119 (60 feee)
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/clefairybuf.gqs", new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 60, true, null, false, 0, 1, 16, false);
+        string path = "S_BS_BDDDDDS_BUUUS_BUU"; //3299 119
+        // string path = "S_BDDDDDUUS_BS_BUS_BUU"; //3299 119
+        // string path = "DDS_BDDDUUS_BS_BUS_BUU"; //3299 119
+        // string path = "S_BLLDDDUUS_BS_BUS_BRR"; //3299 119
+        // string path = "DDS_BDDUUUS_BS_BUS_BLR"; //3299 119
+        // string path = "S_BS_BDDDDUS_BUUUS_BLR"; //3239 119 (62 00f0)
+        // string path = "S_BS_BLS_BLRRDDDUUS_BU"; //3239 119 (60 feee)
+        // string path = "S_BS_BLS_BLRRDDUULS_BR"; //3239 119 (60 feee)
+        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/clefairybuf.gqs", new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 3600, true, null, false, 0, 1, 16, false);
 
-        // string path = "S_BS_BADDDDDDUAUS_BUAUUU"; //56 1
-        // string path = "S_BS_BADDDDDDUAUS_BAUUUU"; //56 1
-        // string path = "S_BS_BADDDDDDAUUS_BUAUUU"; //
-        // string path = "S_BS_BADDDDDUUUS_BUAULAR"; //
-        // string path = "S_BS_BADDDDDUUAUS_BUAULR"; //
-        // string path = "S_BS_BADDDDDUUAUS_BAUULR"; //
-        // string path = "DULLRRADDDS_BUAUS_BS_BAU"; //55 1
-        // string path = "DULLRRADDUS_BUALS_BS_BAR"; //56 1
-        // string path = "DULLRRADLUS_BRADS_BS_BAU"; //
-        // string path = "DULLRRADLUS_BRALS_BS_BAR"; //
-        // RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/clefairyp.gqs", new RbyIntroSequence(RbyStrat.NoPalAB), path, "CLEFAIRY", 60, true, null, true,  0, 1, 16, false);
+        // string path = "S_BS_BADDDDDDUAUS_BUAUUU"; //3360 60
+        // string path = "S_BS_BADDDDDDUAUS_BAUUUU"; //3360 60
+        // string path = "S_BS_BADDDDDDAUUS_BUAUUU"; //3360 60
+        // string path = "S_BS_BADDDDDUUUS_BUAULAR"; //3360 60
+        // string path = "S_BS_BADDDDDUUAUS_BUAULR"; //3360 60
+        // string path = "S_BS_BADDDDDUUAUS_BAUULR"; //3360 60
+        // string path = "DULLRRADDUS_BUALS_BS_BAR"; //3360 60
+        // string path = "DULLRRADLUS_BRADS_BS_BAU"; //3360 60
+        // string path = "DULLRRADLUS_BRALS_BS_BAR"; //3360 60
+        // string path = "DULLRRADDDS_BUAUS_BS_BAU"; //3302 60 (59 geodude)
+        // RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/clefairybuf.gqs", new RbyIntroSequence(RbyStrat.NoPalAB), path, "CLEFAIRY", 3600, true, null, true,  0, 1, 16, false);
     }
 
     public static void Search(int numThreads = 1, int numFrames = 1, int success = -1)

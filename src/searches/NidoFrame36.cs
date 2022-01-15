@@ -119,8 +119,8 @@ class NidoFrame36
                 string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
                 display.Add(new Display(path));
                 // Trace.WriteLine(path);
-                // CheckIGT("basesaves/red/manip/nido.gqs", intro, nido + interval + path, "NIDORANM", 1, true, null, false, 36, 60, 1);
-                // CheckIGT("basesaves/red/manip/nido.gqs", intro, nido + interval + path, "NIDORANM", 1, true, null, true, 36, 60, 1);
+                CheckIGT("basesaves/red/manip/nido.gqs", intro, nido + interval + path, "NIDORANM", 1, true, null, false, 36, 60, 1);
+                CheckIGT("basesaves/red/manip/nido.gqs", intro, nido + interval + path, "NIDORANM", 1, true, null, true, 36, 60, 1);
             }
         }
         Display.PrintAll(display, "https://gunnermaniac.com/pokeworld?local=33#33/8/");
