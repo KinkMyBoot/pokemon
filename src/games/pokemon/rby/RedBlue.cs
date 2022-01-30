@@ -280,7 +280,7 @@ public class RedBlue : Rby {
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }
 
-    public override bool SelectBall(int ballSlot = 0, Joypad hold = Joypad.None) {
+    public override bool Selectball(int ballSlot = 0, Joypad hold = Joypad.None) {
         ClearText(hold);
         Press(Joypad.Down | Joypad.A, Joypad.Select, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down));
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];

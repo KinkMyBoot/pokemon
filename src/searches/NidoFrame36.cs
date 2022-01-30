@@ -31,7 +31,7 @@ class NidoFrame36
         intro.ExecuteAfterIGT(gb);
         gb.Execute(SpacePath(nido));
         gb.Execute(SpacePath(interval + backup));
-        gb.SelectBall();
+        gb.Selectball();
         gb.ClearText();
         gb.Press(Joypad.A, Joypad.None, Joypad.A, Joypad.Start);
         gb.Execute("D");

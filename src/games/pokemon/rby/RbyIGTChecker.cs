@@ -25,7 +25,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
     public static List<(int, byte, byte)> Empty = new List<(int, byte, byte)>();
 
     public static void CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke, int numFrames = 60, bool checkDV = false,
-                                List<(int, byte, byte)> itemPickups = null, bool selectball = false, int startFrame = 0, int stepFrame = 1, int numThreads = 16, bool verbose = true) {
+                                List<(int, byte, byte)> itemPickups = null, bool selectBall = false, int startFrame = 0, int stepFrame = 1,
+                                int numThreads = 16, bool verbose = true, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null) {
         byte[] state = File.ReadAllBytes(statePath);
 
         if(itemPickups==null)
@@ -57,6 +58,14 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             gb.CpuWrite("wPlayTimeFrames", res.IGTFrame);
 
             intro.ExecuteAfterIGT(gb);
+            if(nameLength > 0) {
+                for(int i = 0; i < nameLength; ++i) gb.CpuWrite(gb.SYM["wPartyMonNicks"] + i, 0x80);
+                gb.CpuWrite(gb.SYM["wPartyMonNicks"] + nameLength, 0x50);
+            }
+            if(forceRedBar) {
+                gb.CpuWriteBE<ushort>("wPartyMon1HP", 1);
+            }
+
             int ret = 0;
             foreach(string step in SpacePath(path).Split()) {
                 ret = gb.Execute(step);
@@ -66,7 +75,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             }
 
             if(ret == gb.SYM["CalcStats"]) {
-                res.Yoloball = selectball ? gb.SelectBall() : gb.Yoloball();
+                res.Yoloball = memeBall != null ? memeBall(gb) : selectBall ? gb.Selectball() : gb.Yoloball();
                 res.Mon = gb.EnemyMon;
             }
             res.Tile = gb.Tile;
