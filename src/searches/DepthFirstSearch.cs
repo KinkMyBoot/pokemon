@@ -81,7 +81,6 @@ public static class DepthFirstSearch {
                                                                                                                                                                       where T : Tile<M, T> {
         if(parameters.FoundCallback == null)
             parameters.FoundCallback = state => Console.WriteLine(state.Log);
-        wildEncounterAddress = gbs[0].SYM["CalcStats"];
 
         RecursiveSearch(gbs, parameters, new DFState<M, T> {
             Tile = startTile,
@@ -92,8 +91,6 @@ public static class DepthFirstSearch {
             IGT = initialState,
         }, new HashSet<int>());
     }
-
-    static int wildEncounterAddress;
 
     private static void RecursiveSearch<Gb, M, T>(Gb[] gbs, DFParameters<Gb, M, T> parameters, DFState<M, T> state, HashSet<int> seenStates) where Gb : PokemonGame
                                                                                                                                              where M : Map<M, T>
@@ -128,16 +125,16 @@ public static class DepthFirstSearch {
                     gb.LoadState(prev.State);
                     int ret = gb.Execute(edge.Action);
                     if(ret == gb.OverworldLoopAddress)
-					{
+                    {
                         if(edge.NextTile == parameters.TileCallback.Item1)
                             parameters.TileCallback.Item2(gb);
                         igt = new IGTState(gb, prev.Success, prev.IGTStamp);
-					}
+                    }
                     else
                     {
                         igt = new IGTState();
                         igt.IGTStamp=prev.IGTStamp;
-                        if(ret == wildEncounterAddress) {
+                        if(ret == gb.WildEncounterAddress) {
                             igt.Success = parameters.EncounterCallback(gb);
                         } else {
                             Console.WriteLine("Movement failed on frame " + f + " on tile " + state.Tile);
@@ -176,8 +173,9 @@ public static class DepthFirstSearch {
                     else blockedActions &= ~(Action.A | Action.StartB);
                     newState.BlockedActions = blockedActions;
 
-                    if((edge.Action & (Action.Up | Action.Down | Action.Left | Action.Right)) != 0)
-                        newState.LastDir = edge.Action;
+                    Action moving = edge.Action & (Action.Up | Action.Down | Action.Left | Action.Right);
+                    if(moving != 0)
+                        newState.LastDir = moving;
                     else
                         newState.LastDir = state.LastDir;
 
@@ -192,7 +190,6 @@ public static class DepthFirstSearch {
                                                                                                                                                                       where T : Tile<M, T> {
         if(parameters.SingleCallback == null)
             parameters.SingleCallback = (state, gb) => Console.WriteLine(state.Log);
-        wildEncounterAddress = gb.SYM["CalcStats"];
 
         RecursiveSingle(gb, parameters, new SingleState<M, T> {
             Tile = startTile,
@@ -247,7 +244,7 @@ public static class DepthFirstSearch {
                 newState.IGT = new IGTState(gb, state.IGT.Success, state.IGT.IGTStamp);
             else
             {
-                if(ret == wildEncounterAddress) {
+                if(ret == gb.WildEncounterAddress) {
                     if(parameters.EncounterCallback(gb))
                         parameters.SingleCallback(newState, gb);
                 } else {

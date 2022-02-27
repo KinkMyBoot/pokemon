@@ -128,6 +128,7 @@ public partial class Rby : PokemonGame {
         }
 
         OverworldLoopAddress = SYM["JoypadOverworld"];
+        WildEncounterAddress = SYM["CalcStats"];
     }
 
     private void LoadTypeEffectivenessTable() {

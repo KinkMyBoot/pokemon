@@ -52,6 +52,11 @@ class Clefairy {
         // string path = "DULLRRADLUS_BRALS_BS_BAR"; //3360 60
         // string path = "DULLRRADDDS_BUAUS_BS_BAU"; //3302 60 (59 geodude)
         // RbyIGTChecker<Red>.CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPalAB), path, "CLEFAIRY", 3600, true, null, true,  0, 1, 16, false);
+
+        // spearow 4,7,7s,9 redbar 1,2,2s
+        // pidgey 6,8,9s redbar 1,1s
+        // squirtle 4,7 redbar 2,2s,4,5s,7s
+        // paras 2s,4s,7s
     }
 
     public static void Search(int numThreads = 1, int numFrames = 1, int success = -1)

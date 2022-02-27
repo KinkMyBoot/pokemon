@@ -121,6 +121,7 @@ public class IGTResults {
 public partial class PokemonGame {
 
     public int OverworldLoopAddress;
+    public int WildEncounterAddress;
 
     public IGTState IGTCheckFrame(IGTState state, Func<bool> fn) {
         return IGTCheckFrame(state, _ => fn == null || fn());

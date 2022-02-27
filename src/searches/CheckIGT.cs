@@ -108,7 +108,7 @@ class CheckIGT {
         if(frame == 37) rt3Moon += "UUURRRRRRDDARRRRARRUURRRDDDDDDDDLLLLDDDDDADDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUU";
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
         CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, false, frame, 60, 16, false);
-        CheckIGT("basesaves/red/manip/rt3moon_redbar.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, false);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, false, true);
     }
 
     public static void EntrMoon()

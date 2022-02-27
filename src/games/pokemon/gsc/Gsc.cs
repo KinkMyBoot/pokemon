@@ -88,6 +88,7 @@ public partial class Gsc : PokemonGame {
         }
 
         OverworldLoopAddress = SYM["OWPlayerInput"];
+        WildEncounterAddress = SYM["RandomEncounter.ok"];
     }
 
     private void LoadSpecies() {
