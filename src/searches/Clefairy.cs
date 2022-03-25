@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 using static SearchCommon;
 
-class Clefairy {
+class Clefairy
+{
     public static void Check()
     {
         string state = "basesaves/red/manip/clefairysq.gqs";
@@ -59,22 +60,23 @@ class Clefairy {
         // paras 2s,4s,7s
     }
 
-    public static void Search(int numThreads = 1, int numFrames = 1, int success = -1)
+    public static void Search(int numThreads = 16, int numFrames = 1, int success = 1)
     {
         StartWatch();
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
+        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
         Elapsed("threads");
 
         IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/red/manip/clefairy.gqs");
+        gb.LoadState("basesaves/red/manip/clefairypi.gqs");
         gb.HardReset();
         intro.ExecuteUntilIGT(gb);
         byte[] igtState = gb.SaveState();
 
-        MultiThread.For(states.Length, gbs, (gb, f) => {
+        MultiThread.For(states.Length, gbs, (gb, f) =>
+        {
             gb.LoadState(igtState);
             gb.CpuWrite("wPlayTimeMinutes", 8);
             gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
@@ -90,13 +92,15 @@ class Clefairy {
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { moon[9, 21] };
         RbyTile[] blockedTiles = { moon[7, 20], moon[8, 20], moon[9, 20], moon[10, 21], moon[10, 22], moon[10, 23], moon[10, 24], moon[10, 25], moon[10, 26], moon[11, 26] };
-        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles.First(), actions, blockedTiles);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions, blockedTiles);
         Pathfinding.DebugDrawEdges(gb, moon, 0);
 
-        var parameters = new DFParameters<Red, RbyMap, RbyTile>() {
+        var parameters = new SFParameters<Red, RbyMap, RbyTile>()
+        {
             MaxCost = 400,
-            SuccessSS = success > 0 ? success : Math.Max(1, states.Length - 5),
-            EncounterCallback = gb => {
+            SuccessSS = success,
+            EncounterCallback = gb =>
+            {
                 return gb.EnemyMon.Species.Name == "CLEFAIRY"
                     && gb.EnemyMon.DVs.Attack >= 14 && gb.EnemyMon.DVs.Defense >= 14 && gb.EnemyMon.DVs.Speed >= 14 && gb.EnemyMon.DVs.Special >= 14;
             },
@@ -104,13 +108,14 @@ class Clefairy {
             // {
             //     Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             // },
-            SingleCallback = (state, gb) => {
+            FoundCallback = (state, gb) =>
+            {
                 Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + "  " + gb.EnemyMon.Species.Name + " L" + gb.EnemyMon.Level + " DVs: " + gb.EnemyMon.DVs.ToString() + " Cost: " + state.WastedFrames);
             }
         };
 
         // DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states);
-        DepthFirstSearch.SingleSearch(gb, parameters, startTile, 0, states[0]);
+        SingleFrameSearch.StartSearch(gbs, parameters, startTile, 0, states[0]);
         Elapsed("search");
     }
 }

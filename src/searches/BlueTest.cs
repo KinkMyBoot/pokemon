@@ -11,7 +11,7 @@ class BlueTest
     {
     }
 
-    public static List<DFState<RbyMap,RbyTile>> Search(int numThreads = 15, int numFrames = 60, int success = -1)
+    public static void Search(int numThreads = 16, int numFrames = 60, int success = 55)
     {
         StartWatch();
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPalAB);
@@ -30,11 +30,11 @@ class BlueTest
         MultiThread.For(states.Length, gbs, (gb, f) =>
         {
             gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
+            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
+            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
             intro.ExecuteAfterIGT(gb);
 
-            states[f]=new IGTState(gb, false, f);
+            states[f] = new IGTState(gb, false, f);
         });
         Elapsed("states");
 
@@ -42,13 +42,12 @@ class BlueTest
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route2[8, 48] };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions);
 
-        var results = new List<DFState<RbyMap,RbyTile>>();
-        var parameters = new DFParameters<Blue,RbyMap,RbyTile>()
+        var parameters = new DFParameters<Blue, RbyMap, RbyTile>()
         {
             MaxCost = 4,
-            SuccessSS = success > 0 ? success : Math.Max(1, states.Length - 5),
+            SuccessSS = success,
             EndTiles = endTiles,
             EncounterCallback = gb =>
             {
@@ -56,14 +55,11 @@ class BlueTest
             },
             FoundCallback = state =>
             {
-                results.Add(state);
                 Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
             }
         };
 
         DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states);
         Elapsed("search");
-
-        return results;
     }
 }

@@ -4,8 +4,8 @@ using System.Diagnostics;
 
 using static RbyIGTChecker<Red>;
 
-class CheckIGT {
-
+class CheckIGT
+{
     public static void AltNidos()
     {
         string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU"; // standard
@@ -14,6 +14,7 @@ class CheckIGT {
         // string nido = "LLLULLUAULALDLDLLDADDDLALLALUUAU"; // igt
         // string nido = "LDUALLULLLLAULLLLLADDADDLADLAUUAU"; // palette1
         // string nido = "LDUALLULLLLAULLLLDADDADLLADLAUUAU"; // palette2
+        // string nido = "LDUAULLLLLAULLLLADDADDDLALLALUUAU"; // palette3
         // string nido = "LLLULLLLAUDAULLLADLADDDADLALLUAUU"; // alt1
         // string nido = "LLLULLLAULADULLLADLLDADDADLALUAUU"; // alt2
         // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; // alt3
@@ -151,7 +152,7 @@ class CheckIGT {
     {
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         Red gb = new Red();
-        const Joypad PLD=Joypad.B, PLD_ball=Joypad.A;
+        const Joypad PLD = Joypad.B, PLD_ball = Joypad.A;
 
         gb.LoadState("basesaves/red/manip/nido.gqs");
         gb.HardReset();
@@ -163,7 +164,7 @@ class CheckIGT {
         // for (byte def = 12; def <= 14; ++def)
         // for (byte spd = 10; spd <= 12; ++spd)
         // for (byte spc = 11; spc <= 12; ++spc)
-        for (byte s = 0; s < 60; ++s)
+        for(byte s = 0; s < 60; ++s)
         {
             gb.LoadState(igtState);
 
@@ -186,13 +187,13 @@ class CheckIGT {
 
             Trace.Write($"{s,2} 33,  ");
 
-            if (addr != gb.SYM["CalcStats"])
+            if(addr != gb.SYM["CalcStats"])
             {
                 Trace.WriteLine("No enc");
                 continue;
             }
 
-            if (gb.EnemyMon.Species.Name != "NIDORANM")
+            if(gb.EnemyMon.Species.Name != "NIDORANM")
             {
                 Trace.WriteLine(gb.EnemyMon.Species.Name);
                 continue;
@@ -216,20 +217,24 @@ class CheckIGT {
             gb.Hold(PLD, gb.SYM["ManualTextScroll"]); // missed
             gb.Press(Joypad.A);
 
-            addr=gb.RunUntil(gb.SYM["MoveMissed"], gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]); // get move info
-            byte move=gb.CpuRead(gb.SYM["wEnemySelectedMove"]);
-            if(move > 0) {
+            addr = gb.RunUntil(gb.SYM["MoveMissed"], gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]); // get move info
+            byte move = gb.CpuRead(gb.SYM["wEnemySelectedMove"]);
+            if(move > 0)
+            {
                 Trace.Write(", Move: " + gb.Moves[move].Name);
             }
-            if(addr == gb.SYM["MoveMissed"]) {
+            if(addr == gb.SYM["MoveMissed"])
+            {
                 Trace.Write(" Miss");
-                addr=gb.RunUntil(gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]);
+                addr = gb.RunUntil(gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]);
             }
-            if(gb.CpuRead(gb.SYM["wCriticalHitOrOHKO"]) > 0) {
+            if(gb.CpuRead(gb.SYM["wCriticalHitOrOHKO"]) > 0)
+            {
                 Trace.Write(" Crit");
             }
 
-            if(addr==gb.SYM["ManualTextScroll"]) { // crit / status
+            if(addr == gb.SYM["ManualTextScroll"])
+            { // crit / status
                 gb.AdvanceFrames(4);
                 gb.Press(Joypad.B);
             }
@@ -252,40 +257,40 @@ class CheckIGT {
         intro.ExecuteUntilIGT(gb);
         gb.CpuWrite("wPlayTimeMinutes", 0);
         gb.CpuWrite("wPlayTimeSeconds", 0);
-        gb.CpuWrite("wPlayTimeFrames",  32);
+        gb.CpuWrite("wPlayTimeFrames", 32);
         intro.ExecuteAfterIGT(gb);
         byte[] state = gb.SaveState();
 
-        for (byte maxhp = 21; maxhp <= 23; ++maxhp)
-        for (byte hp = 10; hp <= maxhp; ++hp)
-        {
-            gb.LoadState(state);
-            gb.CpuWriteBE<ushort>("wPartyMon1HP",      hp );
-            gb.CpuWriteBE<ushort>("wPartyMon1MaxHP",   maxhp );
-            Trace.Write(gb.CpuReadBE<ushort>("wPartyMon1HP")+"/"+gb.CpuReadBE<ushort>("wPartyMon1MaxHP")+" ");
+        for(byte maxhp = 21; maxhp <= 23; ++maxhp)
+            for(byte hp = 10; hp <= maxhp; ++hp)
+            {
+                gb.LoadState(state);
+                gb.CpuWriteBE<ushort>("wPartyMon1HP", hp);
+                gb.CpuWriteBE<ushort>("wPartyMon1MaxHP", maxhp);
+                Trace.Write(gb.CpuReadBE<ushort>("wPartyMon1HP") + "/" + gb.CpuReadBE<ushort>("wPartyMon1MaxHP") + " ");
 
-            gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"));
-            gb.Yoloball();
+                gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"));
+                gb.Yoloball();
 
-            gb.ClearText(Joypad.B);
-            gb.Press(Joypad.A);
-            gb.RunUntil("_Joypad");
-            gb.AdvanceFrames(5); // 0 1 2 2 3
+                gb.ClearText(Joypad.B);
+                gb.Press(Joypad.A);
+                gb.RunUntil("_Joypad");
+                gb.AdvanceFrames(5); // 0 1 2 2 3
 
-            gb.Press(Joypad.A, Joypad.Start);
+                gb.Press(Joypad.A, Joypad.Start);
 
-            gb.Execute(SpacePath("DRRUUURRRRRRRRRRRRRRRRRRRRRURUUUUUURAUUUUUUUUUUUUUUUUUUUULUAUULLLUUUUUUUUUURRRARU"));
-            gb.Yoloball();
+                gb.Execute(SpacePath("DRRUUURRRRRRRRRRRRRRRRRRRRRURUUUUUURAUUUUUUUUUUUUUUUUUUUULUAUULLLUUUUUUUUUURRRARU"));
+                gb.Yoloball();
 
-            gb.ClearText(Joypad.A);
-            gb.Press(Joypad.B);
+                gb.ClearText(Joypad.A);
+                gb.Press(Joypad.B);
 
-            int adr = gb.Execute(SpacePath("UUUAULLLLLU" + "RUUUUUUU" + "UUURURRURRRRRUAUUUUUUUUUUUUUUUUUUAUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLUAUU"), (gb.Maps[51][25,12], gb.PickupItem));
-            if(adr == gb.SYM["CalcStats"])
-                Trace.WriteLine(gb.EnemyMon.Species.Name + " " + gb.EnemyMon.Level);
-            else
-                Trace.WriteLine("No encounter");
-        }
+                int adr = gb.Execute(SpacePath("UUUAULLLLLU" + "RUUUUUUU" + "UUURURRURRRRRUAUUUUUUUUUUUUUUUUUUAUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLUAUU"), (gb.Maps[51][25, 12], gb.PickupItem));
+                if(adr == gb.SYM["CalcStats"])
+                    Trace.WriteLine(gb.EnemyMon.Species.Name + " " + gb.EnemyMon.Level);
+                else
+                    Trace.WriteLine("No encounter");
+            }
 
         gb.AdvanceFrames(300);
         gb.Dispose();
@@ -316,29 +321,31 @@ class CheckIGT {
 
         gb.LoadState("basesaves/red/manip/cans.gqs");
         gb.HardReset();
-        if(numThreads==1)
+        if(numThreads == 1)
             gb.Record("test");
         intro.ExecuteUntilIGT(gb);
         byte[] igtState = gb.SaveState();
 
         var full = new List<string>();
-        var results = new Dictionary<(byte,byte),int>();
+        var results = new Dictionary<(byte first, byte second), int>();
 
-        MultiThread.For(numFrames, gbs, (gb, f) => {
+        MultiThread.For(numFrames, gbs, (gb, f) =>
+        {
             gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte)(f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte)(f % 60));
-            // gb.CpuWrite("wPlayTimeMinutes", (byte)(f % 60));
-            // gb.CpuWrite("wPlayTimeSeconds", (byte)(54 + 3*(f/2)));
-            // gb.CpuWrite("wPlayTimeFrames", (byte)(36 + f%2));
+            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
+            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
+            // gb.CpuWrite("wPlayTimeMinutes", (byte) (f % 60));
+            // gb.CpuWrite("wPlayTimeSeconds", (byte) (54 + 3*(f / 2)));
+            // gb.CpuWrite("wPlayTimeFrames", (byte) (36 + f % 2));
 
             intro.ExecuteAfterIGT(gb);
             gb.Execute(SpacePath(path));
 
-            (byte, byte) cans = (gb.CpuRead("wFirstLockTrashCanIndex"), gb.CpuRead("wSecondLockTrashCanIndex"));
-            lock(results) {
-                full.Add($"{f/60,2} {f%60,2}: {cans.Item1},{cans.Item2}");
-                if (!results.ContainsKey(cans))
+            (byte first, byte second) cans = (gb.CpuRead("wFirstLockTrashCanIndex"), gb.CpuRead("wSecondLockTrashCanIndex"));
+            lock(results)
+            {
+                full.Add($"{f / 60,2} {f % 60,2}: {cans.first},{cans.second}");
+                if(!results.ContainsKey(cans))
                     results.Add(cans, 1);
                 else
                     results[cans]++;
@@ -349,6 +356,6 @@ class CheckIGT {
             Trace.WriteLine(line);
         Trace.WriteLine("");
         foreach(var cans in results)
-            Trace.WriteLine(cans.Key.Item1 + "," + cans.Key.Item2 + ": " + cans.Value);
+            Trace.WriteLine(cans.Key.first + "," + cans.Key.second + ": " + cans.Value);
     }
 }

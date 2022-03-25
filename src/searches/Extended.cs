@@ -12,11 +12,11 @@ class Extended
 {
     static bool CheckEncounter(int address, Red gb, string pokename, IGTResult res)
     {
-        if (address != gb.SYM["CalcStats"])
+        if(address != gb.SYM["CalcStats"])
             return false;
 
         res.Mon = gb.EnemyMon;
-        if (res.Mon.Species.Name != pokename)
+        if(res.Mon.Species.Name != pokename)
             return false;
 
         res.Yoloball = gb.Yoloball(0, Joypad.B);
@@ -24,7 +24,7 @@ class Extended
     }
     static bool CheckNoEncounter(int address, Red gb, IGTResult res)
     {
-        if (address != gb.SYM["CalcStats"])
+        if(address != gb.SYM["CalcStats"])
             return true;
 
         res.Mon = gb.EnemyMon;
@@ -49,12 +49,12 @@ class Extended
         {
             if((f + 1) * 100 / numFrames > f * 100 / numFrames) Console.WriteLine("%");
 
-            if (IgnoredFrames.Contains(f % 60))
+            if(IgnoredFrames.Contains(f % 60))
                 return;
 
             gb.LoadState(igtState);
-            byte sec = (byte)(f / 60);
-            byte frame = (byte)(f % 60);
+            byte sec = (byte) (f / 60);
+            byte frame = (byte) (f % 60);
             gb.CpuWrite("wPlayTimeMinutes", 5);
             gb.CpuWrite("wPlayTimeSeconds", sec);
             gb.CpuWrite("wPlayTimeFrames", frame);
@@ -64,7 +64,7 @@ class Extended
             int ret;
             ret = gb.Execute(SpacePath(nidopath));
 
-            if (!CheckEncounter(ret, gb, "NIDORANM", new IGTResult()))
+            if(!CheckEncounter(ret, gb, "NIDORANM", new IGTResult()))
                 return;
 
             gb.ClearText(Joypad.B);
@@ -96,7 +96,7 @@ class Extended
         gb.Yoloball(0, Joypad.B);
         gb.Hold(Joypad.B, "ManualTextScroll"); // all right
         // gb.AdvanceFrame(); // all right late
-            // Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText("allrightlate.txt"), "allrightlate.txt"));
+        // Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText("allrightlate.txt"), "allrightlate.txt"));
         gb.ClearText(Joypad.B, 2);
         gb.Hold(Joypad.B, "ManualTextScroll"); // will be
         // gb.AdvanceFrame(); // will be late
@@ -107,7 +107,7 @@ class Extended
         gb.ClearText(Joypad.B, 1); // yesno
         gb.Press(Joypad.A);
         gb.RunUntil("_Joypad");
-            // Trace.Listeners.Remove("allrightlate.txt");
+        // Trace.Listeners.Remove("allrightlate.txt");
         byte[] state = gb.SaveState();
         // return;
 
@@ -116,8 +116,8 @@ class Extended
         {
             // int p = FramePath(f);
             // string name = "path" + p + (f==3?"b":"") + ".txt";
-            int p = f>=2 ? f : (f+1);
-            string name = "path" + p + (f==2?"c":"b") + ".txt";
+            int p = f >= 2 ? f : (f + 1);
+            string name = "path" + p + (f == 2 ? "c" : "b") + ".txt";
             Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText(name), name));
             gb.LoadState(state);
             if(f < 0)
@@ -140,7 +140,7 @@ class Extended
             {
                 gb.ClearText(Joypad.A);
                 gb.Press(Joypad.B);
-                gb.Execute(SpacePath(Forest[p]), (gb.Maps[51][25,12], gb.PickupItem));
+                gb.Execute(SpacePath(Forest[p]), (gb.Maps[51][25, 12], gb.PickupItem));
             }
             Trace.Listeners.Remove(name);
         }
@@ -155,14 +155,14 @@ class Extended
 
     static List<IGTResult> CheckIGTPersistent(int framesToWait, string path, bool extended = false, int numFrames = 60, int numThreads = 16)
     {
-        if (PersistentGbs == null)
+        if(PersistentGbs == null)
         {
             PersistentGbs = MultiThread.MakeThreads<Red>(numThreads);
             PersistentStates = new Dictionary<string, IGTStateResult[]>();
         }
         Red[] gbs = PersistentGbs;
 
-        if (PersistentStates.Count * numFrames > 2000 * 60) // unreasonable memory usage
+        if(PersistentStates.Count * numFrames > 2000 * 60) // unreasonable memory usage
         {
             // PersistentStates = PersistentStates.Where(x => x.Key.Length < 48).ToDictionary(x => x.Key, x => x.Value);
             int[] lengthCount = new int[1000];
@@ -179,21 +179,23 @@ class Extended
             PersistentStates = PersistentStates.Where(x => x.Key.Length <= maxUnique).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        if (!PersistentStates.ContainsKey(""))
+        if(!PersistentStates.ContainsKey(""))
         {
             IGTStateResult[] results = new IGTStateResult[numFrames];
             MultiThread.For(numFrames, gbs, (gb, f) =>
             {
-                if (IgnoredFrames.Contains(f % 60))
+                if(IgnoredFrames.Contains(f % 60))
                     return;
 
                 IGTStateResult res = results[f] = new IGTStateResult();
 
-                res.IGTSec = (byte)(f / 60);
-                res.IGTFrame = (byte)(f % 60);
-                try {
+                res.IGTSec = (byte) (f / 60);
+                res.IGTFrame = (byte) (f % 60);
+                try
+                {
                     gb.LoadState("basesaves/red/manip/ext/nido_" + res.IGTSec + "_" + res.IGTFrame + ".gqs");
-                } catch(System.IO.FileNotFoundException) {
+                } catch(System.IO.FileNotFoundException)
+                {
                     return;
                 }
 
@@ -207,30 +209,30 @@ class Extended
             });
             PersistentStates[""] = results;
         }
-        if (numThreads == 1)
+        if(numThreads == 1)
             gbs[0].Record("test");
 
         path = path.Replace("_B", "");
         int step = path.Length;
-        while (!PersistentStates.ContainsKey(path.Substring(0, step)))
+        while(!PersistentStates.ContainsKey(path.Substring(0, step)))
             --step;
 
-        if (step < path.Length)
+        if(step < path.Length)
         {
-            for (int i = step + 1; i <= path.Length; ++i)
+            for(int i = step + 1; i <= path.Length; ++i)
                 PersistentStates[path.Substring(0, i)] = new IGTStateResult[numFrames];
 
             MultiThread.For(numFrames, gbs, (gb, f) =>
             {
                 int curstep = step;
                 IGTStateResult prev = PersistentStates[path.Substring(0, curstep)][f];
-                if (prev != null && prev.State != null)
+                if(prev != null && prev.State != null)
                     gb.LoadState(prev.State);
-                while (curstep < path.Length)
+                while(curstep < path.Length)
                 {
                     string curpath = path.Substring(0, curstep + 1);
 
-                    if (prev == null || prev.State == null) // we already have a result
+                    if(prev == null || prev.State == null) // we already have a result
                     {
                         PersistentStates[curpath][f] = prev;
                     }
@@ -242,17 +244,15 @@ class Extended
                         res.IGTSec = prev.IGTSec;
                         res.IGTFrame = prev.IGTFrame;
 
-                        // int address = gb.Execute(action);
-                        int address = gb.Execute(action, (gb.Maps[51][25,12], gb.PickupItem));
-                        if (address == gb.OverworldLoopAddress)
+                        int address = gb.Execute(action, (gb.Maps[51][25, 12], gb.PickupItem));
+                        if(address == gb.OverworldLoopAddress)
                             res.State = gb.SaveState();
-                        else
-                            if(CheckEncounter(address, gb, "PIDGEY", res) && extended)
-                            {
-                                gb.ClearText(Joypad.A);
-                                gb.Press(Joypad.B);
-                                res.State = gb.SaveState();
-                            }
+                        else if(CheckEncounter(address, gb, "PIDGEY", res) && extended)
+                        {
+                            gb.ClearText(Joypad.A);
+                            gb.Press(Joypad.B);
+                            res.State = gb.SaveState();
+                        }
                         res.Tile = gb.Tile;
                         res.Map = gb.Map;
                         prev = res;
@@ -304,7 +304,7 @@ class Extended
     static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
     {
         RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
-        if (numThreads == 1)
+        if(numThreads == 1)
             gbs[0].Record("test");
         List<IGTResult> results = new List<IGTResult>();
 
@@ -313,16 +313,18 @@ class Extended
             if(verbose && numFrames >= 100 && (f + 1) * 100 / numFrames > f * 100 / numFrames) Console.WriteLine("%");
 
             f += startFrame;
-            if (IgnoredFrames.Contains(f % 60))
+            if(IgnoredFrames.Contains(f % 60))
                 return;
 
             IGTResult res = new IGTResult();
 
-            res.IGTSec = (byte)(f / 60);
-            res.IGTFrame = (byte)(f % 60);
-            try {
+            res.IGTSec = (byte) (f / 60);
+            res.IGTFrame = (byte) (f % 60);
+            try
+            {
                 gb.LoadState("basesaves/red/manip/ext/nido_" + res.IGTSec + "_" + res.IGTFrame + ".gqs");
-            } catch(System.IO.FileNotFoundException) {
+            } catch(System.IO.FileNotFoundException)
+            {
                 return;
             }
 
@@ -334,7 +336,7 @@ class Extended
             {
                 string movement;
                 Registers reg = gb.Registers;
-                switch (reg.B)
+                switch(reg.B)
                 {
                     case 1: movement = "r"; break;
                     case 2: movement = "l"; break;
@@ -342,12 +344,12 @@ class Extended
                     case 8: movement = "u"; break;
                     default: movement = ""; break;
                 }
-                if ((reg.F & 0x10) == 0)
+                if((reg.F & 0x10) == 0)
                     movement = movement.ToUpper();
                 (int, int) npc = (gb.Map.Id, gb.CpuRead(0xffda) / 16);
 
                 string log = npcMovement.GetValueOrDefault(npc);
-                if (log == null || log.Last().ToString().ToLower() != movement)
+                if(log == null || log.Last().ToString().ToLower() != movement)
                     npcMovement[npc] = log + movement;
             });
 
@@ -366,7 +368,7 @@ class Extended
 
                 gb.ClearText(Joypad.A);
                 gb.Press(Joypad.B);
-                address = gb.Execute(SpacePath(forest), (gb.Maps[51][25,12], gb.PickupItem));
+                address = gb.Execute(SpacePath(forest), (gb.Maps[51][25, 12], gb.PickupItem));
 
                 CheckNoEncounter(address, gb, ext);
 
@@ -375,11 +377,11 @@ class Extended
                 ext.Map = gb.Map;
             }
 
-            lock (results)
+            lock(results)
                 results.Add(res);
         });
         gbs[0].Dispose();
-        if (verbose)
+        if(verbose)
             Console.WriteLine();
 
         return results;
@@ -387,48 +389,48 @@ class Extended
 
     static int DecideMovement(Red gb, IGTResult res, Dictionary<(int, int), string> npcMovement)
     {
-        res.Info=" path";
+        res.Info = " path";
         int address;
-        string npc1,npc2;
-        npc1=npcMovement.GetValueOrDefault((1, 1));
-        if(npc1=="dD")
+        string npc1, npc2;
+        npc1 = npcMovement.GetValueOrDefault((1, 1));
+        if(npc1 == "dD")
             gb.Execute(SpacePath("RUUUUUU"));
         else
             gb.Execute(SpacePath("UUUUUUR"));
-        npc1=npcMovement.GetValueOrDefault((1, 1));
-        if(npc1=="uL")
+        npc1 = npcMovement.GetValueOrDefault((1, 1));
+        if(npc1 == "uL")
             gb.Execute(SpacePath("UUAUU"));
-        else if(npc1=="rL" || npc1=="rD")
+        else if(npc1 == "rL" || npc1 == "rD")
             gb.Execute(SpacePath("AUUUU"));
         else
             gb.Execute(SpacePath("UUUU"));
-        npc1=npcMovement.GetValueOrDefault((1, 1));
-        npc2=npcMovement.GetValueOrDefault((1, 7));
-        if(npc1=="r" && npc2=="R")
+        npc1 = npcMovement.GetValueOrDefault((1, 1));
+        npc2 = npcMovement.GetValueOrDefault((1, 7));
+        if(npc1 == "r" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[1].Substring(40)));
-        else if(npc1=="uL" && npc2=="R")
+        else if(npc1 == "uL" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[2].Substring(41)));
-        else if((npc1=="rL" || npc1=="rD") && npc2=="L")
+        else if((npc1 == "rL" || npc1 == "rD") && npc2 == "L")
             address = gb.Execute(SpacePath(Paths[3].Substring(41)));
-        else if(npc1=="uU" && npc2=="L")
+        else if(npc1 == "uU" && npc2 == "L")
             address = gb.Execute(SpacePath(Paths[4].Substring(40)));
-        else if(npc1=="d" && npc2=="R")
+        else if(npc1 == "d" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[5].Substring(40)));
-        else if(npc1=="d" && npc2=="L")
+        else if(npc1 == "d" && npc2 == "L")
             address = gb.Execute(SpacePath(Paths[6].Substring(40)));
-        else if(npc1=="dUR" && npc2=="R")
+        else if(npc1 == "dUR" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[7].Substring(40)));
-        else if(npc1=="dD" && npc2=="R")
+        else if(npc1 == "dD" && npc2 == "R")
             address = gb.Execute(SpacePath("LUUUUUUUUUUUUUUUUUUUUULLLUUUUURRRRUUUAU"));
-        else if(npc1=="r" && npc2=="L")
+        else if(npc1 == "r" && npc2 == "L")
             address = gb.Execute(SpacePath(Paths[8].Substring(40)));
-        else if(npc1=="dr" && npc2=="R")
+        else if(npc1 == "dr" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[9].Substring(40)));
-        else if(npc1=="u" && npc2=="R")
+        else if(npc1 == "u" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[10].Substring(40)));
         else
         {
-            res.Info="";
+            res.Info = "";
             if(npc2.Contains("R"))
                 address = gb.Execute(SpacePath("LUUUUUUU"));
             else
@@ -444,38 +446,38 @@ class Extended
         Level = 2,
         Tile = 4,
         Info = 8,
-        Default = List|Level|Tile|Info,
+        Default = List | Level | Tile | Info,
         NoEnc = 16,
-        All = List|Level|Tile|Info|NoEnc,
+        All = List | Level | Tile | Info | NoEnc,
     }
     static string ResultInfo(IGTResult res, PrintFlags flags = PrintFlags.Info)
     {
         string line = "";
-        if ((flags & PrintFlags.Info) != 0 && res.Info != null)
+        if((flags & PrintFlags.Info) != 0 && res.Info != null)
             line += res.Info + " ";
-        if (res.Mon == null)
+        if(res.Mon == null)
         {
-            if ((flags & PrintFlags.Tile) != 0)
+            if((flags & PrintFlags.Tile) != 0)
                 line += "@" + res.Tile;
-            else if ((flags & PrintFlags.NoEnc) != 0)
+            else if((flags & PrintFlags.NoEnc) != 0)
                 line += "No encounter";
         }
         else
         {
             line += res.Mon.Species.Name;
-            if ((flags & PrintFlags.Level) != 0)
+            if((flags & PrintFlags.Level) != 0)
                 line += " " + res.Mon.Level;
-            if ((flags & PrintFlags.Tile) != 0)
+            if((flags & PrintFlags.Tile) != 0)
                 line += " @" + res.Tile;
-            if (res.Mon.Species.Name == "PIDGEY")
+            if(res.Mon.Species.Name == "PIDGEY")
             {
-                if (res.Yoloball)
+                if(res.Yoloball)
                     line += " captured";
                 else
                     line += " failedtocapture";
             }
         }
-        if (res.Extended != null)
+        if(res.Extended != null)
         {
             line += ", " + ResultInfo(res.Extended, flags | PrintFlags.NoEnc);
         }
@@ -483,23 +485,22 @@ class Extended
     }
     static Dictionary<string, int> GetIGTSummary(List<IGTResult> results, PrintFlags flags = PrintFlags.Info)
     {
-        results.Sort(delegate (IGTResult a, IGTResult b)
-        {
+        results.Sort(delegate (IGTResult a, IGTResult b) {
             return (a.IGTSec * 60 + a.IGTFrame).CompareTo(b.IGTSec * 60 + b.IGTFrame);
         });
 
         Dictionary<string, int> summary = new Dictionary<string, int>();
-        foreach (IGTResult res in results)
+        foreach(IGTResult res in results)
         {
             string line = ResultInfo(res, flags);
-            if ((flags & PrintFlags.List) != 0)
+            if((flags & PrintFlags.List) != 0)
                 Trace.WriteLine((results.Count > 60 ? $"{res.IGTSec,2} " : "") + $"{res.IGTFrame,2} " + line);
-            if (!summary.ContainsKey(line))
+            if(!summary.ContainsKey(line))
                 summary.Add(line, 1);
             else
                 summary[line]++;
         }
-        if ((flags & PrintFlags.List) != 0)
+        if((flags & PrintFlags.List) != 0)
             Trace.WriteLine("");
 
         return summary;
@@ -507,24 +508,24 @@ class Extended
 
     static void DisplayIGTResults(List<IGTResult> results, int frame = -1, PrintFlags flags = PrintFlags.Default)
     {
-        if (frame >= 0)
+        if(frame >= 0)
             Trace.WriteLine("PATH " + FramePath(frame) + " (frame " + frame + ")");
 
         Dictionary<string, int> summary = GetIGTSummary(results, flags);
 
-        foreach (var item in summary.OrderByDescending(x => x.Value))
+        foreach(var item in summary.OrderByDescending(x => x.Value))
         {
             Trace.WriteLine(item.Value + "/" + results.Count + " " + (item.Key != "" ? item.Key : "No encounter"));
         }
     }
 
-    static List<DFState<RbyMap,RbyTile>> Search(int framesToWait, string path, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
+    static List<DFState<RbyMap, RbyTile>> Search(int framesToWait, string path, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
         StartWatch();
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
-        if (numThreads == 1)
+        if(numThreads == 1)
             gb.Record("test");
         Elapsed("threads");
 
@@ -532,9 +533,9 @@ class Extended
         MultiThread.For(states.Length, gbs, (gb, i) =>
         {
             int f = i;
-            for(int s=0; s<60; ++s)
-                foreach (int skip in IgnoredFrames)
-                    if (f >= skip + 60*s)
+            for(int s = 0; s < 60; ++s)
+                foreach(int skip in IgnoredFrames)
+                    if(f >= skip + 60 * s)
                         ++f;
 
             gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
@@ -544,7 +545,7 @@ class Extended
             gb.Press(Joypad.Start);
 
             int ret = gb.Execute(SpacePath(path));
-            states[i]=new IGTState(gb, false, f);
+            states[i] = new IGTState(gb, false, f);
         });
         Elapsed("states");
 
@@ -555,11 +556,11 @@ class Extended
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route2[8, 48] };
         RbyTile[] encounterTiles = { route2[6, 48], route2[7, 48], route2[8, 48], route2[7, 49], route2[8, 49], route2[8, 50] };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB);
         // Pathfinding.DebugDrawEdges(gb, viridian, 0);
 
-        var results = new List<DFState<RbyMap,RbyTile>>();
-        var parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        var results = new List<DFState<RbyMap, RbyTile>>();
+        var parameters = new DFParameters<Red, RbyMap, RbyTile>()
         {
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),// amount of yoloball success for found
@@ -581,13 +582,13 @@ class Extended
         return results;
     }
 
-    static List<DFState<RbyMap,RbyTile>> SearchForest(int framesToWait, string pidgeypath, string forestpath, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
+    static List<DFState<RbyMap, RbyTile>> SearchForest(int framesToWait, string pidgeypath, string forestpath, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
         StartWatch();
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
-        if (numThreads == 1)
+        if(numThreads == 1)
             gb.Record("test");
         Elapsed("threads");
 
@@ -595,9 +596,9 @@ class Extended
         MultiThread.For(states.Length, gbs, (gb, i) =>
         {
             int f = i;
-            for(int s=0; s<60; ++s)
-                foreach (int skip in IgnoredFrames)
-                    if (f >= skip + 60*s)
+            for(int s = 0; s < 60; ++s)
+                foreach(int skip in IgnoredFrames)
+                    if(f >= skip + 60 * s)
                         ++f;
 
             gb.LoadState("basesaves/red/manip/ext/nido_" + (f / 60) + "_" + (f % 60) + ".gqs");
@@ -613,9 +614,9 @@ class Extended
             gb.Press(Joypad.B);
 
             if(forestpath != null)
-                ret = gb.Execute(SpacePath(forestpath), (gb.Maps[51][25,12], gb.PickupItem));
+                ret = gb.Execute(SpacePath(forestpath), (gb.Maps[51][25, 12], gb.PickupItem));
 
-            states[i]=new IGTState(gb, false, f);
+            states[i] = new IGTState(gb, false, f);
         });
         Elapsed("states");
 
@@ -626,7 +627,8 @@ class Extended
         Action actions = Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB;
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { forest[1, 19] };
-        RbyTile[] blockedTiles = { forest[26, 12],
+        RbyTile[] blockedTiles = {
+            forest[26, 12],
             forest[16, 10], forest[18, 10],
             forest[16, 15], forest[18, 15],
             forest[11, 15], forest[12, 15],
@@ -635,12 +637,12 @@ class Extended
             forest[6, 15], forest[8, 15],
             forest[2, 19], forest[1, 18]
         };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions, blockedTiles);
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, gate[5, 1], actions, blockedTiles);
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, route2[3, 44], actions, blockedTiles);
-        route2[3, 44].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = gate[4, 7], NextEdgeset = 0, Cost = 0 });
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions, blockedTiles);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, gate[5, 1], actions, blockedTiles);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, route2[3, 44], actions, blockedTiles);
+        route2[3, 44].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = gate[4, 7], NextEdgeset = 0, Cost = 0 });
         gate[4, 7].GetEdge(0, Action.Right).Cost = 0;
-        gate[5, 1].AddEdge(0, new Edge<RbyMap,RbyTile>() { Action = Action.Up, NextTile = forest[17, 47], NextEdgeset = 0, Cost = 0 });
+        gate[5, 1].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = forest[17, 47], NextEdgeset = 0, Cost = 0 });
         forest[1, 19].RemoveEdge(0, Action.A);
         forest[25, 12].RemoveEdge(0, Action.A);
         forest[25, 13].RemoveEdge(0, Action.A);
@@ -649,16 +651,15 @@ class Extended
         // Pathfinding.DebugDrawEdges(gb, forest, 0);
 
         bool addResults = false;
-        var results = new List<DFState<RbyMap,RbyTile>>();
-        var parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        var results = new List<DFState<RbyMap, RbyTile>>();
+        var parameters = new DFParameters<Red, RbyMap, RbyTile>()
         {
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),
             EndTiles = endTiles,
             TileCallback = (forest[25, 12], gb =>
-            {
-                gb.PickupItem();
-            }),
+                gb.PickupItem()
+            ),
             EncounterCallback = gb =>
             {
                 // return gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
@@ -681,7 +682,7 @@ class Extended
     const string BasePathToGirl = BasePath + "UUUUUUR";
     const string BasePathToSignL = BasePathToGirl + "UUUULUUUUUU";
     const string BasePathToSignR = BasePathToGirl + "UUUUUUUUUUL";
-    static Dictionary<string,string> Link = new Dictionary<string,string> {
+    static Dictionary<string, string> Link = new Dictionary<string, string> {
         { BasePath, "https://gunnermaniac.com/pokeworld?map=1#57/178/" },
         { BasePathToGirl, "https://gunnermaniac.com/pokeworld?map=1#58/172/" },
         { BasePathToSignL, "https://gunnermaniac.com/pokeworld?map=1#57/162/" },
@@ -749,15 +750,15 @@ class Extended
     static void IgnoreNpcIgts(int path, string p7 = null)
     {
         IgnoredFrames = new SortedSet<int> { 33, 36, 37 };
-        if (path < 2)
+        if(path < 2)
         {
             IgnoredFrames.Add(14 - path);
             IgnoredFrames.Add(15 - path);
         }
         else
         {
-            IgnoredFrames.Add( (13 - path) % 60 );
-            IgnoredFrames.Add( (14 - path) % 60 );
+            IgnoredFrames.Add((13 - path) % 60);
+            IgnoredFrames.Add((14 - path) % 60);
             if(path == 7)
             {
                 if(p7 == "dUR")
@@ -770,11 +771,11 @@ class Extended
                 }
                 else if(p7 == "dD")
                 {
-                    for(int i=0; i<=11; ++i)
+                    for(int i = 0; i <= 11; ++i)
                         IgnoredFrames.Add(i);
-                    for(int i=13; i<=51; ++i)
+                    for(int i = 13; i <= 51; ++i)
                         IgnoredFrames.Add(i);
-                    for(int i=56; i<=59; ++i)
+                    for(int i = 56; i <= 59; ++i)
                         IgnoredFrames.Add(i);
                 }
             }
@@ -783,7 +784,8 @@ class Extended
     }
     static void PathUnknownMovements()
     {
-        for(int frame=1; frame<=11; ++frame) {
+        for(int frame = 1; frame <= 11; ++frame)
+        {
             List<IGTResult> res;
             res = CheckIGT(frame, BasePath, 60);
             DisplayIGTResults(res, frame, PrintFlags.Info);
@@ -792,12 +794,13 @@ class Extended
     }
     static void PathMovement3600(int frame)
     {
-        var res=CheckIGT(frame, BasePathToSignR, 3600);
-        var ds=new Dictionary<string,int[]>();
-        var df=new Dictionary<string,int[]>();
+        var res = CheckIGT(frame, BasePathToSignR, 3600);
+        var ds = new Dictionary<string, int[]>();
+        var df = new Dictionary<string, int[]>();
         foreach(var r in res)
         {
-            if(!ds.ContainsKey(r.Info)) {
+            if(!ds.ContainsKey(r.Info))
+            {
                 ds.Add(r.Info, new int[60]);
                 df.Add(r.Info, new int[60]);
             }
@@ -807,21 +810,21 @@ class Extended
         foreach(var x in ds)
         {
             Trace.WriteLine(x.Key);
-            for(int i=0; i<60; ++i)
+            for(int i = 0; i < 60; ++i)
                 Trace.WriteLine("s" + i + ": " + x.Value[i]);
         }
         foreach(var x in df)
         {
             Trace.WriteLine(x.Key);
-            for(int i=0; i<60; ++i)
+            for(int i = 0; i < 60; ++i)
                 Trace.WriteLine("f" + i + ": " + x.Value[i]);
         }
     }
     static void CheckPathsInFile(int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
     {
-        string[] lines=File.ReadAllLines("paths.txt");
+        string[] lines = File.ReadAllLines("paths.txt");
         List<Display> display = new List<Display>();
-        foreach (string line in lines)
+        foreach(string line in lines)
         {
             string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
             List<IGTResult> igt = CheckIGTPersistent(frame, basepath + path, extended, numFrames);
@@ -830,10 +833,10 @@ class Extended
         }
         Display.PrintAll(display, prefix);
     }
-    static void ResultsIGT(List<DFState<RbyMap,RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
+    static void ResultsIGT(List<DFState<RbyMap, RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
     {
         List<Display> display = new List<Display>();
-        foreach (var res in results)
+        foreach(var res in results)
         {
             List<IGTResult> igt = CheckIGTPersistent(frame, basepath + res.Log, extended, numFrames);
             int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
@@ -863,7 +866,7 @@ class Extended
         IgnoreNpcIgts(path);
 
         var results = Search(frame, basepath, 4, 4, 4, 2);
-        ResultsIGT(results, frame, basepath, false, 60*2, "PIDGEY captured", Link[basepath]);
+        ResultsIGT(results, frame, basepath, false, 60 * 2, "PIDGEY captured", Link[basepath]);
 
         ElapsedTotal("search + igt");
     }

@@ -10,63 +10,128 @@ using static RbyIGTChecker<Red>;
 
 class NidoFrame36
 {
+    static RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
+    static string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
+
     public static void Check()
     {
-        string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
         string interval = "UUU";
         // string backup = "ADDAUUADDUAUDDUAUDDUAUDADUUDADS_BS_BS_BS_BS_BS_BDDU"; // memeball mirror
-        // string backup = "ALLUUUURRUULLL" + "RRRRRLLLLLRS_BRS_BRDDADDADDDADU"; // s2
+        // string backup = "ALLUUUURRUULLL" + "RRRRRLLLLLRS_BRS_BRDDADDADDDADU"; // 689
         string backup = "ALLS_BLRRRDDDDDDDUUUUUUUDDDDS_BS_BDAUS_BS_BAU"; // 672
         // string backup = "ADUS_BDDDDDDDUUUUUUUDDDDDDDUS_BS_BAUUS_BS_BAU"; // 672b
         // string backup = "ADUS_BDDDDDDDUUUUUUUDDDS_BDDS_BDADUS_BS_BUAUU"; // 672c
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         CheckIGT("basesaves/red/manip/nido.gqs", intro, nido + interval + backup, "NIDORANM", 60, true, null, true, 36, 60);
+    }
 
+    public static void Record(string interval, string backup)
+    {
         Red gb = new Red();
-        gb.LoadState("basesaves/red/manip/nido.gqs");
-        gb.HardReset();
+        gb.LoadState("basesaves/red/manip/nidorace.gqs");
         intro.ExecuteUntilIGT(gb);
         gb.CpuWrite("wPlayTimeFrames", 36);
         gb.Record("nido36");
         intro.ExecuteAfterIGT(gb);
         gb.Execute(SpacePath(nido));
         gb.Execute(SpacePath(interval + backup));
-        gb.Selectball();
+        gb.Selectball(1);
         gb.ClearText();
         gb.Press(Joypad.A, Joypad.None, Joypad.A, Joypad.Start);
         gb.Execute("D");
         gb.Dispose();
+    }
 
-        // gb.Record("nido36back");
-        // intro.ExecuteAfterIGT(gb);
-        // gb.Execute(SpacePath(nido));
-        // // gb.Execute("UD");
-        // gb.Execute(SpacePath("DRRRRUUURRRRRRRRRRD"));
-        // gb.Press(Joypad.Start, Joypad.Up, Joypad.None, Joypad.Up, Joypad.None, Joypad.Up, Joypad.A);
-        // gb.ClearText();
+    public static void RecordGrid672()
+    {
+        Red gb = new Red();
+        gb.LoadState("basesaves/red/manip/nidorace.gqs");
+        intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeFrames", 36);
+        gb.Show();
+        gb.SetSpeedupFlags(SpeedupFlags.None);
+        intro.ExecuteAfterIGT(gb);
+
+        GridComponent g = new GridComponent(0, 0, 160, 144, 1, SpacePath("LLLULLUAULALDLDLLDADDADDLALLALUUAU" + "UUUALLS_BL"));
+        gb.Scene.AddComponent(g);
+        gb.Execute(SpacePath("LLLULLUAULALDLDLL"));
+        gb.Scene.AddComponent(new RecordingComponent("nido36"));
+        gb.Execute(SpacePath("DADDADLALLALUUAU" + "UUUALLS_BL"));
+        g.ChangePath(SpacePath("RRRDDDDDDD"));
+        gb.Execute(SpacePath("RRRDDDDDDD"));
+        g.ChangePath(SpacePath("UUUUUUU"));
+        gb.Execute(SpacePath("UUUUUUU"));
+        g.ChangePath(SpacePath("DDDDS_BS_BD"));
+        gb.Execute(SpacePath("DDDDS_BS_B"));
+        g.ChangePath(SpacePath("DAUS_BS_B"));
+        gb.Execute(SpacePath("DAUS_B"));
+        g.ChangePath(SpacePath("AU"));
+        gb.Execute(SpacePath("S_BAU"));
+        gb.Scene.RemoveComponent(g);
+        gb.Selectball(1);
+        gb.ClearText(2);
+        gb.Dispose();
+    }
+
+    public static void RecordGrid689()
+    {
+        Red gb = new Red();
+        gb.LoadState("basesaves/red/manip/nidorace.gqs");
+        intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeFrames", 36);
+        gb.Show();
+        gb.SetSpeedupFlags(SpeedupFlags.None);
+        intro.ExecuteAfterIGT(gb);
+
+        GridComponent g = new GridComponent(0, 0, 160, 144, 1, SpacePath("LLLULLUAULALDLDLLDADDADDLALLALUUAU" + "UUUALLUUUURRUULLL"));
+        gb.Scene.AddComponent(g);
+        gb.Execute(SpacePath("LLLULLUAULALDLDLL"));
+        gb.Scene.AddComponent(new RecordingComponent("nido36"));
+        gb.Execute(SpacePath("DADDADLALLALUUAU" + "UUUALLUUUURRUULLL"));
+        g.ChangePath(SpacePath("RRRRR"));
+        gb.Execute(SpacePath("RRRRR"));
+        g.ChangePath(SpacePath("LLLLL"));
+        gb.Execute(SpacePath("LLLLL"));
+        g.ChangePath(SpacePath("RS_BRS_BRDDADDADDDDADL"));
+        gb.Execute(SpacePath("RS_BRS_BRDDADDADDDADL"));
+        gb.Scene.RemoveComponent(g);
+        gb.Selectball(1);
+        gb.ClearText(2);
+        gb.Dispose();
+    }
+
+    public static void RecordBack()
+    {
+        Red gb = new Red();
+        gb.LoadState("basesaves/red/manip/nidorace.gqs");
+        intro.ExecuteUntilIGT(gb);
+        gb.CpuWrite("wPlayTimeFrames", 36);
+        gb.Record("nido36back");
+        intro.ExecuteAfterIGT(gb);
+        gb.Execute(SpacePath(nido));
+        gb.AdvanceFrames(30);
+        // gb.Execute("U D");
+        gb.Execute(SpacePath("DRRRRUUURRRRRRRRRRD"));
+        gb.Press(Joypad.Start, Joypad.Up, Joypad.None, Joypad.Up, Joypad.None, Joypad.Up, Joypad.A);
+        gb.ClearText();
         // gb.AdvanceFrames(1);
-        // gb.Press(Joypad.A);
-        // gb.AdvanceFrames(32+105);
-        // gb.HardReset();
-        // intro.Execute(gb);
-        // gb.Execute(SpacePath(nido));
-        // gb.Yoloball();
-        // gb.ClearText();
-        // gb.Press(Joypad.A, Joypad.None, Joypad.A, Joypad.Start);
-        // gb.Execute("D");
-        // gb.Dispose();
+        gb.Press(Joypad.A);
+        gb.AdvanceFrames(5);
+        intro.Execute(gb);
+        gb.Execute(SpacePath(nido));
+        gb.Yoloball(1);
+        gb.ClearText();
+        gb.Press(Joypad.A, Joypad.None, Joypad.A, Joypad.Start);
+        gb.Execute("D");
+        gb.Dispose();
     }
 
     public static void FixFile()
     {
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         string[] lines = File.ReadAllLines("nido36.txt");
-        string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
         string interval = "UUUA";
 
         Red gb = new Red();
         gb.LoadState("basesaves/red/manip/nido.gqs");
-        gb.HardReset();
         intro.ExecuteUntilIGT(gb);
         gb.CpuWrite("wPlayTimeFrames", 36);
         intro.ExecuteAfterIGT(gb);
@@ -91,16 +156,14 @@ class NidoFrame36
                 path += "U";
             else
                 Console.WriteLine("error " + path + " " + gb.Tile);
-            Trace.WriteLine(line.Substring(0,49) + path + line.Substring(49+path.Length-1));
+            Trace.WriteLine(line.Substring(0, 49) + path + line.Substring(49 + path.Length - 1));
         }
     }
 
     public static void CheckFile()
     {
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         string[] lines = File.ReadAllLines("nido36.txt");
-        string nido = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
-        string interval = "UUUA"; //"UUUALLUUUURRUULLL";
+        string interval = "UUUA"; // UUUALLUUUURRUULLL
         var display = new List<Display>();
         int lowest = 1000;
         foreach(string line in lines)
@@ -108,7 +171,7 @@ class NidoFrame36
             if(line.Contains("NIDORANM L4 DVs: 0xffef"))
             {
                 int cost = int.Parse(Regex.Match(line, @"Cost: ([0-9]+)").Groups[1].Value);
-                if(cost < lowest) lowest=cost;
+                if(cost < lowest) lowest = cost;
             }
         }
         Trace.WriteLine("cost: " + lowest);
@@ -126,11 +189,13 @@ class NidoFrame36
         Display.PrintAll(display, "https://gunnermaniac.com/pokeworld?local=33#33/8/");
     }
 
-    public void Search(int numThreads = 10)
+    public void Search(int numThreads = 16)
     {
         StartWatch();
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        Red gb = new Red();
+
+        Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
+        Red gb = gbs[0];
+        Elapsed("threads");
 
         gb.LoadState("basesaves/red/manip/nido.gqs");
         gb.HardReset();
@@ -140,20 +205,20 @@ class NidoFrame36
         gb.CpuWrite("wPlayTimeSeconds", 0);
         gb.CpuWrite("wPlayTimeFrames", 36);
         intro.ExecuteAfterIGT(gb);
-        gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU"+"UUU")); //UUUALLUUUURRUULLL
+        gb.Execute(SpacePath("LLLULLUAULALDLDLLDADDADLALLALUUAU" + "UUU")); // UUUALLUUUURRUULLL
 
-        IGTState state=new IGTState(gb, false, 36);
+        IGTState state = new IGTState(gb, false, 36);
         Elapsed("states");
 
         RbyMap route22 = gb.Maps[33];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route22[33, 11] };
-        Pathfinding.GenerateEdges<RbyMap,RbyTile>(gb, 0, endTiles.First(), actions);
+        Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions);
         route22[30, 4].RemoveEdge(0, Action.Left);
         route22[30, 5].RemoveEdge(0, Action.Left);
 
-        var parameters = new DFParameters<Red,RbyMap,RbyTile>()
+        var parameters = new SFParameters<Red, RbyMap, RbyTile>()
         {
             MaxCost = 675,
             EncounterCallback = gb =>
@@ -161,13 +226,13 @@ class NidoFrame36
                 return //gb.EnemyMon.Species.Name == "NIDORANM" && gb.EnemyMon.Level >= 3 &&
                     gb.EnemyMon.DVs.Attack == 15 && gb.EnemyMon.DVs.Defense == 15 && gb.EnemyMon.DVs.Speed >= 14 && gb.EnemyMon.DVs.Special == 15;
             },
-            SingleCallback = (state,gb) =>
+            FoundCallback = (state, gb) =>
             {
                 Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + "  " + gb.EnemyMon.Species.Name + " L" + gb.EnemyMon.Level + " DVs: " + gb.EnemyMon.DVs.ToString() + " Cost: " + state.WastedFrames);
             }
         };
 
-        DepthFirstSearch.SingleSearch(gb, parameters, startTile, 0, state, 2);
+        SingleFrameSearch.StartSearch(gbs, parameters, startTile, 0, state, 2);
         Elapsed("search");
     }
 }

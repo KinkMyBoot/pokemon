@@ -20,10 +20,11 @@ class SearchCommon
         return Profile("elapsed", fn);
     }
     static System.Diagnostics.Stopwatch Watch;
-    static long LastMs = 0;
+    static long LastMs;
     public static void StartWatch()
     {
         Watch = System.Diagnostics.Stopwatch.StartNew();
+        LastMs = 0;
     }
     public static float Elapsed(string title = "elapsed", bool total = false)
     {
@@ -37,7 +38,8 @@ class SearchCommon
         return Elapsed(title, true);
     }
 
-    public struct Display {
+    public struct Display
+    {
         public string Path;
         public int SS, C, T, A, S;
         public Display(string path, int success = 0, int cost = 0)
@@ -64,7 +66,7 @@ class SearchCommon
         }
         static public void PrintAll(List<Display> list, string prefix = "")
         {
-            foreach (Display d in list.OrderByDescending((d) => d.SS).ThenBy((d) => d.C).ThenBy((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
+            foreach(Display d in list.OrderByDescending((d) => d.SS).ThenBy((d) => d.C).ThenBy((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
                 System.Diagnostics.Trace.WriteLine(prefix + d);
         }
     };
@@ -73,8 +75,8 @@ class SearchCommon
         path = Regex.Replace(path, "[AS_B]", "");
         string a = String.Empty;
         int turns = 0;
-        for (int i = 1; i < path.Length; ++i)
-            if (path[i] != path[i - 1])
+        for(int i = 1; i < path.Length; ++i)
+            if(path[i] != path[i - 1])
                 ++turns;
         return turns;
     }

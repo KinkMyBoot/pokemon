@@ -14,6 +14,7 @@ public class GridComponent : Component {
         { Action.A | Action.Down, new byte[] { 0x00, 0xff, 0x00 } },
         { Action.A | Action.Left, new byte[] { 0x00, 0xff, 0x00 } },
         { Action.A | Action.Right, new byte[] { 0x00, 0xff, 0x00 } },
+        { Action.StartB, new byte[] { 0x00, 0x00, 0xff } },
     };
 
     public byte SCX;
