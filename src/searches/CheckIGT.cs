@@ -77,7 +77,7 @@ class CheckIGT
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLLALLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUUU"; // 6 1 late
         // rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLALLLLLLUUUUAUUALUUUUUUDD"; // clef mvt
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
-        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 3600, false, items);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 3600);
     }
 
     public static void Rt3MoonBackups()
@@ -108,8 +108,8 @@ class CheckIGT
 
         if(frame == 37) rt3Moon += "UUURRRRRRDDARRRRARRUURRRDDDDDDDDLLLLDDDDDADDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUU";
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
-        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, false, frame, 60, 16, false);
-        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, false, true);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, false, frame, 60, 16, Verbosity.Summary);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, Verbosity.Summary, true);
     }
 
     public static void EntrMoon()
@@ -296,25 +296,24 @@ class CheckIGT
         gb.Dispose();
     }
 
-    public static void Cans()
+    public static void Cans(RbyIntroSequence intro = null, string path = null)
     {
-        // string path = "DALLLAURUUUUUA"; // 58 cans - 3477/3600
-        // string path = "DLALLAURUUUUUA"; // alt
-        // string path = "DLLLURUUUUUA"; // 57 cans - 3420/3600
-        string path = "SDALLLAURAUUUUUA"; // 60 cans - 3596/3600
-        // string path = "SDLALLAURUAUUUUA"; // alt
-        // string path = "DLLLU"+"RUUUUULUUUUUUURDA"; // xd
-        // string path = "DDLLLUURUUUUUA"; // fail 57 - 3419
-        // string path = "DDALLLUURUUUUUA"; // fail 58 - 3361
-        // string path = "DDLALLUURUUUUUA"; // fail 58 - 3361
-        // string path = "DLLLURRRRRUUUUUA"; // 60 igt + PalAB
-        int numFrames = 3600;
-        // int numFrames = 4;
+        intro = new RbyIntroSequence(RbyStrat.NoPal);
+        // intro = new RbyIntroSequence(RbyStrat.PalHold); // 60 igt (57)
+        // intro = new RbyIntroSequence(RbyStrat.NoPalAB, RbyStrat.GfSkip, RbyStrat.Hop0, 1); // 60 igt (57)
+        // intro = new RbyIntroSequence(RbyStrat.PalAB);
+
+        path = "SDALLLAURAUUUUUA"; // 60 cans - 3596/3600
+        // path = "DALLLAURUUUUUA"; // 58 cans - 3477/3600
+        // path = "DLLLURUUUUUA"; // 57 cans - 3420/3600
+        // path = "DLLLU"+"RUUUUULUUUUUUURDA"; // xd
+        // path = "DDLLLUURUUUUUA"; // fail 57 - 3419
+        // path = "DDALLLUURUUUUUA"; // fail 58 - 3361
+        // path = "DDLALLUURUUUUUA"; // fail 58 - 3361
+        // path = "DLLLURRRRRUUUUUA"; // 60 igt (PalAB)
+
+        int numFrames = 60; //4
         int numThreads = 16;
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold); // + 57 cans
-        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPalAB, RbyStrat.GfSkip, RbyStrat.Hop0, 1); // + 57 cans
-        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalAB); // + right can
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];

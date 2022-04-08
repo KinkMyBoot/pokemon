@@ -88,7 +88,7 @@ class Extended
         gb.CpuWrite("wPlayTimeSeconds", 58);
         gb.CpuWrite("wPlayTimeFrames", 0);
         intro.ExecuteAfterIGT(gb);
-        gb.SetCallback(gb.SYM["VBlank"], (gb) =>
+        gb.CallbackHandler.SetCallback(gb.SYM["VBlank"], (gb) =>
         {
             Trace.WriteLine($"{gb.CpuRead("wPlayTimeMinutes"):d2}:{gb.CpuRead("wPlayTimeSeconds"):d2}.{gb.CpuRead("wPlayTimeFrames"):d2} {gb.CpuRead("hRandomAdd"):x2}{gb.CpuRead("hRandomSub"):x2}");
         });
@@ -273,30 +273,6 @@ class Extended
         PersistentGbs = null;
     }
 
-    class RedCb : Red
-    {
-        int Address;
-        Action<RedCb> Callback = null;
-        public RedCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { }
-        public void SetCallback(int address, Action<RedCb> callback)
-        {
-            Address = address;
-            Callback = callback;
-        }
-        public unsafe override int Hold(Joypad joypad, params int[] addrs)
-        {
-            if(Callback != null)
-                addrs = addrs.Append(Address).ToArray();
-            int ret;
-            while((ret = base.Hold(joypad, addrs)) == Address)
-            {
-                Callback(this);
-                RunFor(1);
-            }
-            return ret;
-        }
-    }
-
     static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
     {
         return CheckIGT(framesToWait, path, null, numFrames, numThreads, startFrame, verbose);
@@ -331,34 +307,14 @@ class Extended
             gb.AdvanceFrames(framesToWait);
             gb.Press(Joypad.A, Joypad.Start);
 
-            var npcMovement = new Dictionary<(int, int), string>();
-            gb.SetCallback(gb.SYM["TryWalking"] + 25, (gb) =>
-            {
-                string movement;
-                Registers reg = gb.Registers;
-                switch(reg.B)
-                {
-                    case 1: movement = "r"; break;
-                    case 2: movement = "l"; break;
-                    case 4: movement = "d"; break;
-                    case 8: movement = "u"; break;
-                    default: movement = ""; break;
-                }
-                if((reg.F & 0x10) == 0)
-                    movement = movement.ToUpper();
-                (int, int) npc = (gb.Map.Id, gb.CpuRead(0xffda) / 16);
-
-                string log = npcMovement.GetValueOrDefault(npc);
-                if(log == null || log.Last().ToString().ToLower() != movement)
-                    npcMovement[npc] = log + movement;
-            });
+            var npcTracker = new NpcTracker<RedCb>(gb.CallbackHandler);
 
             int address = gb.Execute(SpacePath(path));
-            // address = DecideMovement(gb, res, npcMovement);
+            // address = DecideMovement(gb, res, npcTracker);
 
             CheckEncounter(address, gb, "PIDGEY", res);
 
-            res.Info = npcMovement.GetValueOrDefault((1, 1)) + "," + npcMovement.GetValueOrDefault((1, 7));
+            res.Info = npcTracker.GetMovement((1, 1), (1, 7));
             res.Tile = gb.Tile;
             res.Map = gb.Map;
 
@@ -372,7 +328,7 @@ class Extended
 
                 CheckNoEncounter(address, gb, ext);
 
-                ext.Info = npcMovement.GetValueOrDefault((50, 2)) + "," + npcMovement.GetValueOrDefault((51, 1)) + "," + npcMovement.GetValueOrDefault((51, 8));
+                ext.Info = npcTracker.GetMovement((50, 2), (51, 1), (51, 8));
                 ext.Tile = gb.Tile;
                 ext.Map = gb.Map;
             }
@@ -387,25 +343,25 @@ class Extended
         return results;
     }
 
-    static int DecideMovement(Red gb, IGTResult res, Dictionary<(int, int), string> npcMovement)
+    static int DecideMovement(Red gb, IGTResult res, NpcTracker<RedCb> npcTracker)
     {
         res.Info = " path";
         int address;
         string npc1, npc2;
-        npc1 = npcMovement.GetValueOrDefault((1, 1));
+        npc1 = npcTracker.GetMovement((1, 1));
         if(npc1 == "dD")
             gb.Execute(SpacePath("RUUUUUU"));
         else
             gb.Execute(SpacePath("UUUUUUR"));
-        npc1 = npcMovement.GetValueOrDefault((1, 1));
+        npc1 = npcTracker.GetMovement((1, 1));
         if(npc1 == "uL")
             gb.Execute(SpacePath("UUAUU"));
         else if(npc1 == "rL" || npc1 == "rD")
             gb.Execute(SpacePath("AUUUU"));
         else
             gb.Execute(SpacePath("UUUU"));
-        npc1 = npcMovement.GetValueOrDefault((1, 1));
-        npc2 = npcMovement.GetValueOrDefault((1, 7));
+        npc1 = npcTracker.GetMovement((1, 1));
+        npc2 = npcTracker.GetMovement((1, 7));
         if(npc1 == "r" && npc2 == "R")
             address = gb.Execute(SpacePath(Paths[1].Substring(40)));
         else if(npc1 == "uL" && npc2 == "R")

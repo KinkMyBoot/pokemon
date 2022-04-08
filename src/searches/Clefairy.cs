@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 
 using static SearchCommon;
+using static RbyIGTChecker<Red>;
 
 class Clefairy
 {
@@ -39,8 +40,8 @@ class Clefairy
         // string path = "S_BS_BDDDDUS_BUUUS_BLR"; //3239 119 (62 00f0)
         // string path = "S_BS_BLS_BLRRDDDUUS_BU"; //3239 119 (60 feee)
         // string path = "S_BS_BLS_BLRRDDUULS_BR"; //3239 119 (60 feee)
-        RbyIGTChecker<Red>.CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 3600, true, null, false, 0, 1, 16, false, false, -1, ItemBackoutSelect);
-        RbyIGTChecker<Red>.CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 3600, true, null, false, 0, 1, 16, false, true, -1, PotionBackoutSelect);
+        CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 3600, true, null, false, 0, 1, 16, Verbosity.Summary, false, -1, ItemBackoutSelect);
+        CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPal), path, "CLEFAIRY", 3600, true, null, false, 0, 1, 16, Verbosity.Summary, true, -1, PotionBackoutSelect);
 
         // string path = "S_BS_BADDDDDDUAUS_BUAUUU"; //3360 60
         // string path = "S_BS_BADDDDDDUAUS_BAUUUU"; //3360 60
@@ -52,7 +53,7 @@ class Clefairy
         // string path = "DULLRRADLUS_BRADS_BS_BAU"; //3360 60
         // string path = "DULLRRADLUS_BRALS_BS_BAR"; //3360 60
         // string path = "DULLRRADDDS_BUAUS_BS_BAU"; //3302 60 (59 geodude)
-        // RbyIGTChecker<Red>.CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPalAB), path, "CLEFAIRY", 3600, true, null, true,  0, 1, 16, false);
+        // CheckIGT(state, new RbyIntroSequence(RbyStrat.NoPalAB), path, "CLEFAIRY", 3600, true, null, true,  0, 1, 16, Verbosity.Summary);
 
         // spearow 4,7,7s,9 redbar 1,2,2s
         // pidgey 6,8,9s redbar 1,1s
@@ -93,7 +94,7 @@ class Clefairy
         RbyTile[] endTiles = { moon[9, 21] };
         RbyTile[] blockedTiles = { moon[7, 20], moon[8, 20], moon[9, 20], moon[10, 21], moon[10, 22], moon[10, 23], moon[10, 24], moon[10, 25], moon[10, 26], moon[11, 26] };
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions, blockedTiles);
-        Pathfinding.DebugDrawEdges(gb, moon, 0);
+        // Pathfinding.DebugDrawEdges(gb, moon, 0);
 
         var parameters = new SFParameters<Red, RbyMap, RbyTile>()
         {

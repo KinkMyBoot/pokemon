@@ -127,23 +127,23 @@ public static class RbyStratFunctions {
                 break;
             case RbyStrat.Pal:
                 gb.RunUntil(BiosJoypad);
-                gb.AdvanceFrame(Joypad.Up);
+                gb.AdvanceFrame(Joypad.Left);
                 gb.RunUntil(0x100);
                 break;
             case RbyStrat.PalHold:
-                gb.Hold(Joypad.Up, 0x100);
+                gb.Hold(Joypad.Left, 0x100);
                 break;
             case RbyStrat.PalAB:
                 gb.RunUntil(BiosJoypad);
-                gb.AdvanceFrames(70, Joypad.Up);
+                gb.AdvanceFrames(70, Joypad.Left);
                 gb.RunUntil(BiosJoypad);
-                gb.Hold(Joypad.Up | Joypad.A, 0x100);
+                gb.Hold(Joypad.Left | Joypad.A, 0x100);
                 break;
             case RbyStrat.PalRel:
                 gb.RunUntil(BiosJoypad);
-                gb.AdvanceFrame(Joypad.Up);
+                gb.AdvanceFrame(Joypad.Left);
                 gb.AdvanceFrames(70);
-                gb.Hold(Joypad.Up | Joypad.A, 0x100);
+                gb.Hold(Joypad.Left | Joypad.A, 0x100);
                 break;
             case RbyStrat.GfSkip:
                 gb.Press(gb.IsYellow ? Joypad.Start : Joypad.Up | Joypad.Select | Joypad.B);

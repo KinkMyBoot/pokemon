@@ -22,9 +22,11 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public IGTResult Extended;
     }
 
-    public static int CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke = "", int numFrames = 60, bool checkDV = false,
+    public enum Verbosity { Nothing, Summary, Full };
+
+    public static int CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke = null, int numFrames = 60, bool checkDV = false,
                                 List<(int, byte, byte)> itemPickups = null, bool selectBall = false, int startFrame = 0, int stepFrame = 1,
-                                int numThreads = 16, bool verbose = true, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null) {
+                                int numThreads = 16, Verbosity verbose = Verbosity.Full, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null) {
         byte[] state = File.ReadAllBytes(statePath);
 
         Gb[] gbs = MultiThread.MakeThreads<Gb>(numThreads);
@@ -46,7 +48,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             int igt = startFrame + iterator * stepFrame;
             res.IGTSec = (byte)(igt / 60);
             res.IGTFrame = (byte)(igt % 60);
-            if(verbose && numFrames >= 100 && (iterator + 1) * 100 / numFrames > iterator * 100 / numFrames) Console.WriteLine("%");
+            if(verbose == Verbosity.Full && numFrames >= 100 && (iterator + 1) * 100 / numFrames > iterator * 100 / numFrames) Console.Write("█");
 
             gb.LoadState(igtState);
             gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
@@ -64,8 +66,17 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             int ret = 0;
             foreach(string step in SpacePath(path).Split()) {
                 ret = gb.Execute(step);
-                if(itemPickups != null && itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
+
+                int x = gb.XCoord, y = gb.YCoord;
+                RbySpriteMovement dir = (RbySpriteMovement) gb.CpuRead("wPlayerDirection");
+                if(dir == RbySpriteMovement.MovingRight) x++;
+                else if(dir == RbySpriteMovement.MovingLeft) x--;
+                else if(dir == RbySpriteMovement.MovingDown) y++;
+                else if(dir == RbySpriteMovement.MovingUp) y--;
+                if(gb.Map.ItemBalls.Positions.ContainsKey((x, y)))
+                // if(itemPickups != null && itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
                     gb.PickupItem();
+
                 if(ret != gb.SYM["JoypadOverworld"]) break;
             }
 
@@ -87,10 +98,11 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             return (a.IGTSec*60 + a.IGTFrame).CompareTo(b.IGTSec*60 + b.IGTFrame);
         });
 
+        if(verbose == Verbosity.Full && numFrames >= 100) Console.WriteLine();
         foreach(var item in manipResults) {
-            if(verbose) Trace.WriteLine(item.ToString(checkDV));
+            if(verbose == Verbosity.Full) Trace.WriteLine(item.ToString(checkDV));
             if((String.IsNullOrEmpty(targetPoke) && item.Mon == null) ||
-                (item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
+                (!String.IsNullOrEmpty(targetPoke) && item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
                 success++;
             }
             string summary;
@@ -106,13 +118,15 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
                 manipSummary[summary]++;
             }
         }
-        if(verbose) Trace.WriteLine("");
 
-        foreach(var item in manipSummary) {
-            Trace.WriteLine($"{item.Key}, {item.Value}/{numFrames}");
+        if(verbose >= Verbosity.Summary) {
+            if(verbose == Verbosity.Full) Trace.WriteLine("");
+            foreach(var item in manipSummary) {
+                Trace.WriteLine($"{item.Key}, {item.Value}/{numFrames}");
+            }
+            if(targetPoke != null) Trace.WriteLine($"Success: {success}/{numFrames}");
         }
 
-        Trace.WriteLine($"Success: {success}/{numFrames}");
         return success;
     }
 
@@ -128,7 +142,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public int StartFrame = 0;
         public int StepFrame = 1;
         public int NumThreads = 16;
-        public bool Verbose = true;
+        public Verbosity Verbose = Verbosity.Full;
         public bool ForceRedBar = false;
         public int NameLength = -1;
         public Func<Gb, bool> MemeBall = null;

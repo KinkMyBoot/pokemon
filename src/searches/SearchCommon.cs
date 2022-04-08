@@ -88,4 +88,102 @@ class SearchCommon
     {
         return path.Count(c => c == 'S');
     }
+
+    public static void Record<Gb>(string name, string state, RbyIntroSequence intro, params string[] paths) where Gb : Rby
+    {
+        Gb gb = (Gb) Activator.CreateInstance(typeof(Gb), args: new object[] { null, true });
+        gb.LoadState(state);
+        gb.Record("1");
+        intro.Execute(gb);
+        GridComponent g = new GridComponent(0, 0, 160, 144, 1);
+        gb.Scene.AddComponent(g);
+        foreach(string path in paths)
+        {
+            g.ChangePath(RbyIGTChecker<Red>.SpacePath(path));
+            gb.Execute(RbyIGTChecker<Red>.SpacePath(path));
+        }
+        gb.RunUntil("DisableLCD");
+        gb.Scene.RemoveComponent(g);
+        gb.AdvanceFrames(250);
+        gb.Dispose();
+        FFMPEG.RunFFMPEGCommand("-i movies/1.mp4 -vf scale=800x720:flags=neighbor -y movies/" + name + ".mp4");
+    }
+}
+
+class CallbackHandler<Gb> where Gb : GameBoy
+{
+    int Address;
+    Action<Gb> Callback = null;
+    public Gb gb;
+    public CallbackHandler(Gb gb)
+    {
+        this.gb = gb;
+    }
+    public void SetCallback(int address, Action<Gb> callback)
+    {
+        Address = address;
+        Callback = callback;
+    }
+    public int Hold(Func<Joypad, int[], int> hold, Joypad joypad, params int[] addrs)
+    {
+        if(Callback != null)
+            addrs = addrs.Append(Address).ToArray();
+        int ret;
+        while((ret = hold(joypad, addrs)) == Address)
+        {
+            Callback(gb);
+            gb.RunFor(1);
+        }
+        return ret;
+    }
+}
+
+class NpcTracker<Gb> where Gb : Rby
+{
+    public Dictionary<(int, int), string> NpcMovement = new Dictionary<(int, int), string>();
+    public NpcTracker(CallbackHandler<Gb> handler)
+    {
+        handler.SetCallback(handler.gb.SYM["TryWalking"] + 25, (gb) =>
+        {
+            string movement;
+            switch((RbySpriteMovement) gb.B)
+            {
+                case RbySpriteMovement.MovingRight: movement = "r"; break;
+                case RbySpriteMovement.MovingLeft: movement = "l"; break;
+                case RbySpriteMovement.MovingDown: movement = "d"; break;
+                case RbySpriteMovement.MovingUp: movement = "u"; break;
+                default: movement = ""; break;
+            }
+            if((gb.F & 0x10) == 0)
+                movement = movement.ToUpper();
+            (int, int) npc = (handler.gb.Map.Id, gb.CpuRead(0xffda) / 16);
+
+            string log = NpcMovement.GetValueOrDefault(npc);
+            if(log == null || log.Last().ToString().ToLower() != movement)
+                NpcMovement[npc] = log + movement;
+        });
+    }
+    public string GetMovement(params (int map, int id)[] npc)
+    {
+        string str = NpcMovement.GetValueOrDefault(npc[0]);
+        for(int i = 1; i < npc.Length; ++i)
+        {
+            str += "," + NpcMovement.GetValueOrDefault(npc[i]);
+        }
+        return str;
+    }
+}
+
+class BlueCb : Blue
+{
+    public CallbackHandler<BlueCb> CallbackHandler;
+    public BlueCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { CallbackHandler = new CallbackHandler<BlueCb>(this); }
+    public unsafe override int Hold(Joypad joypad, params int[] addrs) { return CallbackHandler.Hold(base.Hold, joypad, addrs); }
+}
+
+class RedCb : Red
+{
+    public CallbackHandler<RedCb> CallbackHandler;
+    public RedCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { CallbackHandler = new CallbackHandler<RedCb>(this); }
+    public unsafe override int Hold(Joypad joypad, params int[] addrs) { return CallbackHandler.Hold(base.Hold, joypad, addrs); }
 }
