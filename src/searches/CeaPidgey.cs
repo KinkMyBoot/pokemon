@@ -2,15 +2,15 @@ using System.Linq;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 
 using static SearchCommon;
 
 class CeaPidgey
 {
-    static RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPalAB);
-    static string pidgeypath = "UUAURAURRURAU";
+    static RbyIntroSequence Intro = new RbyIntroSequence(RbyStrat.NoPalAB);
+    const string PidgeyPath = "UUAURAURRURAU";
+    const string State = "basesaves/blue/manip/pidgey.gqs";
 
     public static void Check()
     {
@@ -35,60 +35,56 @@ class CeaPidgey
         BlueCb gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
 
-        IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/blue/manip/pidgey.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
+        gb.LoadState(State);
 
         int success = 0;
+        int f = 0;
 
-        void CheckFrame(BlueCb gb, int f, ref int success, bool verbose)
+        bool CheckFrame(BlueCb gb)
         {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-            int address = gb.Execute(RbyIGTChecker<BlueCb>.SpacePath(pidgeypath));
-            if(address != gb.SYM["CalcStats"]) return;
-            if(gb.EnemyMon.Species.Name != "PIDGEY") return;
-            gb.Yoloball(0, Joypad.B);
-            gb.ClearText(Joypad.A);
-            gb.Press(Joypad.B);
-            var npcTracker = new NpcTracker<BlueCb>(gb.CallbackHandler);
-            int addr = gb.Execute(RbyIGTChecker<BlueCb>.SpacePath(path), (gb.Maps[51][25, 12], gb.PickupItem));
-            string info = f + " " + npcTracker.GetMovement((50, 2), (51, 1), (51, 8));
-            if(addr == gb.WildEncounterAddress && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball())
+            bool ret = false;
+            if(gb.Execute(RbyIGTChecker<BlueCb>.SpacePath(PidgeyPath)) == gb.WildEncounterAddress && gb.EnemyMon.Species.Name == "PIDGEY")
             {
-                info += " success";
-                System.Threading.Interlocked.Increment(ref success);
+                gb.Yoloball(0, Joypad.B);
+                gb.ClearText(Joypad.A);
+                gb.Press(Joypad.B);
+                var npcTracker = new NpcTracker<BlueCb>(gb.CallbackHandler);
+                int addr = gb.Execute(RbyIGTChecker<BlueCb>.SpacePath(path), (gb.Maps[51][25, 12], gb.PickupItem));
+                string info = f + " " + npcTracker.GetMovement((50, 2), (51, 1), (51, 8));
+                if(addr == gb.WildEncounterAddress && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball())
+                {
+                    info += " success";
+                    System.Threading.Interlocked.Increment(ref success);
+                    ret = true;
+                }
+                else if(addr != gb.WildEncounterAddress) info += " no encounter";
+                else if(gb.EnemyMon.Species.Name != "CATERPIE") info += " L" + gb.EnemyMon.Level + " " + gb.EnemyMon.Species.Name;
+                else info += " yoloball fail";
+                if(verbose) Trace.WriteLine(info + " " + gb.Tile);
             }
-            else if(addr != gb.WildEncounterAddress) info += " no encounter";
-            else if(gb.EnemyMon.Species.Name != "CATERPIE") info += " L" + gb.EnemyMon.Level + " " + gb.EnemyMon.Species.Name;
-            else info += " yoloball fail";
-            if(verbose) Trace.WriteLine(info + " " + gb.Tile);
+            f++;
+            return ret;
         }
 
         if(verbose)
-            for(int f = 0; f < states.Length; ++f) CheckFrame(gb, f, ref success, true);
+            gb.IGTCheck(Intro, numFrames, () => CheckFrame(gb));
         else
-            MultiThread.For(states.Length, gbs, (gb, f) => CheckFrame(gb, f, ref success, false));
+            BlueCb.IGTCheckParallel(gbs, Intro, numFrames, CheckFrame);
         Trace.WriteLine(success + "/" + numFrames);
         return success;
     }
 
     public static void CheckFile()
     {
-        string[] lines = File.ReadAllLines("paths.txt");
-        List<Display> display = new List<Display>();
-        foreach(string line in lines)
+        Paths paths = new Paths();
+        foreach(string line in System.IO.File.ReadAllLines("paths.txt"))
         {
             string path = Regex.Match(line, @"/([LRUDSA_B]+)").Groups[1].Value;
             Trace.WriteLine(path);
             int success = Check(path, false);
-            display.Add(new Display(path, success));
+            paths.Add(new Path(path, success));
         }
-        Display.PrintAll(display, "https://gunnermaniac.com/pokeworld?local=51#21/61/");
+        paths.PrintAll("https://gunnermaniac.com/pokeworld?local=51#21/61/");
     }
 
     public static void Search(int numThreads = 10, int numFrames = 10)
@@ -98,36 +94,20 @@ class CeaPidgey
         Blue[] gbs = MultiThread.MakeThreads<Blue>(numThreads);
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
-        Elapsed("threads");
 
-        IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/blue/manip/pidgey.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
+        gb.LoadState(State);
         // int[] framesToSearch = {1, 2, 45, 46, 49, 50, 51, 52, 55, 23};
-
-        MultiThread.For(states.Length, gbs, (gb, it) =>
+        bool NoName(Blue gb)
         {
-            int f = it;
-            if(f >= 36) f++;
-            if(f >= 37) f++;
-            if(f >= 47) f++;
-
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-            gb.Execute(RbyIGTChecker<Blue>.SpacePath(pidgeypath));
-            gb.Yoloball(0, Joypad.B);
             gb.ClearText(Joypad.A);
             gb.Press(Joypad.B);
-            gb.Execute(RbyIGTChecker<Blue>.SpacePath("UUUUUULLLLLUUUUUAURUUUUUURRURURRRRRUUUUUUU"));
-
-            states[it] = new IGTState(gb, false, f);
+            return true;
+        }
+        IGTResults states = Blue.IGTCheckParallel(gbs, Intro, numFrames, gb =>
+        {
+            return gb.Execute(RbyIGTChecker<Blue>.SpacePath(PidgeyPath)) == gb.WildEncounterAddress && gb.Yoloball(0, Joypad.B) && NoName(gb);
+            // && gb.Execute(RbyIGTChecker<Blue>.SpacePath("UUUUUULLLLLUUUUUAURUUUUUURRURURRRRRUUUUUUU")) == gb.OverworldLoopAddress;
         });
-        Elapsed("states");
 
         RbyMap route2 = gb.Maps[13];
         RbyMap gate = gb.Maps[50];
@@ -163,16 +143,12 @@ class CeaPidgey
             SuccessSS = 8,
             // RNGSS = 52,
             EndTiles = endTiles,
-            TileCallback = (forest[25, 12], gb =>
-                gb.PickupItem()
-            ),
-            EncounterCallback = gb =>
-            {
-                return gb.Tile == endTiles[0] && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball();
-            },
+            TileCallbacks = new (Tile<RbyMap, RbyTile>, Action<Blue>)[] { (forest[25, 12], gb => gb.PickupItem()) },
+            EncounterCallback = gb => gb.Tile == endTiles[0] && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball(),
+            LogStart = "https://gunnermaniac.com/pokeworld?local=51#21/61/",
             FoundCallback = (state) =>
             {
-                Trace.WriteLine("https://gunnermaniac.com/pokeworld?local=51#21/61/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 

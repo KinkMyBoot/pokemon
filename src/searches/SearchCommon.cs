@@ -38,42 +38,55 @@ class SearchCommon
         return Elapsed(title, true);
     }
 
-    public struct Display
+    public class Path
     {
-        public string Path;
-        public int SS, C, T, A, S;
-        public Display(string path, int success = 0, int cost = 0)
+        public string P, I;
+        public int SS, C, S, A, T;
+        public Path(string path, int success = 0, int cost = 0, string info = "")
         {
-            Path = path;
+            P = path;
             SS = success;
             C = cost;
             T = TurnCount(path);
             A = APressCount(path);
             S = StartCount(path);
+            I = info;
         }
         public override string ToString()
         {
-            string str = Path;
+            string str = P;
             if(SS > 0)
                 str += " " + SS;
             if(C > 0)
-                str += " C:" + C;
+                str += " c:" + C;
             if(S > 0)
-                str += " S:" + S;
-            str += " T:" + T;
-            str += " A:" + A;
+                str += " s:" + S;
+            if(A > 0)
+                str += " a:" + A;
+            str += " t:" + T;
+            if(I != "")
+                str += " " + I;
             return str;
         }
-        static public void PrintAll(List<Display> list, string prefix = "")
+    }
+    public class Paths : List<Path>
+    {
+        public void PrintAll(string prefix = "")
         {
-            foreach(Display d in list.OrderByDescending((d) => d.SS).ThenBy((d) => d.C).ThenBy((d) => d.S).ThenBy((d) => d.A).ThenBy((d) => d.T))
-                System.Diagnostics.Trace.WriteLine(prefix + d);
+            foreach(Path p in this.OrderByDescending(p => p.SS).ThenBy(p => p.C).ThenBy(p => p.S).ThenBy(p => p.A).ThenBy(p => p.T))
+                System.Diagnostics.Trace.WriteLine(prefix + p);
         }
-    };
+        public void CleanPrintAll(string prefix = "")
+        {
+            if(Count == 0) return;
+            System.Diagnostics.Trace.Listeners[1].Close();
+            System.Diagnostics.Trace.Listeners[1] = new System.Diagnostics.TextWriterTraceListener(System.IO.File.CreateText("log.txt"));
+            PrintAll(prefix);
+        }
+    }
     public static int TurnCount(string path)
     {
-        path = Regex.Replace(path, "[AS_B]", "");
-        string a = String.Empty;
+        path = Regex.Replace(path, "[^LRUD]", "");
         int turns = 0;
         for(int i = 1; i < path.Length; ++i)
             if(path[i] != path[i - 1])
@@ -143,7 +156,7 @@ class NpcTracker<Gb> where Gb : Rby
     public Dictionary<(int, int), string> NpcMovement = new Dictionary<(int, int), string>();
     public NpcTracker(CallbackHandler<Gb> handler)
     {
-        handler.SetCallback(handler.gb.SYM["TryWalking"] + 25, (gb) =>
+        handler.SetCallback(handler.gb.SYM["TryWalking"] + 0x19, (gb) =>
         {
             string movement;
             switch((RbySpriteMovement) gb.B)
@@ -156,7 +169,7 @@ class NpcTracker<Gb> where Gb : Rby
             }
             if((gb.F & 0x10) == 0)
                 movement = movement.ToUpper();
-            (int, int) npc = (handler.gb.Map.Id, gb.CpuRead(0xffda) / 16);
+            (int, int) npc = (handler.gb.Map.Id, gb.CpuRead("hCurrentSpriteOffset") / 16);
 
             string log = NpcMovement.GetValueOrDefault(npc);
             if(log == null || log.Last().ToString().ToLower() != movement)

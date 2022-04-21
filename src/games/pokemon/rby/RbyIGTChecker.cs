@@ -67,6 +67,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             foreach(string step in SpacePath(path).Split()) {
                 ret = gb.Execute(step);
 
+                if(ret != gb.SYM["JoypadOverworld"]) break;
+
                 int x = gb.XCoord, y = gb.YCoord;
                 RbySpriteMovement dir = (RbySpriteMovement) gb.CpuRead("wPlayerDirection");
                 if(dir == RbySpriteMovement.MovingRight) x++;
@@ -76,11 +78,9 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
                 if(gb.Map.ItemBalls.Positions.ContainsKey((x, y)))
                 // if(itemPickups != null && itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
                     gb.PickupItem();
-
-                if(ret != gb.SYM["JoypadOverworld"]) break;
             }
 
-            if(ret == gb.SYM["CalcStats"]) {
+            if(ret == gb.WildEncounterAddress) {
                 res.Yoloball = memeBall != null ? memeBall(gb) : selectBall ? gb.Selectball() : gb.Yoloball();
                 res.Mon = gb.EnemyMon;
             }
@@ -121,7 +121,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
         if(verbose >= Verbosity.Summary) {
             if(verbose == Verbosity.Full) Trace.WriteLine("");
-            foreach(var item in manipSummary) {
+            foreach(var item in manipSummary.OrderByDescending(kv => kv.Value)) {
                 Trace.WriteLine($"{item.Key}, {item.Value}/{numFrames}");
             }
             if(targetPoke != null) Trace.WriteLine($"Success: {success}/{numFrames}");
@@ -134,7 +134,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public string StatePath;
         public RbyIntroSequence Intro;
         public string Path;
-        public string TargetPoke = "";
+        public string TargetPoke = null;
         public int NumFrames = 60;
         public bool CheckDV = false;
         public List<(int, byte, byte)> ItemPickups = null;

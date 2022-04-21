@@ -2,7 +2,6 @@ using System.Linq;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 
 using static SearchCommon;
@@ -10,9 +9,10 @@ using static RbyIGTChecker<Blue>;
 
 class CeaCaterpie
 {
+    const string State = "basesaves/blue/manip/caterpie.gqs";
+
     public static void Check()
     {
-        string state = "basesaves/blue/manip/caterpie.gqs";
         // string path = "UURRRRUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLLAUUUUUUUUUUUAUUALLLLDDADDDDDDDDDDDDDDLLAD"; // current 3419
         // string path = "RRRRUUUUUUUUUUUUUUUUUUUUAUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLADDDDDDDDDDDDDDDDDDDALLLLLLU"; // 3419²
         string path = "RARRRUUUUUUUUUUUUUAUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDLDDLLLLLUUU"; // final 3421-3480
@@ -28,24 +28,21 @@ class CeaCaterpie
         // string path = "URRRURUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLALLLUUUUUUUUUUULUULLLLDLDDDDDDDDDDDDDDLDDDDLLLLULUU"; // 1A 3410
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         var antidote = new List<(int, byte, byte)> { (51, 25, 12) };
-        CheckIGT(state, intro, path, "CATERPIE", 60, false, antidote);
+        CheckIGT(State, intro, path, "CATERPIE", 60, false, antidote);
     }
 
     public static void CheckFile()
     {
-        string state = "basesaves/blue/manip/caterpie.gqs";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         var antidote = new List<(int, byte, byte)> { (51, 25, 12) };
-        string[] lines = File.ReadAllLines("paths.txt");
-        List<Display> display = new List<Display>();
-        foreach(string line in lines)
+        Paths paths = new Paths();
+        foreach(string line in System.IO.File.ReadAllLines("paths.txt"))
         {
             string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
             Trace.WriteLine(path);
-            int success = CheckIGT(state, intro, path, "CATERPIE", 60, false, antidote, false, 0, 1, 16, Verbosity.Summary);
-            display.Add(new Display(path, success));
+            paths.Add(new Path(path, CheckIGT(State, intro, path, "CATERPIE", 60, false, antidote, false, 0, 1, 16, Verbosity.Summary)));
         }
-        Display.PrintAll(display, "https://gunnermaniac.com/pokeworld?local=51#21/43/");
+        paths.PrintAll("https://gunnermaniac.com/pokeworld?local=51#21/43/");
     }
 
     public static void Search(int numThreads = 16, int numFrames = 16, int success = 16)
@@ -56,24 +53,9 @@ class CeaCaterpie
         Blue[] gbs = MultiThread.MakeThreads<Blue>(numThreads);
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
-        Elapsed("threads");
 
-        IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/blue/manip/caterpie.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            states[f] = new IGTState(gb, false, f);
-        });
-        Elapsed("states");
+        gb.LoadState(State);
+        IGTResults states = Blue.IGTCheckParallel(gbs, intro, numFrames);
 
         RbyMap forest = gb.Maps[51];
         forest.Sprites.Remove(25, 11);
@@ -99,17 +81,13 @@ class CeaCaterpie
             MaxCost = 6,
             SuccessSS = success,
             EndTiles = endTiles,
-            TileCallback = (forest[25, 12], gb =>
-                gb.PickupItem()
-            ),
-            EncounterCallback = gb =>
-            {
-                // return gb.Tile.X < 4 && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball();
-                return gb.Tile == endTiles[0] && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball();
-            },
+            TileCallbacks = new (Tile<RbyMap, RbyTile>, Action<Blue>)[] { (forest[25, 12], gb => gb.PickupItem()) },
+            // EncounterCallback = gb => gb.Tile.X < 4 && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball(),
+            EncounterCallback = gb => gb.Tile == endTiles[0] && gb.EnemyMon.Species.Name == "CATERPIE" && gb.Yoloball(),
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 

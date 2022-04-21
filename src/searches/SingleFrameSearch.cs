@@ -10,8 +10,6 @@ public class SFParameters<Gb, M, T> where Gb : PokemonGame
 
     public bool PruneAlreadySeenStates = true;
     public int MaxCost = 0;
-    public int SuccessSS = 1;
-    public int RNGSS = -1;
     public string LogStart = "";
     public T[] EndTiles = null;
     public int EndEdgeSet = 0;

@@ -4,9 +4,13 @@ using System.Diagnostics;
 using System.Collections.Generic;
 
 using static SearchCommon;
+using static RbyIGTChecker<Red>;
 
 class PidgeyBackup
 {
+    const string Pidgey13 = "basesaves/red/manip/pidgey13.gqs";
+    const string Pidgey14 = "basesaves/red/manip/pidgey14.gqs";
+
     public static void Check()
     {
         // 13
@@ -17,11 +21,11 @@ class PidgeyBackup
         string pidgeybackup = "UUUUUUUUUUUUU" + "UAUUUUAURU" + "UUUURR" + "RRRRSLLUUUUU"; // 3594/3600
         // string pidgeybackup = "UUUUUUUUUUUUU" + "URUAUUAUUU" + "UUUURR";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/pidgey13.gqs", intro, pidgeybackup, "PIDGEY", 3600);
+        CheckIGT(Pidgey13, intro, pidgeybackup, "PIDGEY", 3600);
         // 14
         // string pidgeybackup = "UUUUUUUUUUUUUU" + "URUAUUAUUU" + "UUAUUAR" + "RRDRRUUUUUURUUUDDDLLLLRR"; // 3595/3600
         // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        // RbyIGTChecker<Red>.CheckIGT("basesaves/red/manip/pidgey14.gqs", intro, pidgeybackup, "PIDGEY", true);
+        // CheckIGT(Pidgey14, intro, pidgeybackup, "PIDGEY", true);
     }
 
     public static void Search(int numThreads = 16, int numFrames = 60, int success = 55)
@@ -32,30 +36,11 @@ class PidgeyBackup
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
-        Elapsed("threads");
 
-        IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/red/manip/pidgey14.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeMinutes", 8);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            // gb.CpuWrite("wPlayTimeSeconds", (byte) (f % 60));
-            // gb.CpuWrite("wPlayTimeFrames", (byte) ((f & 1) != 0 ? 37 : 17));
-            // gb.CpuWrite("wPlayTimeFrames", (byte) ((f & 1) != 0 ? 59 : 36));
-            intro.ExecuteAfterIGT(gb);
-            // gb.Execute(SpacePath("UUUUUUUUUUUUU" + "UAUUUUAURU" + "UUUURR" + "RR")); // p13
-            // gb.Execute(SpacePath("UUUUUUUUUUUUUU" + "URUAUUAUUU" + "UUAUUAR" + "RR")); // p14
-
-            states[f] = new IGTState(gb, false, f);
-        });
-        Elapsed("states");
+        gb.LoadState(Pidgey14);
+        IGTResults states = Red.IGTCheckParallel(gbs, intro, numFrames);
+        // gb.Execute(SpacePath("UUUUUUUUUUUUU" + "UAUUUUAURU" + "UUUURR" + "RR")); // p13
+        // gb.Execute(SpacePath("UUUUUUUUUUUUUU" + "URUAUUAUUU" + "UUAUUAR" + "RR")); // p14
 
         RbyMap forest = gb.Maps[51];
         RbyMap entrance = gb.Maps[47];
@@ -76,13 +61,11 @@ class PidgeyBackup
             MaxCost = 4,
             SuccessSS = success,
             EndTiles = endTiles,
-            EncounterCallback = gb =>
-            {
-                return gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball();
-            },
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball(),
+            LogStart = "https://gunnermaniac.com/pokeworld?local=13#2/32/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 

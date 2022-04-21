@@ -44,22 +44,8 @@ class CeaDugtrio
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
 
-        IGTResults states = new IGTResults(numFrames);
         gb.LoadState(State);
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            states[f] = new IGTState(gb, false, f);
-            // states[f] = new IGTState(gb, true, f);
-        });
+        IGTResults states = Blue.IGTCheckParallel(gbs, intro, numFrames);
 
         RbyMap cave = gb.Maps[197];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
@@ -97,13 +83,11 @@ class CeaDugtrio
             MaxCost = 170,
             SuccessSS = success,
             EndTiles = new RbyTile[]{ gb.Maps[85][4, 4] },
-            EncounterCallback = gb =>
-            {
-                return gb.Tile.X >= 34 && !(gb.Tile.X == 34 && gb.Tile.Y == 30) && gb.EnemyMon.Species.Name == "DUGTRIO" && gb.Yoloball();
-            },
+            EncounterCallback = gb => gb.Tile.X >= 34 && !(gb.Tile.X == 34 && gb.Tile.Y == 30) && gb.EnemyMon.Species.Name == "DUGTRIO" && gb.Yoloball(),
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, null, false, 0, 1, 16, Verbosity.Nothing) + "/60 " + state.WastedFrames + " " + intro.ToString());
+                Trace.WriteLine(state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, null, false, 0, 1, 16, Verbosity.Nothing) + "/60 " + state.WastedFrames + " " + intro);
             }
         };
 

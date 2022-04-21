@@ -24,6 +24,10 @@ public class IGTState {
         get { return (HRA + HRS) & 0xff; }
     }
 
+    public bool Running {
+        get { return State != null; }
+    }
+
     public IGTState() {}
 
     public IGTState(GameBoy gb, bool success, int igtStamp) {
@@ -57,8 +61,8 @@ public class IGTResults {
         get { return IGTs.Where(x => x != null && x.Success).Count(); }
     }
 
-    public int TotalOverworld {
-        get { return IGTs.Where(x => x != null && x.State != null).Count(); }
+    public int TotalRunning {
+        get { return IGTs.Where(x => x != null && x.Running).Count(); }
     }
 
     public int TotalFailures {
@@ -66,15 +70,15 @@ public class IGTResults {
     }
 
     public int MostCommonHRA {
-        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.HRA).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.Running).GroupBy(x => x.HRA).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public int MostCommonHRS {
-        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.HRS).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.Running).GroupBy(x => x.HRS).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public int MostCommonDivider {
-        get { return IGTs.Where(x => x != null && x.State != null).GroupBy(x => x.Divider).OrderByDescending(g => g.Count()).First().Key; }
+        get { return IGTs.Where(x => x != null && x.Running).GroupBy(x => x.Divider).OrderByDescending(g => g.Count()).First().Key; }
     }
 
     public byte[] FirstState {

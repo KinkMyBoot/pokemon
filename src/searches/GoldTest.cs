@@ -19,24 +19,9 @@ class GoldTest
         Gold[] gbs = MultiThread.MakeThreads<Gold>(numThreads);
         Gold gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
-        Elapsed("threads");
 
-        IGTResults states = new IGTResults(numFrames);
         gb.LoadState("basesaves/goldtest.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wGameTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wGameTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            states[f] = new IGTState(gb, false, f);
-        });
-        Elapsed("states");
+        IGTResults states = Gold.IGTCheckParallel(gbs, 4600, intro, numFrames);
 
         GscMap map = gb.Maps[6147];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left;
@@ -54,9 +39,10 @@ class GoldTest
                 gb.RunUntil("CalcMonStats");
                 return gb.EnemyMon.Species.Name == "PIDGEY" && gb.Tile == endTiles[0];
             },
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine("https://gunnermaniac.com/pokeworld2?local=" + startTile.Map.Id + "#" + startTile.X + "/" + startTile.Y + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 

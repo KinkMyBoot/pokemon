@@ -20,6 +20,7 @@ class CheckIGT
         // string nido = "LLLULLLAULADULLLADLADDDADLALLUUAU"; // alt3
         // string nido = "LLLULULLLARLALLLADLDALDADLADLUUAU"; // alt4
         // string nido = "ULLLLLUAUDALLLDLLADDDADLALLALUUAU"; // weird alt
+        // string nido = "LLLAUUULLLLDALLLDDADDADLALLALUAUU"; //
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", 3600, true);
     }
@@ -36,11 +37,11 @@ class CheckIGT
     public static void Rt3Moon()
     {
         var items = new List<(int, byte, byte)> {
+            (59, 5, 31), // wg
             (59, 34, 31), // candy
             (59, 35, 23), // rope
-            (59, 3, 2), // moon stone
-            (59, 5, 31), // wg
             (61, 28, 5), // mp
+            (59, 3, 2), // moon stone
         };
         string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
         rt3Moon += "UUUUUULLLLLALLLLDD";
@@ -115,11 +116,11 @@ class CheckIGT
     public static void EntrMoon()
     {
         var items = new List<(int, byte, byte)> {
+            (59, 5, 31), // wg
             (59, 34, 31), // candy
             (59, 35, 23), // rope
-            (59, 3, 2), // moon stone
-            (59, 5, 31), // wg
             (61, 28, 5), // mp
+            (59, 3, 2), // moon stone
         };
         string entrMoon = "UAUUUUULLLLLLLLALDD";
         entrMoon += "RUUUUURRRRURUURURRRRRRRRUUUUUUURRRRDDRDDDDDADDDDDDDDDDRRRRRRURRR";
@@ -187,7 +188,7 @@ class CheckIGT
 
             Trace.Write($"{s,2} 33,  ");
 
-            if(addr != gb.SYM["CalcStats"])
+            if(addr != gb.WildEncounterAddress)
             {
                 Trace.WriteLine("No enc");
                 continue;
@@ -286,7 +287,7 @@ class CheckIGT
                 gb.Press(Joypad.B);
 
                 int adr = gb.Execute(SpacePath("UUUAULLLLLU" + "RUUUUUUU" + "UUURURRURRRRRUAUUUUUUUUUUUUUUUUUUAUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLUAUU"), (gb.Maps[51][25, 12], gb.PickupItem));
-                if(adr == gb.SYM["CalcStats"])
+                if(adr == gb.WildEncounterAddress)
                     Trace.WriteLine(gb.EnemyMon.Species.Name + " " + gb.EnemyMon.Level);
                 else
                     Trace.WriteLine("No encounter");

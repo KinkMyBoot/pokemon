@@ -38,21 +38,8 @@ class CeaPidgeotto
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
 
-        IGTResults states = new IGTResults(numFrames);
         gb.LoadState(State);
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            states[f] = new IGTState(gb, false, f);
-        });
+        IGTResults states = Blue.IGTCheckParallel(gbs, intro, numFrames);
 
         RbyMap map = gb.Maps[32];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
@@ -65,17 +52,15 @@ class CeaPidgeotto
         {
             MaxCost = 60,
             SuccessSS = success,
-            EncounterCallback = gb =>
-            {
-                return gb.EnemyMon.Species.Name == TargetPoke;
-            },
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == TargetPoke,
+            LogStart = "https://gunnermaniac.com/pokeworld?local=32#10/4/",
             FoundCallback = state =>
             {
                 foreach((string path, int success) in results)
                     if(state.Log.StartsWith(path) && state.IGT.TotalSuccesses == success)
                         return;
                 results.Add(state.Log, state.IGT.TotalSuccesses);
-                Trace.WriteLine("https://gunnermaniac.com/pokeworld?local=32#10/4/" + state.Log + " " + state.IGT.TotalSuccesses + "/" + numFrames + " " + state.WastedFrames + " " + intro.ToString());
+                Trace.WriteLine(state.Log + " " + state.IGT.TotalSuccesses + "/" + numFrames + " " + state.WastedFrames + " " + intro);
             }
         };
 

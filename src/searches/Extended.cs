@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.IO;
 using System.Diagnostics;
 
 using static SearchCommon;
@@ -12,7 +11,7 @@ class Extended
 {
     static bool CheckEncounter(int address, Red gb, string pokename, IGTResult res)
     {
-        if(address != gb.SYM["CalcStats"])
+        if(address != gb.WildEncounterAddress)
             return false;
 
         res.Mon = gb.EnemyMon;
@@ -24,7 +23,7 @@ class Extended
     }
     static bool CheckNoEncounter(int address, Red gb, IGTResult res)
     {
-        if(address != gb.SYM["CalcStats"])
+        if(address != gb.WildEncounterAddress)
             return true;
 
         res.Mon = gb.EnemyMon;
@@ -118,7 +117,7 @@ class Extended
             // string name = "path" + p + (f==3?"b":"") + ".txt";
             int p = f >= 2 ? f : (f + 1);
             string name = "path" + p + (f == 2 ? "c" : "b") + ".txt";
-            Trace.Listeners.Add(new TextWriterTraceListener(File.CreateText(name), name));
+            Trace.Listeners.Add(new TextWriterTraceListener(System.IO.File.CreateText(name), name));
             gb.LoadState(state);
             if(f < 0)
                 gb.AdvanceFrames(f + 2);
@@ -521,14 +520,12 @@ class Extended
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),// amount of yoloball success for found
             EndTiles = endTiles,
-            EncounterCallback = gb =>
-            {
-                return gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball() && encounterTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
-            },
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball() && encounterTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y),
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
                 results.Add(state);
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 
@@ -613,18 +610,14 @@ class Extended
             MaxCost = maxcost,
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),
             EndTiles = endTiles,
-            TileCallback = (forest[25, 12], gb =>
-                gb.PickupItem()
-            ),
-            EncounterCallback = gb =>
-            {
-                // return gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
-                return gb.EnemyMon.Species.Name == "CATERPIE";
-            },
+            TileCallbacks = new (Tile<RbyMap, RbyTile>, Action<Red>)[] { (forest[25, 12], gb => gb.PickupItem()) },
+            // EncounterCallback = gb => gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == "CATERPIE",
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
                 if(addResults) results.Add(state);
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 
@@ -778,27 +771,26 @@ class Extended
     }
     static void CheckPathsInFile(int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
     {
-        string[] lines = File.ReadAllLines("paths.txt");
-        List<Display> display = new List<Display>();
-        foreach(string line in lines)
+        Paths paths = new Paths();
+        foreach(string line in System.IO.File.ReadAllLines("paths.txt"))
         {
             string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
             List<IGTResult> igt = CheckIGTPersistent(frame, basepath + path, extended, numFrames);
             int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
-            display.Add(new Display(path, success));
+            paths.Add(new Path(path, success));
         }
-        Display.PrintAll(display, prefix);
+        paths.PrintAll(prefix);
     }
     static void ResultsIGT(List<DFState<RbyMap, RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
     {
-        List<Display> display = new List<Display>();
+        Paths paths = new Paths();
         foreach(var res in results)
         {
             List<IGTResult> igt = CheckIGTPersistent(frame, basepath + res.Log, extended, numFrames);
             int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
-            display.Add(new Display(res.Log, success));
+            paths.Add(new Path(res.Log, success));
         }
-        Display.PrintAll(display, prefix);
+        paths.PrintAll(prefix);
         Elapsed("igt");
     }
 

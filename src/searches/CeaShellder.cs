@@ -45,28 +45,10 @@ class CeaShellder
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
 
-        IGTResults states = new IGTResults(numFrames);
         gb.LoadState(State);
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
         // int[] framesToSearch = {22, 36, 37};
         // int[] framesToSearch = {22, 23, 36};
-
-        MultiThread.For(states.Length, gbs, (gb, it) =>
-        {
-            int f = it;
-            // f = framesToSearch[it];
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            // gb.Execute(SpacePath("LUUUUUSUUU"));
-
-            states[it] = new IGTState(gb, false, f);
-        });
+        IGTResults states = Blue.IGTCheckParallel(gbs, intro, numFrames);
 
         int baseCost = (int) (gb.EmulatedSamples / GameBoy.SamplesPerFrame - 902);
 
@@ -86,17 +68,15 @@ class CeaShellder
         {
             MaxCost = 10,
             SuccessSS = success,
-            EncounterCallback = gb =>
-            {
-                return gb.EnemyMon.Species.Name == TargetPoke;// && gb.EnemyMon.Level > 32;
-            },
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == TargetPoke,// && gb.EnemyMon.Level > 32
+            LogStart = "https://gunnermaniac.com/pokeworld?local=161#26/14/",
             FoundCallback = state =>
             {
                 foreach((string path, int success) in results)
                     if(state.Log.StartsWith(path) && state.IGT.TotalSuccesses == success)
                         return;
                 results.Add(state.Log, state.IGT.TotalSuccesses);
-                Trace.WriteLine("https://gunnermaniac.com/pokeworld?local=161#26/14/" + state.Log + " " + state.IGT.TotalSuccesses + "/" + numFrames + " " + state.WastedFrames + " " + intro.ToString() + " " + baseCost);
+                Trace.WriteLine(state.Log + " " + state.IGT.TotalSuccesses + "/" + numFrames + " " + state.WastedFrames + " " + intro.ToString() + " " + baseCost);
             }
         };
 

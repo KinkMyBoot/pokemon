@@ -19,24 +19,9 @@ class BlueTest
         Blue[] gbs = MultiThread.MakeThreads<Blue>(numThreads);
         Blue gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
-        Elapsed("threads");
 
-        IGTResults states = new IGTResults(numFrames);
-        gb.LoadState("basesaves/bluetest.gqs");
-        gb.HardReset();
-        intro.ExecuteUntilIGT(gb);
-        byte[] igtState = gb.SaveState();
-
-        MultiThread.For(states.Length, gbs, (gb, f) =>
-        {
-            gb.LoadState(igtState);
-            gb.CpuWrite("wPlayTimeSeconds", (byte) (f / 60));
-            gb.CpuWrite("wPlayTimeFrames", (byte) (f % 60));
-            intro.ExecuteAfterIGT(gb);
-
-            states[f] = new IGTState(gb, false, f);
-        });
-        Elapsed("states");
+        gb.LoadState("basesaves/blue/manip/bluetest.gqs");
+        IGTResults states = Blue.IGTCheckParallel(gbs, intro, numFrames);
 
         RbyMap route2 = gb.Maps[13];
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
@@ -49,13 +34,11 @@ class BlueTest
             MaxCost = 4,
             SuccessSS = success,
             EndTiles = endTiles,
-            EncounterCallback = gb =>
-            {
-                return gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball();
-            },
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball(),
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalOverworld) + " NoEnc: " + state.IGT.TotalOverworld + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 
