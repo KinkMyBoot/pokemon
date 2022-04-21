@@ -91,33 +91,30 @@ public class IGTResults {
 
     // Returns the number of frames that fall into the most commonly hit RNG band.
     public int RNGSuccesses(int range) {
-        List<KeyValuePair<(int, int), int>> bands = RNGBands(range).ToList();
-        bands.Sort((p1, p2) => p2.Value.CompareTo(p1.Value));
-        return bands.First().Value;
+        return TotalRunning > 0 ? RNGBands(range).Values.Max() : 0;
     }
 
     // TODO: Use rDiv too???
     public Dictionary<(int, int), int> RNGBands(int range) {
-        Dictionary<(int, int), int> ret = new Dictionary<(int, int), int>();
-        foreach(IGTState igt in IGTs) {
-            // if(igt.Success) {
-            if(igt.State != null) {
-                bool foundBand = false;
-                for(int j = 0; j < ret.Count; j++) {
-                    (int hra, int hrs) key = ret.ElementAt(j).Key;
-                    if(MathHelper.RangeTest(key.hra, igt.HRA, range) && MathHelper.RangeTest(key.hrs, igt.HRS, range)) {
-                        ret[key]++;
-                        foundBand = true;
-                        break;
-                    }
-                }
+        Dictionary<(int hra, int hrs), int> ret = new Dictionary<(int, int), int>();
 
-                if(!foundBand) {
-                    ret[(igt.HRA, igt.HRS)] = 1;
-                }
+        foreach(IGTState i in IGTs) {
+            if(i.Running && !ret.ContainsKey((i.HRA, i.HRS))) {
+                int count = 0;
+                foreach(IGTState j in IGTs)
+                    if(j.Running && MathHelper.RangeTest(i.HRA, j.HRA, range) && MathHelper.RangeTest(i.HRS, j.HRS, range))
+                        count++;
+                ret[(i.HRA, i.HRS)] = count;
             }
         }
 
+        return ret;
+    }
+
+    public IGTResults Purge(bool success = false)
+    {
+        IGTResults ret = new IGTResults(TotalSuccesses);
+        for(int i = 0, j = 0; i < Length; ++i) if(IGTs[i].Success != success) ret[j++] = IGTs[i];
         return ret;
     }
 }

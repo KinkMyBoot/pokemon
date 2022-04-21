@@ -53,6 +53,10 @@ public class GscConnection : Connection<GscMap, GscTile> {
 
 public class GscTile : Tile<GscMap, GscTile> {
 
+    public string PokeworldLink {
+        get { return "https://gunnermaniac.com/pokeworld2?local=" + Map.Id + "#" + X + "/" + Y; }
+    }
+
     public override int CalcStepCost(bool onBike, bool ledgeHop, bool warp, Action action) {
         int stepCost = onBike ? 9 : 17;
 

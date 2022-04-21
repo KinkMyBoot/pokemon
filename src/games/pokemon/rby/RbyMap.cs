@@ -164,8 +164,8 @@ public class RbyTile : Tile<RbyMap, RbyTile> {
             for(int spriteIndex = 1; spriteIndex < (Map.Game.IsYellow ? 15 : 16); spriteIndex++) {
                 RbySprite sprite = dest.Map.Sprites[spriteIndex - 1];
                 if(!IsSpriteHidden(sprite)) {
-                    int spriteX = Map.Game.CpuRead(0xc205 | (spriteIndex << 4)) - 4;
-                    int spriteY = Map.Game.CpuRead(0xc204 | (spriteIndex << 4)) - 4;
+                    int spriteX = Map.Game.CpuRead(Map.Game.SYM["wSpritePlayerStateData2MapX"] | (spriteIndex << 4)) - 4;
+                    int spriteY = Map.Game.CpuRead(Map.Game.SYM["wSpritePlayerStateData2MapY"] | (spriteIndex << 4)) - 4;
                     if(spriteX == dest.X && spriteY == dest.Y) return true;
                 }
             }

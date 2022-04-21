@@ -251,7 +251,7 @@ public static class Pathfinding {
 
         Bitmap bitmap = map.Render();
         foreach(T tile in map.Tiles) {
-            if(tile.Edges.Count == 0) continue;
+            if(!tile.Edges.ContainsKey(edgeSet)) continue;
             int minCost = tile.Edges[edgeSet].Min(n => n.Cost);
             foreach(Edge<M, T> edge in tile.Edges[edgeSet]) {
                 if(edge.Cost == minCost && DebugArrows.ContainsKey(edge.Action)) {
