@@ -59,7 +59,7 @@ public partial class Rby : PokemonGame {
     public const int BonkCost = 8;
 
     // Maps ROM checksums to their parsed data.
-    private static Dictionary<int, RbyData> ParsedROMs = new Dictionary<int, RbyData>();
+    protected static Dictionary<int, RbyData> ParsedROMs = new Dictionary<int, RbyData>();
 
     public RbyData Data;
     public bool IsYellow;
