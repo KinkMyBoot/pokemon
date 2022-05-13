@@ -111,7 +111,7 @@ class AoNido
         {
             MaxCost = 210,//210 225 240
             EncounterCallback = gb => gb.EnemyMon.DVs.Attack == 15 && gb.EnemyMon.DVs.Defense >= 13 && gb.EnemyMon.DVs.Speed >= 14 && gb.EnemyMon.DVs.Special == 15 && gb.EnemyMon.Species.Name == "NIDORANM",
-            LogStart = "https://gunnermaniac.com/pokeworld?map=1#" + (40 + startTile.X) + "/" + (162 + startTile.Y) + "/",
+            LogStart = Link(startTile, ""),
             FoundCallback = (state, gb) =>
             {
                 Trace.WriteLine(state.Log + " " + gb.EnemyMon.Species.Name + " L" + gb.EnemyMon.Level + " dvs: " + gb.EnemyMon.DVs + " cost: " + state.WastedFrames);

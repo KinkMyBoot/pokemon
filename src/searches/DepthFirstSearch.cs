@@ -102,6 +102,8 @@ public static class DepthFirstSearch {
                 IGTState prev = state.IGT[f];
                 IGTState igt;
                 if(prev.Running) { // we're in the overworld, execute action
+                    igt = new IGTState(gb, prev.Success, prev.IGTStamp);
+
                     gb.LoadState(prev.State);
                     int ret = gb.Execute(edge.Action);
 
@@ -110,12 +112,10 @@ public static class DepthFirstSearch {
                             foreach(var callback in parameters.TileCallbacks)
                                 if(edge.NextTile == callback.Tile)
                                     callback.Function(gb);
-                        igt = new IGTState(gb, prev.Success, prev.IGTStamp);
                     } else {
-                        igt = new IGTState();
-                        igt.IGTStamp = prev.IGTStamp;
                         if(ret == gb.WildEncounterAddress)
                             igt.Success = parameters.EncounterCallback != null ? parameters.EncounterCallback(gb) : false;
+                        igt.Running = false;
                     }
                 } else {
                     igt = prev; // this frame is done, just reference previous state

@@ -121,6 +121,67 @@ class SearchCommon
         gb.Dispose();
         FFMPEG.RunFFMPEGCommand("-i movies/1.mp4 -vf scale=800x720:flags=neighbor -y movies/" + name + ".mp4");
     }
+
+    static Dictionary<int, (int X, int Y)> LocalToMap = new Dictionary<int, (int, int)>() {
+        { 0, (50, 234) },
+        { 1, (40, 162) },
+        { 2, (40, 54) },
+        { 3, (220, 36) },
+        { 4, (320, 116) },
+        { 5, (220, 180) },
+        { 6, (150, 108) },
+        { 7, (160, 270) },
+        { 8, (50, 342) },
+        { 9, (0, 8) },
+        { 10, (220, 108) },
+        { 12, (50, 198) },
+        { 13, (50, 90) },
+        { 14, (80, 62) },
+        { 15, (130, 44) },
+        { 16, (230, 72) },
+        { 17, (230, 144) },
+        { 18, (200, 116) },
+        { 19, (260, 116) },
+        { 20, (260, 44) },
+        { 21, (320, 44) },
+        { 22, (260, 188) },
+        { 23, (320, 134) },
+        { 24, (280, 242) },
+        { 25, (260, 242) },
+        { 26, (200, 278) },
+        { 27, (110, 116) },
+        { 28, (110, 134) },
+        { 29, (110, 278) },
+        { 30, (170, 306) },
+        { 31, (70, 342) },
+        { 32, (50, 252) },
+        { 33, (0, 170) },
+        { 34, (0, 26) },
+        { 35, (230, 0) },
+        { 36, (250, 0) },
+    };
+    public static string Link(RbyTile tile, string path, bool local = false)
+    {
+        Action[] actions = ActionFunctions.PathToActions(RbyIGTChecker<Red>.SpacePath(path));
+        var warp = tile.WarpCheck();
+        foreach(Action a in actions) {
+            if(warp.TileToWarpTo != null && warp.ActionRequired == a)
+                tile = warp.TileToWarpTo;
+            else
+                tile = tile.GetNeighbor(a);
+            warp = tile.WarpCheck();
+            if(warp.TileToWarpTo != null && warp.ActionRequired == Action.None)
+            {
+                tile = warp.TileToWarpTo;
+                warp = tile.WarpCheck();
+            }
+        }
+        if(!local && LocalToMap.ContainsKey(tile.Map.Id)) {
+            var coord = LocalToMap[tile.Map.Id];
+            return "https://gunnermaniac.com/pokeworld?map=1#" + (tile.X + coord.X) + "/" + (tile.Y + coord.Y) + "/";
+        }
+        return tile.PokeworldLink + "/";
+    }
 }
 
 class CallbackHandler<Gb> where Gb : GameBoy

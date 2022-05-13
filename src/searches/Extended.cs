@@ -32,6 +32,10 @@ class Extended
 
     static void BuildStates()
     {
+        if(System.IO.File.Exists("basesaves/red/manip/ext/nido_0_0.gqs"))
+            return;
+
+        System.IO.Directory.CreateDirectory("basesaves/red/manip/ext");
         const int numThreads = 16;
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
@@ -47,9 +51,6 @@ class Extended
         MultiThread.For(numFrames, gbs, (gb, f) =>
         {
             if((f + 1) * 100 / numFrames > f * 100 / numFrames) Console.WriteLine("%");
-
-            if(IgnoredFrames.Contains(f % 60))
-                return;
 
             gb.LoadState(igtState);
             byte sec = (byte) (f / 60);
@@ -154,6 +155,7 @@ class Extended
 
     static List<IGTResult> CheckIGTPersistent(int framesToWait, string path, bool extended = false, int numFrames = 60, int numThreads = 16)
     {
+        BuildStates();
         if(PersistentGbs == null)
         {
             PersistentGbs = MultiThread.MakeThreads<Red>(numThreads);
@@ -272,12 +274,9 @@ class Extended
         PersistentGbs = null;
     }
 
-    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
-    {
-        return CheckIGT(framesToWait, path, null, numFrames, numThreads, startFrame, verbose);
-    }
     static List<IGTResult> CheckIGT(int framesToWait, string path, string forest, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
     {
+        BuildStates();
         RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if(numThreads == 1)
             gbs[0].Record("test");
@@ -295,13 +294,11 @@ class Extended
 
             res.IGTSec = (byte) (f / 60);
             res.IGTFrame = (byte) (f % 60);
-            try
-            {
-                gb.LoadState("basesaves/red/manip/ext/nido_" + res.IGTSec + "_" + res.IGTFrame + ".gqs");
-            } catch(System.IO.FileNotFoundException)
-            {
+            string state = "basesaves/red/manip/ext/nido_" + res.IGTSec + "_" + res.IGTFrame + ".gqs";
+            if(System.IO.File.Exists(state))
+                gb.LoadState(state);
+            else
                 return;
-            }
 
             gb.AdvanceFrames(framesToWait);
             gb.Press(Joypad.A, Joypad.Start);
@@ -340,6 +337,10 @@ class Extended
             Console.WriteLine();
 
         return results;
+    }
+    static List<IGTResult> CheckIGT(int framesToWait, string path, int numFrames = 60, int numThreads = 16, int startFrame = 0, bool verbose = true)
+    {
+        return CheckIGT(framesToWait, path, null, numFrames, numThreads, startFrame, verbose);
     }
 
     static int DecideMovement(Red gb, IGTResult res, NpcTracker<RedCb> npcTracker)
@@ -476,6 +477,7 @@ class Extended
 
     static List<DFState<RbyMap, RbyTile>> Search(int framesToWait, string path, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
+        BuildStates();
         StartWatch();
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
@@ -521,11 +523,10 @@ class Extended
             SuccessSS = success >= 0 ? success : Math.Max(1, states.Length - 3),// amount of yoloball success for found
             EndTiles = endTiles,
             EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball() && encounterTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y),
-            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
                 results.Add(state);
-                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 
@@ -537,6 +538,7 @@ class Extended
 
     static List<DFState<RbyMap, RbyTile>> SearchForest(int framesToWait, string pidgeypath, string forestpath, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
     {
+        BuildStates();
         StartWatch();
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
@@ -603,7 +605,7 @@ class Extended
         // Pathfinding.DebugDrawEdges(gb, gate, 0);
         // Pathfinding.DebugDrawEdges(gb, forest, 0);
 
-        bool addResults = false;
+        bool addResults = true;
         var results = new List<DFState<RbyMap, RbyTile>>();
         var parameters = new DFParameters<Red, RbyMap, RbyTile>()
         {
@@ -613,11 +615,10 @@ class Extended
             TileCallbacks = new (Tile<RbyMap, RbyTile>, Action<Red>)[] { (forest[25, 12], gb => gb.PickupItem()) },
             // EncounterCallback = gb => gb.EnemyMon.Species.Name == "CATERPIE" && endTiles.Any(t => t.X == gb.Tile.X && t.Y == gb.Tile.Y);
             EncounterCallback = gb => gb.EnemyMon.Species.Name == "CATERPIE",
-            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
                 if(addResults) results.Add(state);
-                Trace.WriteLine(state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
+                Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log + " Success: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
             }
         };
 
@@ -631,12 +632,6 @@ class Extended
     const string BasePathToGirl = BasePath + "UUUUUUR";
     const string BasePathToSignL = BasePathToGirl + "UUUULUUUUUU";
     const string BasePathToSignR = BasePathToGirl + "UUUUUUUUUUL";
-    static Dictionary<string, string> Link = new Dictionary<string, string> {
-        { BasePath, "https://gunnermaniac.com/pokeworld?map=1#57/178/" },
-        { BasePathToGirl, "https://gunnermaniac.com/pokeworld?map=1#58/172/" },
-        { BasePathToSignL, "https://gunnermaniac.com/pokeworld?map=1#57/162/" },
-        { BasePathToSignR, "https://gunnermaniac.com/pokeworld?map=1#57/162/" }
-    };
     static string[] Pathsv3 = { "",
         "DRRRRUUURRRRRRRRRRRRRRRRRRRURRUUUUUUUUUULUUUUUUUUUUUUUUUUUUUUULLLUUUUURRRRUUUSUUUUULLLLLU",      // 1
         "DRRRRUUURRRRRRRRRRRRRRRRRRRURRUUUUUUUUUUUUUUUUUUUUUUUUUULUUUUULLLUUUUUUARRARRSUUUUUUULLLLLU",    // 2
@@ -684,6 +679,14 @@ class Extended
         "UUUULLLLLU" + "UUUURUUU" + "UUUURRRRRRRURAUUUUUAUUUUUUAUUUUUUUUUUUUUUUUUAUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLAUUU",    // 5
         "UUUULALLLLUUU" + "RUUUUUUU" + "UUURURRRRRRRUUUUUUUAUUUUAUUUUUUUUUUUUUAUUUAUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDLDLLLLUUU",  // 6
         null, null, null, null
+    };
+    static string[] Caterpie = { "",
+        Forest[1].Substring(0,104) + "DDADLDDDDDDD",
+        Forest[2].Substring(0,120) + "DDDDDDDLUU",
+        Forest[3].Substring(0,119) + "DADDDDLRLLLLDUALLUUU",
+        Forest[4].Substring(0,107) + "DDDDDDDDDDDDDLS_BAD",
+        Forest[5].Substring(0,120) + "DDDLDDD",
+        Forest[6].Substring(0,123) + "LADDADDDDDAU",
     };
     static SortedSet<int> IgnoredFrames = new SortedSet<int> { 33, 36, 37 };
 
@@ -769,7 +772,7 @@ class Extended
                 Trace.WriteLine("f" + i + ": " + x.Value[i]);
         }
     }
-    static void CheckPathsInFile(int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
+    static void CheckPathsInFile(int frame, string basepath, bool extended, int numFrames, string expectedResult)
     {
         Paths paths = new Paths();
         foreach(string line in System.IO.File.ReadAllLines("paths.txt"))
@@ -779,9 +782,9 @@ class Extended
             int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
             paths.Add(new Path(path, success));
         }
-        paths.PrintAll(prefix);
+        paths.PrintAll(Link(basepath));
     }
-    static void ResultsIGT(List<DFState<RbyMap, RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult, string prefix = "")
+    static void ResultsIGT(List<DFState<RbyMap, RbyTile>> results, int frame, string basepath, bool extended, int numFrames, string expectedResult)
     {
         Paths paths = new Paths();
         foreach(var res in results)
@@ -790,21 +793,23 @@ class Extended
             int success = GetIGTSummary(igt).GetValueOrDefault(expectedResult);
             paths.Add(new Path(res.Log, success));
         }
-        paths.PrintAll(prefix);
+        paths.PrintAll(Link(basepath));
         Elapsed("igt");
     }
+    static string Link(string path)
+    {
+        return SearchCommon.Link(new Red().Maps[33][33, 11], path);
+    }
+
 
     public static void Check(int path)
     {
         int frame = PathFrame(path);
         string p = Paths[path];
-        string f = Forest[path];
+        string f = Caterpie[path];
         IgnoreNpcIgts(path);
 
-        DisplayIGTResults(
-            CheckIGT(frame, p, f, 60),
-            frame
-            );
+        DisplayIGTResults(CheckIGT(frame, p, f, 3600), frame, PrintFlags.Default);
     }
 
     public static void Search(int path)
@@ -814,7 +819,7 @@ class Extended
         IgnoreNpcIgts(path);
 
         var results = Search(frame, basepath, 4, 4, 4, 2);
-        ResultsIGT(results, frame, basepath, false, 60 * 2, "PIDGEY captured", Link[basepath]);
+        ResultsIGT(results, frame, basepath, false, 60 * 2, "PIDGEY captured");
 
         ElapsedTotal("search + igt");
     }
@@ -822,11 +827,11 @@ class Extended
     public static void SearchForest(int path)
     {
         int frame = PathFrame(path);
-        string basepath = Forest[path].Substring(0,105);
+        string basepath = Forest[path].Substring(0,123);
         IgnoreNpcIgts(path);
 
-        var results = SearchForest(frame, Paths[path], basepath, 10, 10, 7, 8);
-        ResultsIGT(results, frame, Paths[path] + basepath, true, 60, "CATERPIE", "https://gunnermaniac.com/pokeworld?local=51#7/3/");
+        var results = SearchForest(frame, Paths[path], basepath, 8, 8, 6, 100);
+        ResultsIGT(results, frame, Paths[path] + basepath, true, 60, "CATERPIE");
 
         ElapsedTotal("search + igt");
     }
@@ -835,6 +840,6 @@ class Extended
     {
         int path = 6;
         Check(path);
-        // Search(path);
+        // SearchForest(path);
     }
 }

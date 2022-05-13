@@ -13,34 +13,41 @@ class PidgeyBackup
 
     public static void Check()
     {
-        // 13
-        // string pidgeybackup = "UUAUUUUUUAUUUUU" + "UUUAUUURU" + "UUUUARRRRR";
-        // string pidgeybackup = "UUAUUUUUUAUUUUU" + "UUUAUUURU" + "UUUURARRRUUUUUR";
-        // string pidgeybackup = "UUAUUUUUUUUUUU" + "UURUUUUU" + "UAUUURRRR";
-        // string pidgeybackup = "UUAUUUUUUUUUUU" + "UURUUUUU" + "UUUURRRRU";
-        string pidgeybackup = "UUUUUUUUUUUUU" + "UAUUUUAURU" + "UUUURR" + "RRRRSLLUUUUU"; // 3594/3600
-        // string pidgeybackup = "UUUUUUUUUUUUU" + "URUAUUAUUU" + "UUUURR";
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        CheckIGT(Pidgey13, intro, pidgeybackup, "PIDGEY", 3600);
-        // 14
-        // string pidgeybackup = "UUUUUUUUUUUUUU" + "URUAUUAUUU" + "UUAUUAR" + "RRDRRUUUUUURUUUDDDLLLLRR"; // 3595/3600
-        // RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        // CheckIGT(Pidgey14, intro, pidgeybackup, "PIDGEY", true);
+        RbyStrat pal;
+        string state, path;
+
+        state = Pidgey13;
+        pal = RbyStrat.NoPal; path = "UUAUUAUUUUUUUUURUAUUUUUUUUAUURARRR" + "RUUUS_BUUL"; // lll 3591
+        // pal = RbyStrat.NoPal; path = "UAUUAUUUUUUUUUURUAUUUUUUUAUUUARRRR" + "UUUS_BS_BS_BAU"; // eee 3593
+        // pal = RbyStrat.NoPal; path = "UAUUAUUUUUUUUUURUAUUUUUUUAUUURARRR" + "UURUS_BUUL"; // eel 3593
+        // pal = RbyStrat.NoPalAB; path = "UUUUUAUUUUUUUAURUUUAUUAUUUAUUURRRR" + "RRUUUUUS_BLLLLRR"; // 3592
+        // pal = RbyStrat.PalHold; path = "UUAUUAUUUUAUUUAUUUUUUUURUUAUUURR" + "RRRRLLUUUS_BS_BAUU"; // 3592
+        // pal = RbyStrat.PalHold; path = "UUUUUUUUUUUUUUAUUUUAURUUUUURR" + "RRRRSLLUUUUU"; // bad tile 3594
+
+        // state = Pidgey14;
+        // pal = RbyStrat.PalHold; path = "UUUUUUUUUUUUUUURUAUUAUUUUUAUUAR" + "RRDRRUUUUUURUUUDDDLLLLRR"; // bad tile 3595
+
+        CheckIGT(state, new RbyIntroSequence(pal), path, "PIDGEY", 3600);
     }
 
-    public static void Search(int numThreads = 16, int numFrames = 60, int success = 55)
+    public static void Search()
+    {
+        for(RbyStrat pal = RbyStrat.NoPal; pal <= RbyStrat.PalHold; ++pal)
+            Search(new RbyIntroSequence(pal), 16, 60, 57, 12);
+    }
+
+    public static void Search(RbyIntroSequence intro, int numThreads = 16, int numFrames = 60, int success = 55, int cost = 8)
     {
         StartWatch();
-        RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
+        Trace.WriteLine(intro);
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
         if(numThreads == 1) gb.Record("test");
 
-        gb.LoadState(Pidgey14);
+        gb.LoadState(Pidgey13);
         IGTResults states = Red.IGTCheckParallel(gbs, intro, numFrames);
-        // gb.Execute(SpacePath("UUUUUUUUUUUUU" + "UAUUUUAURU" + "UUUURR" + "RR")); // p13
-        // gb.Execute(SpacePath("UUUUUUUUUUUUUU" + "URUAUUAUUU" + "UUAUUAR" + "RR")); // p14
+        // IGTResults states = Red.IGTCheckParallel(gbs, intro, numFrames, gb => gb.Execute(SpacePath("UAUUAUUUUUUUUUURUAUUUUUUUAUUURARRR")) == gb.OverworldLoopAddress).Purge();
 
         RbyMap forest = gb.Maps[51];
         RbyMap entrance = gb.Maps[47];
@@ -48,24 +55,35 @@ class PidgeyBackup
         Action actions = Action.Right | Action.Down | Action.Up | Action.Left | Action.A | Action.StartB;
         RbyTile startTile = gb.Tile;
         RbyTile[] endTiles = { route2[8, 7] };
+        // RbyTile[] endTiles = { route2[8, 2] };
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions);
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, entrance[5, 1], actions);
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, forest[1, 0], actions);
         forest[1, 1].GetEdge(0, Action.Up).NextTile = entrance[4, 7];
         entrance[4, 7].GetEdge(0, Action.Right).Cost = 0;
         entrance[5, 1].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = route2[3, 11], NextEdgeset = 0, Cost = 0 });
-        // Pathfinding.DebugDrawEdges(gb, route2, 0);
 
         var parameters = new DFParameters<Red, RbyMap, RbyTile>()
         {
-            MaxCost = 4,
+            MaxCost = cost,
             SuccessSS = success,
-            EndTiles = endTiles,
-            EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball(),
-            LogStart = "https://gunnermaniac.com/pokeworld?local=13#2/32/",
+            // EndTiles = endTiles,
+            EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && gb.Yoloball() && gb.Tile.X >= 5,
+            LogStart = "https://gunnermaniac.com/pokeworld?local=13#2/31/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames);
+                string failures = "";
+                foreach(var i in state.IGT.IGTs)
+                {
+                    if(!i.Running && !i.Success)
+                    {
+                        gb.LoadState(i.State);
+                        if(gb.EnemyMon.Species.Name != "PIDGEY") failures += " " + gb.EnemyMon.Species.Name;
+                        else if(!gb.Yoloball()) failures += " yoloball";
+                        else if(gb.Tile.X < 5) failures += " x=" + gb.Tile.X;
+                    }
+                }
+                Trace.WriteLine(state.Log + " Captured: " + state.IGT.TotalSuccesses + " Failed: " + (state.IGT.TotalFailures - state.IGT.TotalRunning) + " NoEnc: " + state.IGT.TotalRunning + " Cost: " + state.WastedFrames + failures);
             }
         };
 

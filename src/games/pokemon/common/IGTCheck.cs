@@ -7,6 +7,7 @@ public class IGTState {
 
     public int IGTStamp;
     public bool Success;
+    public bool Running = true;
     public byte[] State;
     public int HRA;
     public int HRS;
@@ -23,12 +24,6 @@ public class IGTState {
     public int Dsum {
         get { return (HRA + HRS) & 0xff; }
     }
-
-    public bool Running {
-        get { return State != null; }
-    }
-
-    public IGTState() {}
 
     public IGTState(GameBoy gb, bool success, int igtStamp) {
         IGTStamp = igtStamp;
