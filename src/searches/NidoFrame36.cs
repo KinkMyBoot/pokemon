@@ -22,7 +22,7 @@ class NidoFrame36
         string backup = "ALLS_BLRRRDDDDDDDUUUUUUUDDDDS_BS_BDAUS_BS_BAU"; // 672
         // string backup = "ADUS_BDDDDDDDUUUUUUUDDDDDDDUS_BS_BAUUS_BS_BAU"; // 672b
         // string backup = "ADUS_BDDDDDDDUUUUUUUDDDS_BDDS_BDADUS_BS_BUAUU"; // 672c
-        CheckIGT(State, Intro, Nido + interval + backup, "NIDORANM", 60, true, null, true, 36, 60);
+        CheckIGT(State, Intro, Nido + interval + backup, "NIDORANM", 60, true, true, Verbosity.Full, false, -1, null, 36, 60);
     }
 
     public static void Record(string interval, string backup)
@@ -148,8 +148,8 @@ class NidoFrame36
                 string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
                 paths.Add(new Path(path));
                 // Trace.WriteLine(path);
-                CheckIGT(State, Intro, Nido + interval + path, "NIDORANM", 1, true, null, false, 36, 60, 1);
-                CheckIGT(State, Intro, Nido + interval + path, "NIDORANM", 1, true, null, true, 36, 60, 1);
+                CheckIGT(State, Intro, Nido + interval + path, "NIDORANM", 1, true, false, Verbosity.Full, false, -1, null, 36, 60, 1);
+                CheckIGT(State, Intro, Nido + interval + path, "NIDORANM", 1, true, true, Verbosity.Full, false, -1, null, 36, 60, 1);
             }
         }
         paths.PrintAll("https://gunnermaniac.com/pokeworld?local=33#33/8/");

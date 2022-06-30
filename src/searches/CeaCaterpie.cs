@@ -28,7 +28,7 @@ class CeaCaterpie
         // string path = "URRRURUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLALLLUUUUUUUUUUULUULLLLDLDDDDDDDDDDDDDDLDDDDLLLLULUU"; // 1A 3410
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         var antidote = new List<(int, byte, byte)> { (51, 25, 12) };
-        CheckIGT(State, intro, path, "CATERPIE", 60, false, antidote);
+        CheckIGT(State, intro, path, "CATERPIE", 60, false);
     }
 
     public static void CheckFile()
@@ -40,7 +40,7 @@ class CeaCaterpie
         {
             string path = Regex.Match(line, @"/([LRUDSA_B]+) ").Groups[1].Value;
             Trace.WriteLine(path);
-            paths.Add(new Path(path, CheckIGT(State, intro, path, "CATERPIE", 60, false, antidote, false, 0, 1, 16, Verbosity.Summary)));
+            paths.Add(new Path(path, CheckIGT(State, intro, path, "CATERPIE", 60, false, false, Verbosity.Summary)));
         }
         paths.PrintAll("https://gunnermaniac.com/pokeworld?local=51#21/43/");
     }

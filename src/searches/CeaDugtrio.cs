@@ -87,7 +87,7 @@ class CeaDugtrio
             LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, null, false, 0, 1, 16, Verbosity.Nothing) + "/60 " + state.WastedFrames + " " + intro);
+                Trace.WriteLine(state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, false, Verbosity.Nothing) + "/60 " + state.WastedFrames + " " + intro);
             }
         };
 

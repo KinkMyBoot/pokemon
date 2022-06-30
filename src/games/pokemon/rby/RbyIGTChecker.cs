@@ -25,8 +25,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
     public enum Verbosity { Nothing, Summary, Full };
 
     public static int CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke = null, int numFrames = 60, bool checkDV = false,
-                                List<(int, byte, byte)> itemPickups = null, bool selectBall = false, int startFrame = 0, int stepFrame = 1,
-                                int numThreads = 16, Verbosity verbose = Verbosity.Full, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null) {
+                                bool selectBall = false, Verbosity verbose = Verbosity.Full, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null,
+                                int startFrame = 0, int stepFrame = 1, int numThreads = 16, List<(int, byte, byte)> itemPickups = null) {
         byte[] state = File.ReadAllBytes(statePath);
 
         Gb[] gbs = MultiThread.MakeThreads<Gb>(numThreads);
@@ -69,15 +69,19 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
                 if(ret != gb.SYM["JoypadOverworld"]) break;
 
-                int x = gb.XCoord, y = gb.YCoord;
-                RbySpriteMovement dir = (RbySpriteMovement) gb.CpuRead("wPlayerDirection");
-                if(dir == RbySpriteMovement.MovingRight) x++;
-                else if(dir == RbySpriteMovement.MovingLeft) x--;
-                else if(dir == RbySpriteMovement.MovingDown) y++;
-                else if(dir == RbySpriteMovement.MovingUp) y--;
-                if(gb.Map.ItemBalls.Positions.ContainsKey((x, y)))
-                // if(itemPickups != null && itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
-                    gb.PickupItem();
+                if(itemPickups != null) {
+                    if(itemPickups.Contains((gb.Tile.Map.Id, gb.Tile.X, gb.Tile.Y)))
+                        gb.PickupItem();
+                } else {
+                    int x = gb.XCoord, y = gb.YCoord;
+                    RbySpriteMovement dir = (RbySpriteMovement) gb.CpuRead("wPlayerDirection");
+                    if(dir == RbySpriteMovement.MovingRight) x++;
+                    else if(dir == RbySpriteMovement.MovingLeft) x--;
+                    else if(dir == RbySpriteMovement.MovingDown) y++;
+                    else if(dir == RbySpriteMovement.MovingUp) y--;
+                    if(gb.Map.ItemBalls.Positions.ContainsKey((x, y)))
+                        gb.PickupItem();
+                }
             }
 
             if(ret == gb.WildEncounterAddress) {
@@ -137,19 +141,19 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public string TargetPoke = null;
         public int NumFrames = 60;
         public bool CheckDV = false;
-        public List<(int, byte, byte)> ItemPickups = null;
         public bool SelectBall = false;
-        public int StartFrame = 0;
-        public int StepFrame = 1;
-        public int NumThreads = 16;
         public Verbosity Verbose = Verbosity.Full;
         public bool ForceRedBar = false;
         public int NameLength = -1;
         public Func<Gb, bool> MemeBall = null;
+        public int StartFrame = 0;
+        public int StepFrame = 1;
+        public int NumThreads = 16;
+        public List<(int, byte, byte)> ItemPickups = null;
     }
 
     public static int CheckIGT(CheckIGTParameters p) {
-        return CheckIGT(p.StatePath, p.Intro, p.Path, p.TargetPoke, p.NumFrames, p.CheckDV, p.ItemPickups, p.SelectBall, p.StartFrame, p.StepFrame, p.NumThreads, p.Verbose, p.ForceRedBar, p.NameLength, p.MemeBall);
+        return CheckIGT(p.StatePath, p.Intro, p.Path, p.TargetPoke, p.NumFrames, p.CheckDV, p.SelectBall, p.Verbose, p.ForceRedBar, p.NameLength, p.MemeBall, p.StartFrame, p.StepFrame, p.NumThreads, p.ItemPickups);
     }
 
     public static string SpacePath(string path) {

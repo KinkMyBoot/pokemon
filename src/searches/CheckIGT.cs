@@ -30,19 +30,12 @@ class CheckIGT
         string poy = "DDDDDDDDDDDARRRRRRRRRRRRRRRRD";
         poy += "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", 3600, false, null, true);
-        // CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, null, true);
+        CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", 3600, false, true);
+        // CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, true);
     }
 
     public static void Rt3Moon()
     {
-        var items = new List<(int, byte, byte)> {
-            (59, 5, 31), // wg
-            (59, 34, 31), // candy
-            (59, 35, 23), // rope
-            (61, 28, 5), // mp
-            (59, 3, 2), // moon stone
-        };
         string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
         rt3Moon += "UUUUUULLLLLALLLLDD";
         rt3Moon += "RRRRUURRRARRUUUUUUURRRRRRRAUUUUUUURRRDRDDDDDDDADDDDDDDDADRRRRRURRRR";
@@ -81,16 +74,8 @@ class CheckIGT
         CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 3600);
     }
 
-    public static void Rt3MoonBackups()
+    public static void Rt3MoonBackups(int frame = 36)
     {
-        int frame = 36;
-        var items = new List<(int, byte, byte)> {
-            (59, 34, 31), // candy
-            (59, 35, 23), // rope
-            (59, 3, 2), // moon stone
-            (59, 5, 31), // wg
-            (61, 28, 5), // mp
-        };
         string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
         rt3Moon += "UUUUUULLLLLLLLLDD";
         // rt3Moon += "RRRRUURRRRRUUUUUUURRRRRRURUUUUUURRRDDDDDDDDDRDDDDDDDDRRRRRRRRURUUUUUUUURULUUUUUUUUUUUULLULUUUUUULLDLLLLDDDLLLLLLLLDDDD";
@@ -106,26 +91,19 @@ class CheckIGT
         // if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDDDLLLLADDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
         // if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDLLLLADDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
         if(frame == 36) rt3Moon += "UUURRRRRRDDRRARRRUURRRRDDDDDDDDALLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUUU"; // alt
-
         if(frame == 37) rt3Moon += "UUURRRRRRDDARRRRARRUURRRDDDDDDDDLLLLDDDDDADDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUUU";
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
-        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, false, frame, 60, 16, Verbosity.Summary);
-        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, items, frame == 36, frame, 60, 16, Verbosity.Summary, true);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, Verbosity.Summary, false, -1, null, frame, 60, 16);
+        CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, frame == 36, Verbosity.Summary, true, -1, null, frame, 60, 16);
     }
 
     public static void EntrMoon()
     {
-        var items = new List<(int, byte, byte)> {
-            (59, 5, 31), // wg
-            (59, 34, 31), // candy
-            (59, 35, 23), // rope
-            (61, 28, 5), // mp
-            (59, 3, 2), // moon stone
-        };
         string entrMoon = "UAUUUUULLLLLLLLALDD";
         entrMoon += "RUUUUURRRRURUURURRRRRRRRUUUUUUURRRRDDRDDDDDADDDDDDDDDDRRRRRRURRR";
-        // entrMoon += "RUUUUURRRRURUURURRRRRRRRUUUUUUURRRRDRDDDDDDADDDDDDDDDDRRRRRRURRR"; //early ladder turn
+        // entrMoon += "RUUUUURRRRURUURURRRRRRRRUUUUUUURRRRDRDDDDDDADDDDDDDDDDRRRRRRURRR"; // early ladder turn
         entrMoon += "UUUUUUUURUUUUUUUUUUULUUUUULLLUUUULLDDLLLLLALLLLLLLDDDDDD";
+        // entrMoon += "UUUUUUUURUUUUUUUUUUULUUUUULLLUUUULLLLLLDDLALLLDDLLLLDDDD"; // original movement
         entrMoon += "LLALLDADLALLAL";
         entrMoon += "RRRUUULUR";
         entrMoon += "DDDDLLL";
@@ -135,7 +113,7 @@ class CheckIGT
         entrMoon += "DADDRRDDDDDDDDDRRRRRRRRRRRRRR";
         entrMoon += "RRUUURARRRDDRRRRRRUURRARDDDDDDDDLLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUUUAUUU";
         RbyIntroSequence entrMoonIntro = new RbyIntroSequence(RbyStrat.NoPalAB);
-        CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", 3600, false, items, true);
+        CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", 3600, false, true);
     }
 
     public static void ParasBackup()
