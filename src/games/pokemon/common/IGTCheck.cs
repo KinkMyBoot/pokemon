@@ -106,6 +106,18 @@ public class IGTResults {
         return ret;
     }
 
+    public int RDivSuccesses() {
+        if(TotalRunning == 0) return 0;
+        Dictionary<int, int> ret = new Dictionary<int, int>();
+        foreach(IGTState i in IGTs) {
+            if(i.Running) {
+                ret.TryAdd(i.Divider, 0);
+                ret[i.Divider]++;
+            }
+        }
+        return ret.Values.Max();
+    }
+
     public IGTResults Purge(bool success = false)
     {
         IGTResults ret = new IGTResults(TotalSuccesses);

@@ -102,17 +102,17 @@ public static class DepthFirstSearch {
                 IGTState prev = state.IGT[f];
                 IGTState igt;
                 if(prev.Running) { // we're in the overworld, execute action
-                    igt = new IGTState(gb, prev.Success, prev.IGTStamp);
-
                     gb.LoadState(prev.State);
                     int ret = gb.Execute(edge.Action);
 
-                    if(ret == gb.OverworldLoopAddress) {
-                        if(parameters.TileCallbacks != null)
-                            foreach(var callback in parameters.TileCallbacks)
-                                if(edge.NextTile == callback.Tile)
-                                    callback.Function(gb);
-                    } else {
+                    if(parameters.TileCallbacks != null && ret == gb.OverworldLoopAddress)
+                        foreach(var callback in parameters.TileCallbacks)
+                            if(edge.NextTile == callback.Tile)
+                                callback.Function(gb);
+
+                    igt = new IGTState(gb, prev.Success, prev.IGTStamp);
+
+                    if(ret != gb.OverworldLoopAddress) {
                         if(ret == gb.WildEncounterAddress)
                             igt.Success = parameters.EncounterCallback != null ? parameters.EncounterCallback(gb) : false;
                         igt.Running = false;

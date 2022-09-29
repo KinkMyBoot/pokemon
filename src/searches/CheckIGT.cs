@@ -97,6 +97,39 @@ class CheckIGT
         CheckIGT("basesaves/red/manip/rt3moon.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, frame == 36, Verbosity.Summary, true, -1, null, frame, 60, 16);
     }
 
+    public static void Rt3MoonFrame54Backup()
+    {
+        string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
+        rt3Moon += "UUUUUULLLLLALLLLDD";
+        rt3Moon += "RRRRUURRRARRUUUUUUURRRRRRRAUUUUUUURRRDRDDDDDDDADDDDDDDDADRRRRRURRRR";
+        rt3Moon += "UUUUUUUUR";
+        rt3Moon += "ULUUUUUAUUUUUULLLUUUUUUUULLLLLLDDLALLLLLLLDDDDDD";
+        rt3Moon += "LALLALLALLALDD";
+        rt3Moon += "RRRUUULAUR";
+        rt3Moon += "DDADLALLAD";
+        rt3Moon += "RARRARRARRARUU";
+        rt3Moon += "DDLDDDDLLLLLLLULUUUUULUUUUUUUULLLUL";
+        rt3Moon += "DADDRAR";
+        rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR";
+        rt3Moon += "RRUUURARRRDDRRRRRUARURARRDDDDDDDDALLLLDDDDDDDADDLLLALLLLLLLLLLLLLLALLLLUUUUAUUALUUUUUUUU";
+        RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
+        bool memeBall(Red gb)
+        {
+            gb.RunUntil("WaitForTextScrollButtonPress");
+            // gb.AdvanceFrames(1); // missing textbox
+            gb.Press(Joypad.B);
+            gb.RunUntil("HandleMenuInput");
+            gb.Press(Joypad.A | Joypad.Down, Joypad.A | Joypad.Down | Joypad.Right);
+            if(gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"]) return true;
+            gb.ClearText();
+            // gb.Press(Joypad.A, Joypad.Select, Joypad.B, Joypad.A, Joypad.Select, Joypad.A);
+            gb.Press(Joypad.A, Joypad.A | Joypad.Up, Joypad.B, Joypad.Select, Joypad.A | Joypad.Down);
+            return gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"];
+        }
+        CheckIGT("basesaves/red/manip/rt3moon_slot2.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, RbyIGTChecker<Red>.Verbosity.Full, false, -1, memeBall, 54, 60); // yoloball igt
+        // CheckIGT("basesaves/red/manip/rt3moon_slot2.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, RbyIGTChecker<Red>.Verbosity.Full, false, -1, memeBall, 0, 1); // normal igt
+    }
+
     public static void EntrMoon()
     {
         string entrMoon = "UAUUUUULLLLLLLLALDD";
@@ -116,6 +149,20 @@ class CheckIGT
         CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", 3600, false, true);
     }
 
+    public static void YellowMoon()
+    {
+        RbyIGTChecker<Yellow>.CheckIGT("basesaves/yellow/nido.gqs", new RbyIntroSequence(), "URARU", null, 3600, true);
+        string path = "UAUUUUUUUUAUUURRRARRRURUUUUUURARRDDDDDDDDDDDDRDDDDDRRRRRRURRR"
+        + "RAUUUAUUUUUUULUUAUUUUUUUUAUULLUUUUULULLLLLLLDDDLLLLDLLLDDLDDDADDDDDLLLLLLLALLLUULULLUUUUUUULAUUUU"
+        + "DRRRD"
+        + "DDDDDDDDRDDDDRRRARRRARRRARRRRRR"
+        // + "DDDDDDDDRDDDDRRRARRRARRARRRRRRR" //3397
+        // + "DDDDDDDRDDDDDRRRARRRARRRARRRRRR" //3377
+        + "RRUUURRRDDARRRRARRUAURARRARDADDDADDDDADDLLDDADDDADDALLLLLALLLALLLLLLLLLLLLLLLUUUUUAUUUUAUUAUUUURUUAUUAUUU";
+        // + "RRUUURRRDDARRRRARRUAURARRARDADDDADDDDADDLLDDADDDADDALLLLLALLALLLLLLLLLLLLLLLLUUUUUAUUUUAUUAUUUURUUAUUAUUU"; //3462
+        RbyIGTChecker<Yellow>.CheckIGT("basesaves/yellow/moon.gqs", new RbyIntroSequence(), path, "", 3600, false, false, RbyIGTChecker<Yellow>.Verbosity.Full, false, -1, gb => true);
+    }
+
     public static void ParasBackup()
     {
         // string parasbackup = "LLLLLLLLLLDDDADDRAR" + "RRRD"; // sf - 3300 & 3299
@@ -133,16 +180,12 @@ class CheckIGT
         Red gb = new Red();
         const Joypad PLD = Joypad.B, PLD_ball = Joypad.A;
 
+        Dictionary<string, int> statsSuccess = new Dictionary<string, int>();
+
         gb.LoadState("basesaves/red/manip/nido.gqs");
         gb.HardReset();
         intro.ExecuteUntilIGT(gb);
         byte[] igtState = gb.SaveState();
-        // for (byte maxhp = 21; maxhp <= 23; ++maxhp)
-        // for (byte hp = 10; hp <= maxhp; ++hp)
-        // for (byte atk = 10; atk <= 12; ++atk)
-        // for (byte def = 12; def <= 14; ++def)
-        // for (byte spd = 10; spd <= 12; ++spd)
-        // for (byte spc = 11; spc <= 12; ++spc)
         for(byte s = 0; s < 60; ++s)
         {
             gb.LoadState(igtState);
@@ -152,76 +195,93 @@ class CheckIGT
             gb.CpuWrite("wPlayTimeFrames", 33);
             intro.ExecuteAfterIGT(gb);
 
-            // gb.CpuWriteBE<ushort>("wPartyMon1HP",      hp );
-            // gb.CpuWriteBE<ushort>("wPartyMon1MaxHP",   maxhp );
-            // gb.CpuWriteBE<ushort>("wPartyMon1Attack",  atk );
-            // gb.CpuWriteBE<ushort>("wPartyMon1Defense", def );
-            // gb.CpuWriteBE<ushort>("wPartyMon1Speed",   spd );
-            // gb.CpuWriteBE<ushort>("wPartyMon1Special", spc );
-            // Trace.Write(gb.CpuReadBE<ushort>("wPartyMon1HP")+"/"+gb.CpuReadBE<ushort>("wPartyMon1MaxHP")+" "+gb.CpuReadBE<ushort>("wPartyMon1Attack")+" "+gb.CpuReadBE<ushort>("wPartyMon1Defense")+" "+gb.CpuReadBE<ushort>("wPartyMon1Speed")+" "+gb.CpuReadBE<ushort>("wPartyMon1Special"));
-
             const string nidopath = "LLLULLUAULALDLDLLDADDADLALLALUUAU";
             int addr;
             addr = gb.Execute(SpacePath(nidopath));
 
-            Trace.Write($"{s,2} 33,  ");
-
             if(addr != gb.WildEncounterAddress)
             {
-                Trace.WriteLine("No enc");
+                Trace.WriteLine($"{s,2} 33,  No enc");
                 continue;
             }
-
             if(gb.EnemyMon.Species.Name != "NIDORANM")
             {
-                Trace.WriteLine(gb.EnemyMon.Species.Name);
+                Trace.WriteLine($"{s,2} 33,  " + gb.EnemyMon.Species.Name);
                 continue;
             }
 
-            bool yoloball;
+            gb.AdvanceFrames(240);
+            byte[] encounterState = gb.SaveState();
 
-            gb.Hold(PLD, gb.SYM["ManualTextScroll"]); // nido appeared
-            gb.Press(Joypad.A);
-
-            gb.Hold(PLD, gb.SYM["PlayCry"]);
-            gb.Press(Joypad.Down | Joypad.A, Joypad.A | Joypad.Left); // yoloball 1
-            yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
-            Trace.Write("Yoloball1: " + yoloball);
-            if(yoloball)
+            // for(byte maxhp = 21; maxhp <= 23; ++maxhp)
+            // for(byte hp = 10; hp <= maxhp; ++hp)
+            // for(byte def = 12; def <= 14; ++def)
+            // for(byte spd = 10; spd <= 12; ++spd)
             {
-                Trace.WriteLine("");
-                continue;
-            }
+                gb.LoadState(encounterState);
 
-            gb.Hold(PLD, gb.SYM["ManualTextScroll"]); // missed
-            gb.Press(Joypad.A);
+                Trace.Write($"{s,2} 33,  ");
 
-            addr = gb.RunUntil(gb.SYM["MoveMissed"], gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]); // get move info
-            byte move = gb.CpuRead(gb.SYM["wEnemySelectedMove"]);
-            if(move > 0)
-            {
-                Trace.Write(", Move: " + gb.Moves[move].Name);
-            }
-            if(addr == gb.SYM["MoveMissed"])
-            {
-                Trace.Write(" Miss");
-                addr = gb.RunUntil(gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]);
-            }
-            if(gb.CpuRead(gb.SYM["wCriticalHitOrOHKO"]) > 0)
-            {
-                Trace.Write(" Crit");
-            }
+                // gb.CpuWriteBE<ushort>("wPartyMon1HP",      hp );
+                // gb.CpuWriteBE<ushort>("wPartyMon1MaxHP",   maxhp );
+                // gb.CpuWriteBE<ushort>("wPartyMon1Defense", def );
+                // gb.CpuWriteBE<ushort>("wPartyMon1Speed",   spd );
+                string stats = gb.CpuReadBE<ushort>("wPartyMon1HP") + "/" + gb.CpuReadBE<ushort>("wPartyMon1MaxHP") + " " + gb.CpuReadBE<ushort>("wPartyMon1Attack") + " " + gb.CpuReadBE<ushort>("wPartyMon1Defense") + " " + gb.CpuReadBE<ushort>("wPartyMon1Speed") + " " + gb.CpuReadBE<ushort>("wPartyMon1Special");
+                // Trace.Write(stats + ", ");
 
-            if(addr == gb.SYM["ManualTextScroll"])
-            { // crit / status
-                gb.AdvanceFrames(4);
-                gb.Press(Joypad.B);
-            }
+                bool yoloball;
 
-            gb.Press(Joypad.A, Joypad.A | Joypad.Right); // yoloball 2
-            // gb.Press(Joypad.A, Joypad.Select, Joypad.A); // select
-            yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
-            Trace.WriteLine(", Yoloball2: " + yoloball);
+                gb.Hold(PLD, gb.SYM["ManualTextScroll"]); // nido appeared
+                gb.Press(Joypad.A);
+
+                gb.Hold(PLD, gb.SYM["PlayCry"]);
+                gb.Press(Joypad.Down | Joypad.A, Joypad.A | Joypad.Left); // yoloball 1
+                yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
+                Trace.Write("Yoloball1: " + yoloball);
+                if(yoloball)
+                {
+                    Trace.WriteLine("");
+                    continue;
+                }
+
+                gb.Hold(PLD, gb.SYM["ManualTextScroll"]); // missed
+                gb.Press(Joypad.A);
+                gb.Hold(PLD, gb.SYM["EnemyCanExecuteMove"] + 0x7);
+
+                addr = gb.RunUntil(gb.SYM["MoveMissed"], gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]); // get move info
+                byte move = gb.CpuRead(gb.SYM["wEnemySelectedMove"]);
+                if(move > 0)
+                {
+                    Trace.Write(", Move: " + gb.Moves[move].Name);
+                }
+                if(addr == gb.SYM["MoveMissed"])
+                {
+                    Trace.Write(" Miss");
+                    addr = gb.RunUntil(gb.SYM["ManualTextScroll"], gb.SYM["HandleMenuInput_"]);
+                }
+                if(gb.CpuRead(gb.SYM["wCriticalHitOrOHKO"]) > 0)
+                {
+                    Trace.Write(" Crit");
+                }
+
+                if(addr == gb.SYM["ManualTextScroll"]) // crit / status
+                {
+                    gb.AdvanceFrames(9);
+                    gb.Press(Joypad.B);
+                }
+
+                gb.Press(Joypad.A, Joypad.A | Joypad.Right); // yoloball 2
+                // gb.Press(Joypad.A, Joypad.Select, Joypad.A); // select
+                yoloball = gb.Hold(PLD_ball, gb.SYM["ItemUseBall.captured"], gb.SYM["ItemUseBall.failedToCapture"]) == gb.SYM["ItemUseBall.captured"];
+                Trace.WriteLine(", Yoloball2: " + yoloball);
+                statsSuccess.TryAdd(stats, 0);
+                if(yoloball) statsSuccess[stats]++;
+            }
+        }
+
+        foreach(var kv in statsSuccess)
+        {
+            Trace.WriteLine(kv.Key + " " + kv.Value);
         }
     }
 

@@ -27,6 +27,16 @@ class PidgeyBackup
         // state = Pidgey14;
         // pal = RbyStrat.PalHold; path = "UUUUUUUUUUUUUUURUAUUAUUUUUAUUAR" + "RRDRRUUUUUURUUUDDDLLLLRR"; // bad tile 3595
 
+        // blue
+        // state = Pidgey13;
+        // pal = RbyStrat.Pal; path = "UUUUUUAUUUUAUUUARUAUUUUAUUUUUUR";//3476 3
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUUUAUUAUUAURUAUUUUUUUUUUARRR";//3477 5
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUUUAUUAUUAURAUUUUUUUUUUUARRR";//3477 5
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUUAUUUUUUARUUUUUUUUAUUAURRAR";//3478 3
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUUAUUUAUUAURUAUUUUUUUUUUARRR";//3478 5
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUUAUUUAUUAURAUUUUUUUUUUUARRR";//3478 5
+        // pal = RbyStrat.NoPalAB; path = "UUUUUUAUUUUUUUARUUUUUUUUAUUAURRAR";//3478 3
+
         CheckIGT(state, new RbyIntroSequence(pal), path, "PIDGEY", 3600);
     }
 

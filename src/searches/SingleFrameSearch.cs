@@ -122,10 +122,11 @@ public static class SingleFrameSearch {
 
             gb.LoadState(state.IGT.State);
             int ret = gb.Execute(edge.Action);
+            newState.IGT = new IGTState(gb, state.IGT.Success, state.IGT.IGTStamp);
+
             if(ret == gb.OverworldLoopAddress) {
                 if(edge.NextTile == parameters.TileCallback.Tile)
                     parameters.TileCallback.Callback(gb);
-                newState.IGT = new IGTState(gb, state.IGT.Success, state.IGT.IGTStamp);
             } else {
                 if(ret == gb.WildEncounterAddress)
                     if(parameters.EncounterCallback(gb))
