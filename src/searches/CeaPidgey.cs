@@ -24,6 +24,9 @@ class CeaPidgey
         // Check("UUUULLLLLUUAURUUAUUUAUUUUAUURRRRURRRRUUUUUUUUUUUUUUUUAUUUUUUUUUUAUUUUUUULLLLLLLLDDADDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDLLLLLLUUAU"); // 54 3 3220 DD,r
         // Check("UUUULLLLLUUAURUUUAUUAUUUUAUURRRRURRURRUUUUUUUUUUUUUUUUAUUUUUUUUUUAUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDADDDDDDDDDDDDDDDLLLLLLUUAU"); // 54 3 3218 DD,r
         // Check("UUUULLLLLUUAURUUUAUUAUUUUAUURRRRURRURRUUUUUUUUUUUUUUUUAUUUUUUUUUUAUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDADDDDDDDDDDDDDDDDDDLLLLLLUUAU"); // 54 3 3218 DD,r
+
+        // 1 frame late
+        // Check("UUUAUULALLLLUUUUURAUUAUUU" + "UUURRRURRRRRUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDLDDLLLLL"); // 50
     }
 
     public static int Check(string path, bool verbose = true)
@@ -47,6 +50,7 @@ class CeaPidgey
             {
                 gb.Yoloball(0, Joypad.B);
                 gb.ClearText(Joypad.A);
+                // gb.AdvanceFrame(); // miss textbox
                 gb.Press(Joypad.B);
                 var npcTracker = new NpcTracker<BlueCb>(gb.CallbackHandler);
                 int addr = gb.Execute(RbyIGTChecker<BlueCb>.SpacePath(path), (gb.Maps[51][25, 12], gb.PickupItem));
@@ -100,13 +104,14 @@ class CeaPidgey
         bool NoName(Blue gb)
         {
             gb.ClearText(Joypad.A);
+            // gb.AdvanceFrame(); // miss textbox
             gb.Press(Joypad.B);
             return true;
         }
         IGTResults states = Blue.IGTCheckParallel(gbs, Intro, numFrames, gb =>
         {
             return gb.Execute(RbyIGTChecker<Blue>.SpacePath(PidgeyPath)) == gb.WildEncounterAddress && gb.Yoloball(0, Joypad.B) && NoName(gb);
-            // && gb.Execute(RbyIGTChecker<Blue>.SpacePath("UUUUUULLLLLUUUUUAURUUUUUURRURURRRRRUUUUUUU")) == gb.OverworldLoopAddress;
+            // && gb.Execute(RbyIGTChecker<Blue>.SpacePath("UUUAUULALLLLUUUUURAUUAUUU")) == gb.OverworldLoopAddress;
         });
 
         RbyMap route2 = gb.Maps[13];

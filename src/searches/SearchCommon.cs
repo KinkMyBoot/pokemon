@@ -217,7 +217,7 @@ class NpcTracker<Gb> where Gb : Rby
     public Dictionary<(int, int), string> NpcMovement = new Dictionary<(int, int), string>();
     public NpcTracker(CallbackHandler<Gb> handler)
     {
-        handler.SetCallback(handler.gb.SYM["TryWalking"] + 0x19, (gb) =>
+        handler.SetCallback(handler.gb.SYM["TryWalking"] + (handler.gb.IsYellow ? 0x0B : 0x19), (gb) =>
         {
             string movement;
             switch((RbySpriteMovement) gb.B)
@@ -259,5 +259,12 @@ class RedCb : Red
 {
     public CallbackHandler<RedCb> CallbackHandler;
     public RedCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { CallbackHandler = new CallbackHandler<RedCb>(this); }
+    public unsafe override int Hold(Joypad joypad, params int[] addrs) { return CallbackHandler.Hold(base.Hold, joypad, addrs); }
+}
+
+class YellowCb : Yellow
+{
+    public CallbackHandler<YellowCb> CallbackHandler;
+    public YellowCb(string savFile = null, bool speedup = true) : base(savFile, speedup) { CallbackHandler = new CallbackHandler<YellowCb>(this); }
     public unsafe override int Hold(Joypad joypad, params int[] addrs) { return CallbackHandler.Hold(base.Hold, joypad, addrs); }
 }

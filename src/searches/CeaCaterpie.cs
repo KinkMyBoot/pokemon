@@ -34,7 +34,6 @@ class CeaCaterpie
     public static void CheckFile()
     {
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
-        var antidote = new List<(int, byte, byte)> { (51, 25, 12) };
         Paths paths = new Paths();
         foreach(string line in System.IO.File.ReadAllLines("paths.txt"))
         {

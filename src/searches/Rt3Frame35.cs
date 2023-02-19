@@ -26,7 +26,7 @@ class Rt3Frame35
         // pal = RbyStrat.PalHold; path = "RDDDDDDADDLLLLADDADDDDDDDALLLLLLLLLLLLALLLLLLLLLUUUUUUUUUUS_BLUUAUU"; //55
         // pal = RbyStrat.NoPalAB; path = "RDDDDADDDDLLLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLUAUUUUUUS_BUULLUAUUAUU"; //57
 
-        CheckIGT(state, new RbyIntroSequence(pal), path, "PARAS", 60);
+        CheckIGT(state, new RbyIntroSequence(pal), path, "PARAS", 60, false, false, Verbosity.Full);
     }
 
     public static void Search()

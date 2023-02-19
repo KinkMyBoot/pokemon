@@ -25,18 +25,26 @@ class CheckIGT
         CheckIGT("basesaves/red/manip/nido.gqs", intro, nido, "NIDORANM", 3600, true);
     }
 
-    public static void Poy()
+    public static void PostHiker()
     {
-        string poy = "DDDDDDDDDDDARRRRRRRRRRRRRRRRD";
-        poy += "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
+
+        string poy = "DDDDDDDDDDDARRRRRRRRRRRRRRRRD";
+        // poy += "UUURRRRRDDRRRRRRRUURRRDDDDDDDDLLDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU";
+        poy += "UUURRRRRDDRRRRRRRUURRRDDDDDDDDDDLLDDDDDDDLLLLLLLLLLLLLLLLLLLLLLLUUUALUUUUUUUUUUU"; // late turn
         CheckIGT("basesaves/red/manip/posthiker.gqs", intro, poy, "PARAS", 3600, false, true);
-        // CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", true, false, true);
+        CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, poy, "PARAS", 3600, false, true);
+
+        string posthiker = "DDDDDDDDDDDADRRRRRRRRRRRRRRRR";
+        posthiker += "UUURRRRRDDRRRRRRUURRRRDDDDDDDDLLLLDDDDDDDDDALLLALLLLLLLLLLLLLALLLALL";
+        CheckIGT("basesaves/red/manip/posthiker.gqs", intro, posthiker + "UAUUUUAUUUULUUUU", "PARAS", 3600);
+        CheckIGT("basesaves/red/manip/posthiker_redbar.gqs", intro, posthiker + "UAUUUUULUUUUUUAUU", "PARAS", 3600);
     }
 
     public static void Rt3Moon()
     {
         string rt3Moon = "RRRRRRRRURRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU";
+        // string rt3Moon = "RRRRRRRURRRUUUUUARRRRRRRRRRRRDDDDDRRRRRRRARUURRUUUUUUUUUURRRRUUUUUUUUUURRRRRU"; // 1 early
         rt3Moon += "UUUUUULLLLLALLLLDD";
         rt3Moon += "RRRRUURRRARRUUUUUUURRRRRRRAUUUUUUURRRDRDDDDDDDADDDDDDDDADRRRRRURRRR";
         rt3Moon += "UUUUUUUUR";
@@ -51,8 +59,8 @@ class CheckIGT
         // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRDR";
         // rt3Moon += "DRRDDDDDDDDDDRRRARRRRRRRRRRRD"; // slayer
         // rt3Moon += "DRRDDDDDDDDDADRRRRRRRRRRRRRDR"; // 4 early
-        rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; // 3 early
-        // rt3Moon += "DRRDDDDDDDDDDRARRRRRRRRRRRRDR"; // 2 early
+        // rt3Moon += "DRRDDDDDDDDDDARRRRRRRRRRRRRDR"; // 3 early
+        rt3Moon += "DRRDDDDDDDDDDRARRRRRRRRRRRRDR"; // 2 early
         // rt3Moon += "DRRDDDDDDDDDDRRARRRRRRRRRRRDR"; // 1 early
         // rt3Moon += "DRRDDDDDDDDDDRRRRARRRRRRRRRDR"; // 1 late
         // rt3Moon += "DRRDDDDDDDDDDRRRRRARRRRRRRRDR"; // 2 late
@@ -115,19 +123,110 @@ class CheckIGT
         RbyIntroSequence rt3MoonIntro = new RbyIntroSequence(RbyStrat.PalHold);
         bool memeBall(Red gb)
         {
+            if(gb.EnemyMon.Species.Name != "PARAS") return false;
             gb.RunUntil("WaitForTextScrollButtonPress");
             // gb.AdvanceFrames(1); // missing textbox
             gb.Press(Joypad.B);
             gb.RunUntil("HandleMenuInput");
             gb.Press(Joypad.A | Joypad.Down, Joypad.A | Joypad.Down | Joypad.Right);
             if(gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"]) return true;
-            gb.ClearText();
+            gb.ClearText(Joypad.B);
             // gb.Press(Joypad.A, Joypad.Select, Joypad.B, Joypad.A, Joypad.Select, Joypad.A);
-            gb.Press(Joypad.A, Joypad.A | Joypad.Up, Joypad.B, Joypad.Select, Joypad.A | Joypad.Down);
+            // gb.Press(Joypad.A, Joypad.A | Joypad.Up, Joypad.B, Joypad.Select, Joypad.A | Joypad.Down);
+            gb.Press(Joypad.A, Joypad.A | Joypad.Up, Joypad.B, Joypad.B | Joypad.Left, Joypad.A, Joypad.Select, Joypad.A | Joypad.Down);
             return gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"];
         }
         CheckIGT("basesaves/red/manip/rt3moon_slot2.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, RbyIGTChecker<Red>.Verbosity.Full, false, -1, memeBall, 54, 60); // yoloball igt
-        // CheckIGT("basesaves/red/manip/rt3moon_slot2.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, RbyIGTChecker<Red>.Verbosity.Full, false, -1, memeBall, 0, 1); // normal igt
+        CheckIGT("basesaves/red/manip/rt3moon_slot2.gqs", rt3MoonIntro, rt3Moon, "PARAS", 60, false, false, RbyIGTChecker<Red>.Verbosity.Full, false, -1, memeBall, 0, 1); // normal igt
+        // return;
+        for(ushort h = 7; h <= 41; ++h)
+        {
+            Trace.WriteLine("");
+            Trace.WriteLine(h);
+            Red[] gbs = MultiThread.MakeThreads<Red>(16);
+            gbs[0].LoadState("basesaves/red/manip/rt3moon_slot2.gqs");
+            // gbs[0].Show();
+            rt3MoonIntro.ExecuteUntilIGT(gbs[0]);
+            byte[] state = gbs[0].SaveState();
+            Dictionary<string, int> results = new Dictionary<string, int>();
+            MultiThread.For(60, gbs, (gb, i) => {
+                gb.LoadState(state);
+                // gb.CpuWrite("wPlayTimeSeconds", (byte)(i));
+                // gb.CpuWrite("wPlayTimeFrames", (byte)(54));
+                gb.CpuWrite("wPlayTimeSeconds", (byte)(0));
+                gb.CpuWrite("wPlayTimeFrames", (byte)(i));
+                rt3MoonIntro.ExecuteAfterIGT(gb);
+                gb.CpuWriteBE<ushort>("wPartyMon1HP", h);
+                gb.Execute(SpacePath(rt3Moon),
+                    (gb.Maps[59][ 5, 31], gb.PickupItem),
+                    (gb.Maps[59][34, 31], gb.PickupItem),
+                    (gb.Maps[59][35, 23], gb.PickupItem),
+                    (gb.Maps[61][28,  5], gb.PickupItem),
+                    (gb.Maps[59][ 2,  3], gb.PickupItem),
+                    (gb.Maps[59][ 3,  2], gb.PickupItem));
+                // gb.SaveState("37hp.gqs");
+                if(gb.EnemyMon.Species.Name != "PARAS") return;
+                // gbs[0].Record("test");
+                gb.RunUntil("WaitForTextScrollButtonPress");
+                gb.AdvanceFrames(1); // missing textbox
+                gb.Press(Joypad.B);
+                gb.RunUntil("HandleMenuInput");
+                gb.Press(Joypad.A | Joypad.Down, Joypad.A | Joypad.Down | Joypad.Right);
+                // bool[] res = new bool[20];
+                if(gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"]) return;
+                gb.ClearText(Joypad.B);
+                if(gb.BattleMon.HP == 0) return;
+                gb.Press(Joypad.A);
+                byte[] ballstate = gb.SaveState();
+                for(int a = 0; a <= 4; ++a)
+                {
+                    for(int b = 0; b <= 4; ++b)
+                    {
+                        if(b == 0 && a != 0) continue;
+                        for(int c = 8; c <= 9; ++c)
+                        {
+                            gb.LoadState(ballstate);
+                            void Backout(int n)
+                            {
+                                if(n == 1) gb.Press(Joypad.B | Joypad.Right, Joypad.A);
+                                else if(n == 2) gb.Press(Joypad.Select, Joypad.B, Joypad.A);
+                                else if(n == 3) gb.Press(Joypad.A | Joypad.Up, Joypad.B);
+                                else if(n == 4) gb.Press(Joypad.Select, Joypad.A | Joypad.Up, Joypad.B);
+                            }
+                            string trad(int n)
+                            {
+                                if(n == 1) return "i  ";
+                                else if(n == 2) return "si ";
+                                else if(n == 3) return "p  ";
+                                else if(n == 4) return "sp ";
+                                else if(n == 8) return "b  ";
+                                else if(n == 9) return "sb ";
+                                return "";
+                            }
+                            Backout(a);
+                            Backout(b);
+                            gb.RunUntil("HandleMenuInput_.getJoypadState");
+                            if(c == 9) gb.Press(Joypad.Select);
+                            gb.Press(Joypad.A | (gb.CpuRead("wCurrentMenuItem") == 0 ? Joypad.Down : Joypad.Left));
+                            bool res = false;
+                            if(gb.Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == gb.SYM["ItemUseBall.captured"])
+                                res = true;
+                            lock(results) {
+                                string str = trad(a) + trad(b) + trad(c);
+                                results.TryAdd(str, 0);
+                                if(res) results[str]++;
+                            }
+                            // Trace.WriteLine(a + " " + b + " " + c + ": " + res);
+                            // gb.AdvanceFrames(60);
+                        }
+                    }
+                }
+            });
+            foreach(var r in results)
+            {
+                Trace.WriteLine(r.Key + ": " + r.Value);
+            }
+        }
     }
 
     public static void EntrMoon()
@@ -149,9 +248,13 @@ class CheckIGT
         CheckIGT("basesaves/red/manip/entrmoon.gqs", entrMoonIntro, entrMoon, "PARAS", 3600, false, true);
     }
 
-    public static void YellowMoon()
+    public static void YellowNido()
     {
         RbyIGTChecker<Yellow>.CheckIGT("basesaves/yellow/nido.gqs", new RbyIntroSequence(), "URARU", null, 3600, true);
+    }
+
+    public static void YellowMoon()
+    {
         string path = "UAUUUUUUUUAUUURRRARRRURUUUUUURARRDDDDDDDDDDDDRDDDDDRRRRRRURRR"
         + "RAUUUAUUUUUUULUUAUUUUUUUUAUULLUUUUULULLLLLLLDDDLLLLDLLLDDLDDDADDDDDLLLLLLLALLLUULULLUUUUUUULAUUUU"
         + "DRRRD"
@@ -163,15 +266,15 @@ class CheckIGT
         RbyIGTChecker<Yellow>.CheckIGT("basesaves/yellow/moon.gqs", new RbyIntroSequence(), path, "", 3600, false, false, RbyIGTChecker<Yellow>.Verbosity.Full, false, -1, gb => true);
     }
 
-    public static void ParasBackup()
+    public static void PostNerd()
     {
-        // string parasbackup = "LLLLLLLLLLDDDADDRAR" + "RRRD"; // sf - 3300 & 3299
-        // string parasbackup = "LLLLLLLLLLDDDADRRAD" + "RRR"; // hw - 3359 & 3358
-        // string parasbackup = "LLLLLLLLLLDDDADRARD" + "RRR"; // 3359 3358
-        string parasbackup = "LLLLLLLLLLDDDDARRAD" + "RRR"; // 3359 3358
+        // string postnerd = "LLLLLLLLLLDDDADDRAR" + "RRRD"; // sf - 3300 & 3299
+        // string postnerd = "LLLLLLLLLLDDDADRRAD" + "RRR"; // hw - 3359 & 3358
+        // string postnerd = "LLLLLLLLLLDDDADRARD" + "RRR"; // 3359 3358
+        string postnerd = "LLLLLLLLLLDDDDARRAD" + "RRR"; // 3359 3358
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.PalHold);
-        CheckIGT("basesaves/red/manip/parasbackup.gqs", intro, parasbackup, "PARAS", 3600);
-        CheckIGT("basesaves/red/manip/parasbackup_redbar.gqs", intro, parasbackup, "PARAS", 3600);
+        CheckIGT("basesaves/red/manip/postnerd.gqs", intro, postnerd, "PARAS", 3600);
+        CheckIGT("basesaves/red/manip/postnerd_redbar.gqs", intro, postnerd, "PARAS", 3600);
     }
 
     public static void NidoFrame33Backup()
@@ -341,8 +444,10 @@ class CheckIGT
         // intro = new RbyIntroSequence(RbyStrat.PalHold); // 60 igt (57)
         // intro = new RbyIntroSequence(RbyStrat.NoPalAB, RbyStrat.GfSkip, RbyStrat.Hop0, 1); // 60 igt (57)
         // intro = new RbyIntroSequence(RbyStrat.PalAB);
+        // intro = new RbyIntroSequence(RbyStrat.Pal, RbyStrat.GfSkip, RbyStrat.Hop0, 1); // 59
 
         path = "SDALLLAURAUUUUUA"; // 60 cans - 3596/3600
+        // path = "LLURUUUUUA"; // 59 cans - 3539/3600
         // path = "DALLLAURUUUUUA"; // 58 cans - 3477/3600
         // path = "DLLLURUUUUUA"; // 57 cans - 3420/3600
         // path = "DLLLU"+"RUUUUULUUUUUUURDA"; // xd
@@ -351,7 +456,7 @@ class CheckIGT
         // path = "DDLALLUURUUUUUA"; // fail 58 - 3361
         // path = "DLLLURRRRRUUUUUA"; // 60 igt (PalAB)
 
-        int numFrames = 60; //4
+        int numFrames = 60*60;
         int numThreads = 16;
 
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);

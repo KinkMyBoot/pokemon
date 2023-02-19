@@ -13,8 +13,8 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public RbyTile Tile;
         public bool Yoloball;
 
-        public string ToString(bool dvs = false) {
-            return $"[{IGTSec}] [{IGTFrame}]: " + (Mon != null ? (dvs ? Mon.ToString() : $"L{Mon.Level} {Mon.Species.Name}")+$" on {Tile}, Yoloball: {Yoloball}" : "");
+        public string ToString(bool dvs = false, bool yb = true) {
+            return $"[{IGTSec}] [{IGTFrame}]: " + (Mon != null ? (dvs ? Mon.ToString() : $"L{Mon.Level} {Mon.Species.Name}")+$" on {Tile}" + (yb ? $", Yoloball: {Yoloball}" : "") : "");
         }
         public byte IGTSec;
         public byte IGTFrame;
@@ -23,13 +23,14 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
     }
 
     public enum Verbosity { Nothing, Summary, Full };
+    static Gb[] gbs = null;
 
     public static int CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke = null, int numFrames = 60, bool checkDV = false,
                                 bool selectBall = false, Verbosity verbose = Verbosity.Full, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null,
-                                int startFrame = 0, int stepFrame = 1, int numThreads = 16, List<(int, byte, byte)> itemPickups = null) {
+                                int startFrame = 0, int minutes = 1, int numThreads = 16, List<(int, byte, byte)> itemPickups = null, List<IGTResult> fullResults = null) {
         byte[] state = File.ReadAllBytes(statePath);
 
-        Gb[] gbs = MultiThread.MakeThreads<Gb>(numThreads);
+        if(gbs == null || gbs.Length != numThreads) gbs = MultiThread.MakeThreads<Gb>(numThreads);
         Gb gb = gbs[0];
 
         gb.LoadState(state);
@@ -39,16 +40,18 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         intro.ExecuteUntilIGT(gb);
         byte[] igtState = gb.SaveState();
 
-        List<IGTResult> manipResults = new List<IGTResult>();
+        List<IGTResult> manipResults = fullResults != null ? fullResults : new List<IGTResult>();
         Dictionary<string, int> manipSummary = new Dictionary<string, int>();
+        int totalNumFrames = numFrames * minutes;
 
-        MultiThread.For(numFrames, gbs, (gb, iterator) => {
+        MultiThread.For(totalNumFrames, gbs, (gb, iterator) => {
             IGTResult res = new IGTResult();
 
-            int igt = startFrame + iterator * stepFrame;
+            // int igt = startFrame + iterator * stepFrame;
+            int igt = startFrame + iterator % numFrames + iterator / numFrames * 60;
             res.IGTSec = (byte)(igt / 60);
             res.IGTFrame = (byte)(igt % 60);
-            if(verbose == Verbosity.Full && numFrames >= 100 && (iterator + 1) * 100 / numFrames > iterator * 100 / numFrames) Console.Write("█");
+            if(verbose == Verbosity.Full && totalNumFrames >= 100 && (iterator + 1) * 100 / totalNumFrames > iterator * 100 / totalNumFrames) Console.WriteLine("%");
 
             gb.LoadState(igtState);
             gb.CpuWrite("wPlayTimeSeconds", res.IGTSec);
@@ -99,36 +102,42 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         // print out manip success
         int success = 0;
         manipResults.Sort(delegate(IGTResult a, IGTResult b) {
-            return (a.IGTSec*60 + a.IGTFrame).CompareTo(b.IGTSec*60 + b.IGTFrame);
+            return (a.IGTSec * 60 + a.IGTFrame).CompareTo(b.IGTSec * 60 + b.IGTFrame);
         });
 
-        if(verbose == Verbosity.Full && numFrames >= 100) Console.WriteLine();
+        if(verbose == Verbosity.Full && totalNumFrames >= 100) Console.WriteLine();
+
         foreach(var item in manipResults) {
-            if(verbose == Verbosity.Full) Trace.WriteLine(item.ToString(checkDV));
+            if(verbose == Verbosity.Full) Trace.WriteLine(item.ToString(checkDV, item.Mon != null && (String.IsNullOrEmpty(targetPoke) || item.Mon.Species.Name.ToLower() == targetPoke.ToLower())));
+
             if((String.IsNullOrEmpty(targetPoke) && item.Mon == null) ||
-                (!String.IsNullOrEmpty(targetPoke) && item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
+            (!String.IsNullOrEmpty(targetPoke) && item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
                 success++;
             }
-            string summary;
-            if(item.Mon != null) {
-                summary = $", Tile: {item.Tile.ToString()}, Yoloball: {item.Yoloball}";
-                summary = checkDV ? item.Mon + summary : "L" + item.Mon.Level + " " + item.Mon.Species.Name + summary;
-            } else {
-                summary = "No Encounter";
-            }
-            if(!manipSummary.ContainsKey(summary)) {
-                manipSummary.Add(summary, 1);
-            } else {
-                manipSummary[summary]++;
+
+            if(verbose >= Verbosity.Summary) {
+                string summary;
+                if(item.Mon != null) {
+                    summary = $", Tile: {item.Tile.ToString()}";
+                    if(item.Mon.Species.Name == targetPoke) summary += $", Yoloball: {item.Yoloball}";
+                    summary = checkDV ? item.Mon + summary : "L" + item.Mon.Level + " " + item.Mon.Species.Name + summary;
+                } else {
+                    summary = "No Encounter";
+                }
+                if(!manipSummary.ContainsKey(summary)) {
+                    manipSummary.Add(summary, 1);
+                } else {
+                    manipSummary[summary]++;
+                }
             }
         }
 
         if(verbose >= Verbosity.Summary) {
             if(verbose == Verbosity.Full) Trace.WriteLine("");
             foreach(var item in manipSummary.OrderByDescending(kv => kv.Value)) {
-                Trace.WriteLine($"{item.Key}, {item.Value}/{numFrames}");
+                Trace.WriteLine($"{item.Key}, {item.Value}/{totalNumFrames}");
             }
-            if(targetPoke != null) Trace.WriteLine($"Success: {success}/{numFrames}");
+            if(!String.IsNullOrEmpty(targetPoke)) Trace.WriteLine($"Success: {success}/{totalNumFrames}");
         }
 
         return success;
@@ -147,13 +156,14 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public int NameLength = -1;
         public Func<Gb, bool> MemeBall = null;
         public int StartFrame = 0;
-        public int StepFrame = 1;
+        public int Minutes = 1;
         public int NumThreads = 16;
         public List<(int, byte, byte)> ItemPickups = null;
+        public List<IGTResult> FullResults = null;
     }
 
     public static int CheckIGT(CheckIGTParameters p) {
-        return CheckIGT(p.StatePath, p.Intro, p.Path, p.TargetPoke, p.NumFrames, p.CheckDV, p.SelectBall, p.Verbose, p.ForceRedBar, p.NameLength, p.MemeBall, p.StartFrame, p.StepFrame, p.NumThreads, p.ItemPickups);
+        return CheckIGT(p.StatePath, p.Intro, p.Path, p.TargetPoke, p.NumFrames, p.CheckDV, p.SelectBall, p.Verbose, p.ForceRedBar, p.NameLength, p.MemeBall, p.StartFrame, p.Minutes, p.NumThreads, p.ItemPickups, p.FullResults);
     }
 
     public static string SpacePath(string path) {
