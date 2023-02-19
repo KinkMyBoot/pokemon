@@ -133,7 +133,8 @@ public partial class GameBoy : IDisposable {
     }
 
     public GameBoy(string biosFile, string romFile, string savFile = null, SpeedupFlags speedupFlags = SpeedupFlags.None) {
-        ROM = new ROM(romFile);
+        ROM = ROM.New(romFile);
+        SYM = ROM.Symbols;
         Debug.Assert(ROM.HeaderChecksumMatches(), "Cartridge header checksum mismatch!");
 
         string romName = Path.GetFileNameWithoutExtension(romFile);
@@ -153,12 +154,6 @@ public partial class GameBoy : IDisposable {
 
         InputGetter = () => CurrentJoypad;
         Libgambatte.gambatte_setinputgetter(Handle, InputGetter);
-
-        string symPath = "symfiles/" + romName + ".sym";
-        if(File.Exists(symPath)) {
-            SYM = new SYM(symPath);
-            ROM.Symbols = SYM;
-        }
 
         SetSpeedupFlags(speedupFlags);
         StateSize = Libgambatte.gambatte_savestate(Handle, null, 160, null);
@@ -256,6 +251,7 @@ public partial class GameBoy : IDisposable {
     // Loads the emulator state given by a buffer.
     public void LoadState(byte[] buffer) {
         Libgambatte.gambatte_loadstate(Handle, buffer, buffer.Length);
+        BufferSamples = 0;
     }
 
     // Helper function that reads the buffer directly from disk.

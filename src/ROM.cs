@@ -53,7 +53,7 @@ public class ROM {
             (3) allows ROM address and CPU breakpoints to use the same value. (bank << 16 | address)
     */
 
-    public ROM(string path) {
+    private ROM(string path) {
         byte[] contents = File.ReadAllBytes(path);
         int numBanks = contents.Length / BankSize;
 
@@ -70,6 +70,19 @@ public class ROM {
             Array.Fill(Data, (byte) 0x00, offset, BankSize);                            // wram
             offset += BankSize;
         }
+
+        string symPath = "symfiles/" + Path.GetFileNameWithoutExtension(path) + ".sym";
+        if(File.Exists(symPath)) {
+            Symbols = new SYM(symPath);
+        }
+    }
+
+    public static Dictionary<string, ROM> ROMs = new Dictionary<string, ROM>();
+    public static ROM New(string path) {
+        if(!ROMs.ContainsKey(path)) {
+            ROMs[path] = new ROM(path);
+        }
+        return ROMs[path];
     }
 
     public bool HeaderChecksumMatches() {
@@ -159,7 +172,6 @@ public class ROM {
 }
 
 public class SYM : BiDictionary<string, int> {
-    public static bool AddEveryAddress = false;
 
     public SYM(string file) : base() {
         string[] lines = File.ReadAllLines(file);
@@ -178,7 +190,7 @@ public class SYM : BiDictionary<string, int> {
             string label = match.Groups[3].Value;
             Add(label, bank << 16 | addr);
 
-            if(AddEveryAddress && previousBank != -1) {
+            if(previousBank != -1) {
                 for(int newAddr = previousAddr + 1; newAddr < addr && newAddr <= 0x8000; newAddr++) {
                     int offset = (newAddr - previousAddr);
                     int newAddress = previousBank << 16 | newAddr;
