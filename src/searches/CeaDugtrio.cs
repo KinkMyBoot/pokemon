@@ -83,11 +83,11 @@ class CeaDugtrio
             MaxCost = 170,
             SuccessSS = success,
             EndTiles = new RbyTile[]{ gb.Maps[85][4, 4] },
-            EncounterCallback = gb => gb.Tile.X >= 34 && !(gb.Tile.X == 34 && gb.Tile.Y == 30) && gb.EnemyMon.Species.Name == "DUGTRIO" && gb.Yoloball(),
+            EncounterCallback = gb => gb.Tile.X >= 34 && !(gb.Tile.X == 34 && gb.Tile.Y == 30) && gb.EnemyMon.Species.Name == "DUGTRIO" && gb.Yoloball() ,
             LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
-                Trace.WriteLine(state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, false, Verbosity.Nothing) + "/60 " + state.WastedFrames + " " + intro);
+                Trace.WriteLine(state.Log + " " + CheckIGT(State, intro, state.Log, "DUGTRIO", 60, false, false, Verbosity.Summary) + "/60 " + state.WastedFrames + " " + intro);
             }
         };
 

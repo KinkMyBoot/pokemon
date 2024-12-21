@@ -16,7 +16,10 @@ class Program {
         Trace.AutoFlush = true;
 
         // Tests.RunAllTests();
-
-        new Extended();
+        var stat = new List<byte>{21,11,12,10,11};
+        //FrontupPidgey.SearchForest(stats:stat,r1damage:3,minClusterSize:1,path:"UAULULLULLUURUUUUU",maxcost:2);
+        
+        FrontupPidgey.PruneForest(stats:stat,r1damage:1,minClusterSize:1,maxcost:4);
+        //FrontupPidgey.Check();
     }
 }

@@ -280,6 +280,20 @@ public class RedBlue : Rby {
         return Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
     }
 
+    public override bool RedbarYoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
+        byte[] state = SaveState();
+        ClearText(hold);
+        Press(Joypad.A | Joypad.Down, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down | Joypad.Right));
+        bool check1 = Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
+        LoadState(state);
+        CpuWriteBE<ushort>("wPartyMon1HP", 1);
+        CpuWriteBE<ushort>("wBattleMonHP", 1);
+        ClearText(hold);
+        Press(Joypad.A | Joypad.Down, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down | Joypad.Right));
+        bool check2 = Hold(Joypad.A, "ItemUseBall.captured", "ItemUseBall.failedToCapture") == SYM["ItemUseBall.captured"];
+        return (check1 && check2);
+    }
+
     public override bool Selectball(int ballSlot = 0, Joypad hold = Joypad.None) {
         ClearText(hold);
         Press(Joypad.Down | Joypad.A, Joypad.Select, Joypad.A | (ballSlot == 0 ? Joypad.Up : Joypad.Down));

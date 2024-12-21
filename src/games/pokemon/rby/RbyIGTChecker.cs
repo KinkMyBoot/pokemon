@@ -13,6 +13,10 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public RbyTile Tile;
         public bool Yoloball;
 
+        public bool Success;
+
+        public List<int> dmgTaken;
+
         public string ToString(bool dvs = false, bool yb = true) {
             return $"[{IGTSec}] [{IGTFrame}]: " + (Mon != null ? (dvs ? Mon.ToString() : $"L{Mon.Level} {Mon.Species.Name}")+$" on {Tile}" + (yb ? $", Yoloball: {Yoloball}" : "") : "");
         }
@@ -27,7 +31,7 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
 
     public static int CheckIGT(string statePath, RbyIntroSequence intro, string path, string targetPoke = null, int numFrames = 60, bool checkDV = false,
                                 bool selectBall = false, Verbosity verbose = Verbosity.Full, bool forceRedBar = false, int nameLength = -1, Func<Gb, bool> memeBall = null,
-                                int startFrame = 0, int minutes = 1, int numThreads = 16, List<(int, byte, byte)> itemPickups = null, List<IGTResult> fullResults = null) {
+                                int startFrame = 0, int minutes = 1, int numThreads = 12, List<(int, byte, byte)> itemPickups = null, List<IGTResult> fullResults = null, int checkHPunder = 0, byte hpWrite = 0) {
         byte[] state = File.ReadAllBytes(statePath);
 
         if(gbs == null || gbs.Length != numThreads) gbs = MultiThread.MakeThreads<Gb>(numThreads);
@@ -38,6 +42,10 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         if(numThreads == 1)
             gb.Record("test");
         intro.ExecuteUntilIGT(gb);
+        if(hpWrite>0){
+            byte newhp = gb.CpuRead("wPartyMon1MaxHP");
+            newhp-=hpWrite;
+            gb.CpuWrite("wPartyMon1HP", newhp);}
         byte[] igtState = gb.SaveState();
 
         List<IGTResult> manipResults = fullResults != null ? fullResults : new List<IGTResult>();
@@ -100,6 +108,11 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         });
 
         // print out manip success
+        bool[] trackable = new bool[60];
+        for(int i=0; i<60;i++){
+            trackable[i]=true;
+        }
+        int lowhp = 0;
         int success = 0;
         manipResults.Sort(delegate(IGTResult a, IGTResult b) {
             return (a.IGTSec * 60 + a.IGTFrame).CompareTo(b.IGTSec * 60 + b.IGTFrame);
@@ -113,8 +126,42 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             if((String.IsNullOrEmpty(targetPoke) && item.Mon == null) ||
             (!String.IsNullOrEmpty(targetPoke) && item.Mon != null && item.Mon.Species.Name.ToLower() == targetPoke.ToLower() && item.Yoloball)) {
                 success++;
+                if(item.Mon.MaxHP < checkHPunder){
+                    lowhp++;                    
+                }
+                else if(checkHPunder>0){
+                    for(int i = item.IGTFrame-2;i<=item.IGTFrame+2;i++){
+                        if(i<0){
+                            int k=i+60;
+                            trackable[k]=false;
+                        }
+                        else if(i>59){
+                            int k=i-60;
+                            trackable[k]=false;
+                        }
+                        else{
+                        trackable[i]=false;
+                        }
+                    }
+                }
             }
-
+            else{
+                for(int i = item.IGTFrame-2;i<=item.IGTFrame+2;i++){
+                        if(i<0){
+                            int k=i+60;
+                            trackable[k]=false;
+                        }
+                        else if(i>59){
+                            int k=i-60;
+                            trackable[k]=false;
+                        }
+                        else{
+                        trackable[i]=false;
+                        }
+                    }
+            }
+            
+            
             if(verbose >= Verbosity.Summary) {
                 string summary;
                 if(item.Mon != null) {
@@ -139,7 +186,13 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
             }
             if(!String.IsNullOrEmpty(targetPoke)) Trace.WriteLine($"Success: {success}/{totalNumFrames}");
         }
+        if(checkHPunder>0){
+            Trace.WriteLine(lowhp);
+        }
 
+        for(int i=0; i<60;i++){
+            if(!trackable[i]){Trace.WriteLine(i);}}
+            
         return success;
     }
 

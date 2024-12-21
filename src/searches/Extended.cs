@@ -36,7 +36,7 @@ class Extended
             return;
 
         System.IO.Directory.CreateDirectory("basesaves/red/manip/ext");
-        const int numThreads = 16;
+        const int numThreads = 12;
         RbyIntroSequence intro = new RbyIntroSequence(RbyStrat.NoPal);
         Red[] gbs = MultiThread.MakeThreads<Red>(numThreads);
         Red gb = gbs[0];
@@ -475,7 +475,7 @@ class Extended
         }
     }
 
-    static List<DFState<RbyMap, RbyTile>> Search(int framesToWait, string path, int numThreads = 14, int numFrames = 57, int success = -1, int maxcost = 10)
+    static List<DFState<RbyMap, RbyTile>> Search(int framesToWait, string path, int numThreads = 12, int numFrames = 57, int success = -1, int maxcost = 10)
     {
         BuildStates();
         StartWatch();
@@ -581,16 +581,16 @@ class Extended
         forest.Sprites.Remove(25, 11);
         Action actions = Action.Right | Action.Left | Action.Up | Action.Down | Action.A | Action.StartB;
         RbyTile startTile = gb.Tile;
-        RbyTile[] endTiles = { forest[1, 19] };
+        RbyTile[] endTiles = { forest[1, 18] };
         RbyTile[] blockedTiles = {
-            forest[26, 12],
-            forest[16, 10], forest[18, 10],
-            forest[16, 15], forest[18, 15],
-            forest[11, 15], forest[12, 15],
-            forest[11, 6], forest[12, 6],
+            forest[26, 12]
+            //forest[16, 10], forest[18, 10],
+            //forest[16, 15], forest[18, 15],
+            //forest[11, 15], forest[12, 15],
+            //forest[11, 6], forest[12, 6],
             // forest[6, 6], forest[8, 6],
-            forest[6, 15], forest[8, 15],
-            forest[2, 19], forest[1, 18]
+            //forest[6, 15], forest[8, 15],
+            //forest[2, 19], forest[1, 18]
         };
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, endTiles[0], actions, blockedTiles);
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, gate[5, 1], actions, blockedTiles);

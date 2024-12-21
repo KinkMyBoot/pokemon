@@ -81,6 +81,10 @@ public partial class Rby {
         throw new NotImplementedException();
     }
 
+    public virtual bool RedbarYoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
+        throw new NotImplementedException();
+    }
+
     public virtual bool Selectball(int ballSlot = 0, Joypad hold = Joypad.None) {
         throw new NotImplementedException();
     }

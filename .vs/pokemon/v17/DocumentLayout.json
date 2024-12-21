@@ -1,0 +1,267 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\gameboy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\gameboy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\searches\\parasbackuptest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\searches\\parasbackuptest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\rby\\redblue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\rby\\redblue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\tests\\rbymaniptests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\tests\\rbymaniptests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\rby\\rbyexecution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\rby\\rbyexecution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\rby\\rbygamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\rby\\rbygamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\rby\\rby.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\rby\\rby.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\searches\\depthfirstsearch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\searches\\depthfirstsearch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\searches\\ceadugtrio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\searches\\ceadugtrio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\searches\\extended.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\searches\\extended.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\common\\pokemongame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\common\\pokemongame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\searches\\clefairy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\searches\\clefairy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\rby\\rbyintro.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\rby\\rbyintro.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|c:\\users\\boldu\\source\\repos\\pokemon\\src\\games\\pokemon\\common\\action.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B50CBAD-E636-43AB-A4EC-97B240ABA819}|pokemon.csproj|solutionrelative:src\\games\\pokemon\\common\\action.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\Program.cs",
+              "RelativeDocumentMoniker": "src\\Program.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\Program.cs",
+              "RelativeToolTip": "src\\Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-26T20:30:34.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ParasBackupTest.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\ParasBackupTest.cs",
+              "RelativeDocumentMoniker": "src\\searches\\ParasBackupTest.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\ParasBackupTest.cs",
+              "RelativeToolTip": "src\\searches\\ParasBackupTest.cs",
+              "ViewState": "AQIAACkAAAAAAAAAAAAwwD0AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-16T23:07:41.286Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RbyManipTests.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\tests\\RbyManipTests.cs",
+              "RelativeDocumentMoniker": "src\\tests\\RbyManipTests.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\tests\\RbyManipTests.cs",
+              "RelativeToolTip": "src\\tests\\RbyManipTests.cs",
+              "ViewState": "AQIAAHYAAAAAAAAAAAAUwIwAAABOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-26T20:12:54.706Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CeaDugtrio.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\CeaDugtrio.cs",
+              "RelativeDocumentMoniker": "src\\searches\\CeaDugtrio.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\CeaDugtrio.cs",
+              "RelativeToolTip": "src\\searches\\CeaDugtrio.cs",
+              "ViewState": "AQIAABMAAAAAAAAAAAAgwDMAAAAPAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-27T03:15:01.108Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "PokemonGame.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\common\\PokemonGame.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\common\\PokemonGame.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\common\\PokemonGame.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\common\\PokemonGame.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T21:04:05.942Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GameBoy.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\GameBoy.cs",
+              "RelativeDocumentMoniker": "src\\GameBoy.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\GameBoy.cs",
+              "RelativeToolTip": "src\\GameBoy.cs",
+              "ViewState": "AQIAAIAAAAAAAAAAAAAUwJ4AAABMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:59:54.755Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Clefairy.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\Clefairy.cs",
+              "RelativeDocumentMoniker": "src\\searches\\Clefairy.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\Clefairy.cs",
+              "RelativeToolTip": "src\\searches\\Clefairy.cs",
+              "ViewState": "AQIAAFQAAAAAAAAAAAAowAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:59:14.16Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RbyGameState.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyGameState.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\rby\\RbyGameState.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyGameState.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\rby\\RbyGameState.cs",
+              "ViewState": "AQIAAE0AAAAAAAAAAAAiwGAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:58:36.983Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "RbyExecution.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyExecution.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\rby\\RbyExecution.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyExecution.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\rby\\RbyExecution.cs",
+              "ViewState": "AQIAAP8AAAAAAAAAAADwvw4BAAAmAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:58:09.421Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RbyIntro.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyIntro.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\rby\\RbyIntro.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RbyIntro.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\rby\\RbyIntro.cs",
+              "ViewState": "AQIAAA0BAAAAAAAAAAAUwBkBAAANAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:53:53.658Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RedBlue.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RedBlue.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\rby\\RedBlue.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\RedBlue.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\rby\\RedBlue.cs",
+              "ViewState": "AQIAAA4BAAAAAAAAAAAiwC8BAAANAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-27T00:06:31.297Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "DepthFirstSearch.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\DepthFirstSearch.cs",
+              "RelativeDocumentMoniker": "src\\searches\\DepthFirstSearch.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\DepthFirstSearch.cs",
+              "RelativeToolTip": "src\\searches\\DepthFirstSearch.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAJMAAAARAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-01T23:22:33.473Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Action.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\common\\Action.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\common\\Action.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\common\\Action.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\common\\Action.cs",
+              "ViewState": "AQIAAAsAAAAAAAAAAAAQwAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:53:42.996Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Rby.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\Rby.cs",
+              "RelativeDocumentMoniker": "src\\games\\pokemon\\rby\\Rby.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\games\\pokemon\\rby\\Rby.cs",
+              "RelativeToolTip": "src\\games\\pokemon\\rby\\Rby.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAA2AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:53:08.508Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Extended.cs",
+              "DocumentMoniker": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\Extended.cs",
+              "RelativeDocumentMoniker": "src\\searches\\Extended.cs",
+              "ToolTip": "C:\\Users\\boldu\\Source\\Repos\\pokemon\\src\\searches\\Extended.cs",
+              "RelativeToolTip": "src\\searches\\Extended.cs",
+              "ViewState": "AQIAAEoAAAAAAAAAAAAwwCcAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T20:49:19.913Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

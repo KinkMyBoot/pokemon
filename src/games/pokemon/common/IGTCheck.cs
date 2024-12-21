@@ -63,6 +63,25 @@ public class IGTResults {
     public int TotalFailures {
         get { return IGTs.Where(x => x == null || !x.Success).Count(); }
     }
+// IGTs[Math.Max(0,i-2)].Success && IGTs[Math.Max(0,i-1)].Success && IGTs[i].Success && IGTs[Math.Min(IGTs.Length,i+1)].Success && IGTs[Math.Min(IGTs.Length,i+2)].Success
+    public List<int> Trackables {
+        get {
+            List<int> frames = Enumerable.Range(0, IGTs.Length-1).ToList();
+            for(int i=0;i<IGTs.Length;i++){
+                if (!IGTs[i].Success){
+                    frames.Remove(i-2);
+                    frames.Remove(i-1);
+                    frames.Remove(i);
+                    frames.Remove(i+1);
+                    frames.Remove(i+2);
+                }
+            }
+            for(int i =0;i<frames.Count;i++){
+                frames[i]+=IGTs[0].IGTFrame;
+            }
+            return frames;
+        }
+    }
 
     public int MostCommonHRA {
         get { return IGTs.Where(x => x != null && x.Running).GroupBy(x => x.HRA).OrderByDescending(g => g.Count()).First().Key; }
