@@ -193,7 +193,8 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
     }
 
 
-    public static List<DFState<RbyMap, RbyTile>> SearchForest(string path=null, int numThreads = 12, int numFrames = 54, int success = -1, int maxcost = 10, List<byte> stats = null, int r1damage=0, int minClusterSize=3)
+    public static List<DFState<RbyMap, RbyTile>> SearchForest(string path=null, int numThreads = 12, int numFrames = 54, 
+    int success = -1, int maxcost = 10, List<byte> stats = null, int r1damage=0, int minClusterSize=3, int igtFrameCluster=5)
     {
         BuildStates(stats);
         StartWatch();
@@ -247,7 +248,7 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
         forest[25, 13].RemoveEdge(0, Action.A);
         route2[3, 44].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = gate[4, 7], NextEdgeset = 0, Cost = 0 });
         gate[5, 1].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = forest[17, 47], NextEdgeset = 0, Cost = 0 });
-        
+        bool gotThroughGrass = false;
         //Pathfinding.DebugDrawEdges(gb,forest, 0);
         //Pathfinding.DebugDrawEdges(gb, gate, 0);
         //Pathfinding.DebugDrawEdges(gb, forest, 0);
@@ -260,37 +261,90 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
             TileCallbacks = new (Tile<RbyMap, RbyTile>, Action<Red>)[] { (forest[25, 12], gb => gb.PickupItem()), (forest[1, 19], gb => gb.PickupItem())},
             FoundCallback = state =>
             {
-                Elapsed("checking");
-                var fightResults = FullCheck(path+state.Log,stats:stats ,r1damage:r1damage, minClusterSize:minClusterSize, numThreads:12);
-                //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
-                int count =0;
+                Elapsed("checking: ");
+                gotThroughGrass = true;
+                var fightResults = FullCheck(path+state.Log,stats:stats ,r1damage:r1damage, minClusterSize:minClusterSize);
+                
                 StringBuilder trace = new StringBuilder();
-                trace.AppendLine(startTile.PokeworldLink + "/" + state.Log);
+                
+                trace.AppendLine("https://gunnermaniac.com/pokeworld?local=51#21/59/" + path + state.Log);
+
+                List<int> goodFrames = new List<int>();
+                
                 for(int i = 0;i<60;i++){
                     if(IgnoredFrames.Contains(i)){continue;}
-                    int successcount = 0;
-                    int totalDmg=0;
+                    //int successcount = 0;
+                    //int totalDmg=0;
                     foreach(var res in fightResults.Where(res => res.IGTFrame == i)){
-                        successcount++;
-                        totalDmg+=res.dmgTaken.Sum();
+                        //successcount++;
+                        goodFrames.Add(i);
+                        //totalDmg+=res.dmgTaken.Sum();
                     }     
-                    float avgDamage = (float)totalDmg / ((r1damage+1)*minClusterSize);
-                    if(successcount>0){
-                        count++;                        
-                        trace.AppendLine("Frame: " + i +" Success: " + successcount + "/1 IGT seconds. Average Damage: " + avgDamage);
-                    }          
-                    }
-                if (count >= 1){                    
-                    Trace.WriteLine(trace.ToString());
+                    //float avgDamage = (float)totalDmg / ((r1damage+1)*minClusterSize);
+                    //if(successcount>0){
+                        //count++;
+                        //trace.AppendLine("Frame: " + i +" Success: " + successcount + "/1 IGT seconds. Average Damage: ");
+                    //}          
                 }
-                
-                //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
+                if(goodFrames.Count>0){
+                    int count =1;
+                    List<(int, int)> intPairs = new List<(int, int)>();
+                    for (int i = 1; i < goodFrames.Count; i++){
+                        if (goodFrames[i] == goodFrames[i - 1] + 1)
+                        {
+                            count++; // Increase count if consecutive     
+                            if(count == goodFrames.Count && count>=igtFrameCluster){
+                                intPairs.Add((count,goodFrames[i]+1));
+                            }                   
+                        }
+                        else if (goodFrames[i] != goodFrames[i - 1]) 
+                        {
+                            if(count>=igtFrameCluster){
+                                intPairs.Add((count,goodFrames[i-1]+1));
+                            }
+                            count = 1; // Reset count if non-consecutive
+                        }
+                    }
+                    List<int> targetCluster = new List<int>();
+                    foreach ((int,int) rawcluster in intPairs){
+                        for(int i=rawcluster.Item2-rawcluster.Item1; i<rawcluster.Item2;i++){
+                            targetCluster.Add(i);
+                        }
+                    }
+                    if (targetCluster.Count >= igtFrameCluster) {
+                        var igtSecResults = FullCheck(path+state.Log,stats:stats ,r1damage:r1damage, minClusterSize:minClusterSize, numThreads:numThreads, targetFrames:targetCluster,numFrames:3600 );
+
+                        foreach(int i in targetCluster){
+                            if(IgnoredFrames.Contains(i)){continue;}
+                            int successcount = 0;
+                            int totalDmg=0;
+                            foreach(var res in igtSecResults.Where(res => res.IGTFrame == i)){
+                                successcount++;
+                                totalDmg+=res.dmgTaken.Sum();
+                            }
+                            float avgDamage = (float)totalDmg / (minClusterSize*successcount);
+                            if(successcount>=0){
+                                count++;
+                                trace.AppendLine("Frame: " + i +" Success: " + successcount + "/60 IGT seconds. Average Damage: " + avgDamage);
+                            }
+                        }
+                  
+                        Trace.WriteLine(trace.ToString());
+                        
+
+                        //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
+                    }
+                }
             }
         };
 
         DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states, 0);
+        
+        if(!gotThroughGrass){
+            Trace.WriteLine("Bad prune: "+ path);
+        }
+        
         Elapsed("search");
-
         return results;
     }
 
@@ -305,33 +359,86 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
         //CheckIGT(State, new RbyIntroSequence(pal), path, "PIDGEY", 3600, verbose:Verbosity.Summary);
         //path = "UUUUUUUUAUUUUUUULLULUUUURUUUURRR"; pal = RbyStrat.Pal; // 57/60 
         //string forest = "UUUULLLLLUUUUUUURUUUUURRRRRRRRUUUUUUAUUUUUUUUUUUUUUUUUUUUUUUUUUUULLALLALLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDDDALLLLLLUUU";
-        string forest = "UUUULLLLLUUUUUUURUUUUURRRRRRRRUUUUUUAUUUUUUUUUUUUUUUUUUUUUUUUUUUULLALLALLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDDDADDLLLLLLUUU";
+        string forest = "UUUULLLLLAUUUUUUUARUUUUURRRRUURRRRUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULLLLLLLLDDDDDDDLLLLUUUUUUUUUUUUULLLLLLDDDDDDDDDDDDDDDLDDDDLLLLULUU";
         //BuildStates();
         //RedCb[] gbs = MultiThread.MakeThreads<RedCb>(1);
         //gbs[0].Record("test");
-        var stat = new List<byte>{21,11,12,10,11};
-        var fightResults = FullCheck(forest,stats:stat ,r1damage:0, minClusterSize:3, numThreads:1);
+        var stat = new List<byte>{22,11,12,10,11};
+
+        BuildStates(stat);
+
+        int igtFrameCluster = 5;
+        int r1damage = 0;
+        var fightResults = FullCheck(forest,stats:stat ,r1damage:r1damage, minClusterSize:3, numThreads:12);
         //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
-        int count =0;
+        
         StringBuilder trace = new StringBuilder();
-        trace.AppendLine("https://gunnermaniac.com/pokeworld?local=13#8/48/" + forest);
+        trace.AppendLine("https://gunnermaniac.com/pokeworld?local=51#21/59/" + forest);
+        List<int> goodFrames = new List<int>();
+                
         for(int i = 0;i<60;i++){
             if(IgnoredFrames.Contains(i)){continue;}
-            int successcount = 0;
-            int totalDmg=0;
+            //int successcount = 0;
+            //int totalDmg=0;
             foreach(var res in fightResults.Where(res => res.IGTFrame == i)){
-                successcount++;
-                totalDmg+=res.dmgTaken.Sum();
+                //successcount++;
+                goodFrames.Add(i);
+                //totalDmg+=res.dmgTaken.Sum();
             }     
-            float avgDamage = (float)totalDmg / ((0+1)*3);
-            if(successcount>0){
-                count++;                        
-                trace.AppendLine("Frame: " + i +" Success: " + successcount + "/1 IGT seconds. Average Damage: " + avgDamage);
-            }          
+            //float avgDamage = (float)totalDmg / ((r1damage+1)*minClusterSize);
+            //if(successcount>0){
+                //count++;
+                //trace.AppendLine("Frame: " + i +" Success: " + successcount + "/1 IGT seconds. Average Damage: ");
+            //}          
         }
-        if (count >= 1){
-            Trace.WriteLine(trace.ToString());
-        } 
+        if(goodFrames.Count>0){
+            int count =1;
+            List<(int, int)> intPairs = new List<(int, int)>();
+            for (int i = 1; i < goodFrames.Count; i++){
+                if (goodFrames[i] == goodFrames[i - 1] + 1)
+                {
+                    count++; // Increase count if consecutive     
+                    if(count == goodFrames.Count && count>=igtFrameCluster){
+                        intPairs.Add((count,goodFrames[i]+1));
+                    }                   
+                }
+                else if (goodFrames[i] != goodFrames[i - 1]) 
+                {
+                    if(count>=igtFrameCluster){
+                        intPairs.Add((count,goodFrames[i-1]+1));
+                    }
+                    count = 1; // Reset count if non-consecutive
+                }
+            }
+            List<int> targetCluster = new List<int>();
+            foreach ((int,int) rawcluster in intPairs){
+                for(int i=rawcluster.Item2-rawcluster.Item1; i<rawcluster.Item2;i++){
+                    targetCluster.Add(i);
+                }
+            }
+            if (targetCluster.Count >= igtFrameCluster) {
+                var igtSecResults = FullCheck(forest,stats:stat ,r1damage:r1damage, minClusterSize:3, numThreads:12, targetFrames:targetCluster,numFrames:3600);
+                foreach(int i in targetCluster){
+                    if(IgnoredFrames.Contains(i)){continue;}
+                    int successcount = 0;
+                    int totalDmg=0;
+                    foreach(var res in igtSecResults.Where(res => res.IGTFrame == i)){
+                        successcount++;
+                        totalDmg+=res.dmgTaken.Sum();
+                    }
+                    float avgDamage = (float)totalDmg / (3*successcount);
+                    if(successcount>=0){
+                        count++;
+                        trace.AppendLine("Frame: " + i +" Success: " + successcount + "/60 IGT seconds. Average Damage: " + avgDamage);
+                    }
+                }
+          
+                Trace.WriteLine(trace.ToString());
+            
+                //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
+            }
+        }
+            
     }
 
     public static void Search()
@@ -345,7 +452,7 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
 
     static List<IGTResult> FullCheck(string path, int numFrames = 60, 
                                  bool verbose = true, int numThreads = 12, int minClusterSize = 3,
-                                 List<byte> stats=null, int r1damage = 9)
+                                 List<byte> stats=null, int r1damage = 9, List<int> targetFrames = null)
         {
             RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
             if(numThreads == 1){
@@ -366,6 +473,7 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
                 
 
                 if(IgnoredFrames.Contains(f % 60)){return;}
+                if(targetFrames!=null && !targetFrames.Contains(f % 60)){return;}
                 //if(!(f==7 || f==9 || f==12 || f==14 || f==15 || f==16 || f==17 || f==18 || f==20 || f==21 || f==22 || f==35 || f==47 || f==48 || f==49)){return;}
 
                 IGTResult res = new IGTResult();
@@ -374,7 +482,7 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
                 res.IGTFrame = (byte) (f % 60);
                 res.dmgTaken = new List<int>();
                 string state = "basesaves/red/manip/pext/preFpidgey_" + res.IGTSec + "_" + res.IGTFrame + ".gqs";
-                for(byte dmgTaken=0;dmgTaken<=r1damage;dmgTaken++){
+                for(byte dmgTaken=(byte)r1damage;dmgTaken<=r1damage;dmgTaken++){
                     
 
                     if(System.IO.File.Exists(state)){gb.LoadState(state);}
@@ -650,7 +758,7 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
             EndTiles = new RbyTile[]{ gb.Maps[13][8, 48]},
             EncounterCallback = gb => gb.EnemyMon.Species.Name == "PIDGEY" && (gb.Tile == gb.Maps[13][8, 48] || gb.Tile == gb.Maps[13][7, 48] || gb.Tile == gb.Maps[13][6, 48] || gb.Tile == gb.Maps[13][8, 49] || gb.Tile == gb.Maps[13][7, 49] || gb.Tile == gb.Maps[13][8, 50]) 
             && gb.Yoloball() && gb.EnemyMon.DVs.HP <= 9 && gb.EnemyMon.Level == 3,
-            //LogStart = startTile.PokeworldLink + "/",
+            LogStart = startTile.PokeworldLink + "/",
             FoundCallback = state =>
             {
                 success = CheckIGT(State, intro, state.Log, "PIDGEY", 60, false, false, Verbosity.Nothing);
@@ -659,8 +767,8 @@ public static List<DFState<RbyMap, RbyTile>> PruneForest(string path=null, int n
                 }
             }
         };
-        Trace.WriteLine(startTile.PokeworldLink + "/");
-        /*DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states);
-        Elapsed("search");*/
+        //Trace.WriteLine(startTile.PokeworldLink + "/");
+        DepthFirstSearch.StartSearch(gbs, parameters, startTile, 0, states);
+        Elapsed("search");
     }
 }

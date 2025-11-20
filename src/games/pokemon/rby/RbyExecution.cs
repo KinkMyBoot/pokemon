@@ -93,7 +93,36 @@ public partial class Rby {
         Inject(Joypad.A);
         Hold(Joypad.A, SYM["PlaySound"]);
     }
-
+    public void DoFirstCan()
+    {
+        if (CheckEventFlag(352))
+            return;
+        Press(Joypad.A);
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+    }
+    public void DoSecondCan()
+    {
+        if (CheckEventFlag(352))
+            return;
+        Execute("U A");
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+        Hold(Joypad.A, "WaitForTextScrollButtonPress");
+        Press(Joypad.B);
+    }
+    public bool CheckEventFlag(int flag) {
+        int offs = flag / 8;
+        int bit = flag % 8;
+        var ret = (this.CpuRead(this.SYM["wEventFlags"] + offs) & (1 << bit)) > 0;
+        return (this.CpuRead(this.SYM["wEventFlags"] + offs) & (1 << bit)) > 0;
+    }
     public override int ClearText(Joypad holdInput, int numTextBoxes, params int[] additionalBreakpoints) {
         int[] breakpoints = new int[additionalBreakpoints.Length + 1];
         breakpoints[0] = SYM["Joypad"];

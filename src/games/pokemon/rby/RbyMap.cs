@@ -75,7 +75,20 @@ public class RbyTile : Tile<RbyMap, RbyTile> {
 
         return (null, Action.None);
     }
-
+    public void JoinEdgeset(int edgeSet, Action action, int nextEdgeSet, RbyTile nextTile, int cost = 0)
+    {
+        RemoveEdge(edgeSet, action);
+        AddEdge(
+            edgeSet,
+            new Edge<RbyMap, RbyTile>
+            {
+                Action = action,
+                NextTile = nextTile,
+                Cost = cost,
+                NextEdgeset = nextEdgeSet,
+            }
+        );
+    }
     private Action ExtraWarpCheck() {
         int map = Map.Id;
         byte tileset = Map.Tileset.Id;

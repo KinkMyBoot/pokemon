@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using static SearchCommon;
+using static RbyIGTChecker<Red>;
 
 class Program {
 
@@ -16,10 +18,13 @@ class Program {
         Trace.AutoFlush = true;
 
         // Tests.RunAllTests();
-        var stat = new List<byte>{21,11,12,10,11};
-        //FrontupPidgey.SearchForest(stats:stat,r1damage:3,minClusterSize:1,path:"UAULULLULLUURUUUUU",maxcost:2);
         
-        FrontupPidgey.PruneForest(stats:stat,r1damage:1,minClusterSize:1,maxcost:4);
-        //FrontupPidgey.Check();
+        List<int> targetsecs = Enumerable.Range(54, 1).ToList();
+        List<int> successList = new List<int>();
+        List<int> targetIGT = Enumerable.Range(43, 4).ToList();
+        
+        //Surge.Search(1,1,42,numThreads:12,minClusterSize:3,igtFrameCluster:4, offset60fps:0, wantQA:false, wantTackle:false);
+        Surge.CheckPathsInFile(1,"surgepaths.txt",12);
+        Console.WriteLine(DateTime.Now);
     }
 }

@@ -12,9 +12,11 @@ public static class RbyIGTChecker<Gb> where Gb : Rby {
         public RbyMap Map;
         public RbyTile Tile;
         public bool Yoloball;
-
+        public int qaDeaths;
         public bool Success;
-
+        public int threeTurn;
+        public int Crits;
+        public int Turns;
         public List<int> dmgTaken;
 
         public string ToString(bool dvs = false, bool yb = true) {
