@@ -227,8 +227,9 @@ class Surge
         var ret = (gb.CpuRead(gb.SYM["wEventFlags"] + offs) & (1 << bit)) > 0;
         return (gb.CpuRead(gb.SYM["wEventFlags"] + offs) & (1 << bit)) > 0;
     }
-    public static void CheckPathsInFile(int hp,string filename, int numThreads=12)
+    public static void CheckPathsInFile(int hp, string filename, int numThreads=12)
     {
+        RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         using (var reader = new StreamReader(filename))
         {
             string line;
@@ -238,7 +239,7 @@ class Surge
                     continue;
                 }
                 Console.WriteLine("Checking path: " + line);
-                CheckIGT(line, hp, hp, numThreads, minClusterSize:3, igtFrameCluster:4, offset60fps:0,wantQA:(12 <= hp && hp <= 20)||(32 <= hp), wantTackle:hp>20);
+                CheckIGT(line, hp, hp, gbs, numThreads, minClusterSize:3, igtFrameCluster:4, offset60fps:0,wantQA:(12 <= hp && hp <= 20)||(32 <= hp), wantTackle:hp>20);
                 //GC.Collect();
             }
         }
@@ -275,18 +276,20 @@ class Surge
         gb.Execute(SpacePath("RD"));
         Console.WriteLine("wFirstLockTrashCanIndex: " + gb.CpuRead("wFirstLockTrashCanIndex"));
     }
-    public static void CheckIGT(string path, int minhp, int maxhp, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantTackle = false)
+    public static void CheckIGT(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantTackle = false)
     {
         StringBuilder trace = new StringBuilder();
         List<IGTResult> results = null;
         trace.AppendLine("https://gunnermaniac.com/pokeworld?local=92#7/12/" + path);
+        if(gbs==null)
+            gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if (!wantTackle)
         {
-            results = CheckFight(path, minhp, maxhp, numThreads, numFrames, verbose, targetFrames, targetSecs, minClusterSize, offset60fps: offset60fps, wantQA: wantQA);
+            results = CheckFight(path, minhp, maxhp, gbs, numThreads, numFrames, verbose, targetFrames, targetSecs, minClusterSize, offset60fps: offset60fps, wantQA: wantQA);
         }
         else
         {
-            results = CheckTackleQAFight(path, minhp, maxhp, numThreads, numFrames, verbose, targetFrames, targetSecs, minClusterSize, offset60fps: offset60fps, wantQA: wantQA);
+            results = CheckTackleQAFight(path, minhp, maxhp, gbs, numThreads, numFrames, verbose, targetFrames, targetSecs, minClusterSize, offset60fps: offset60fps, wantQA: wantQA);
         }
         List<int> goodFrames = new List<int>();
         for (int i = 0; i < 60; i++)
@@ -332,11 +335,11 @@ class Surge
                 List<RbyIGTChecker<Red>.IGTResult> igtSecResults = null;
                 if (!wantTackle)
                 {
-                    igtSecResults = CheckFight(path, minhp, maxhp, numThreads, numFrames: 3600, verbose, targetFrames: targetCluster, targetSecs, minClusterSize, offset60fps, wantQA: wantQA);
+                    igtSecResults = CheckFight(path, minhp, maxhp, gbs, numThreads, numFrames: 3600, verbose, targetFrames: targetCluster, targetSecs, minClusterSize, offset60fps, wantQA: wantQA);
                 }
                 else
                 {
-                    igtSecResults = CheckTackleQAFight(path, minhp, maxhp, numThreads, numFrames: 3600, verbose, targetFrames: targetCluster, targetSecs, minClusterSize, offset60fps, wantQA: wantQA);
+                    igtSecResults = CheckTackleQAFight(path, minhp, maxhp, gbs, numThreads, numFrames: 3600, verbose, targetFrames: targetCluster, targetSecs, minClusterSize, offset60fps, wantQA: wantQA);
                 }
                 foreach (int i in targetCluster)
                     {
@@ -371,10 +374,11 @@ class Surge
         }
     }
     
-    public static List<IGTResult> CheckFight(string path, int minhp, int maxhp, int numThreads = 12, int numFrames = 60, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int offset60fps = 0, bool wantQA = false){
+    public static List<IGTResult> CheckFight(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 60, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int offset60fps = 0, bool wantQA = false){
         
         List<IGTResult> results = new List<IGTResult>();
-        RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
+        if(gbs == null)
+            gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if(numThreads == 1){
             gbs[0].Record("test");
         }
@@ -517,8 +521,7 @@ class Surge
                 results.Add(res); 
                           
         });
-
-
+        
         return results;
     
     }
@@ -671,10 +674,11 @@ class Surge
         return results;
     
     }
-    public static List<IGTResult> CheckTackleQAFight(string path, int minhp, int maxhp, int numThreads = 12, int numFrames = 60, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int offset60fps = 0, bool wantQA = false){
+    public static List<IGTResult> CheckTackleQAFight(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 60, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int offset60fps = 0, bool wantQA = false){
         // THIS DOUBLES AS A SONICBOOM MANIP. too lazy to make it smart
         List<IGTResult> results = new List<IGTResult>();
-        RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
+        if(gbs == null)
+            gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if(numThreads == 1){
             gbs[0].Record("test");
         }

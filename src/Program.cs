@@ -19,12 +19,15 @@ class Program {
 
         // Tests.RunAllTests();
         
-        List<int> targetsecs = Enumerable.Range(54, 1).ToList();
-        List<int> successList = new List<int>();
-        List<int> targetIGT = Enumerable.Range(43, 4).ToList();
+        //List<int> targetsecs = Enumerable.Range(54, 1).ToList();
+        //List<int> successList = new List<int>();
+        //List<int> targetIGT = Enumerable.Range(43, 4).ToList();
         
         //Surge.Search(1,1,42,numThreads:12,minClusterSize:3,igtFrameCluster:4, offset60fps:0, wantQA:false, wantTackle:false);
-        Surge.CheckPathsInFile(1,"surgepaths.txt",12);
+
+        int hp = 1;
+        int numThreads = 12;
+        Surge.CheckPathsInFile(hp,"surgepaths.txt",numThreads);
         Console.WriteLine(DateTime.Now);
     }
 }
