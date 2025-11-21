@@ -99,7 +99,7 @@ class Surge
             gb.SaveState("basesaves/red/manip/surge/surge" + sec + "_" + frame +".gqs");
         });
     }
-    public static void Search(int minhp, int maxhp , int maxcost, int numThreads = 12, int numFrames = 56, int success = 56, string path = null, int minClusterSize=3, int igtFrameCluster = 5, int offset60fps=0, bool wantQA = false, bool wantTackle = false, string betweenCans= "RRDUA")
+    public static void Search(int maxcost, int numThreads = 12, int numFrames = 56, int success = 56, string path = null, int minClusterSize=3, int igtFrameCluster = 5, int offset60fps=0, bool wantQA = false, bool wantSonicboom = false, string betweenCans= "RRDUA")
     {
         BuildStates();
         StartWatch();
@@ -239,7 +239,7 @@ class Surge
                     continue;
                 }
                 Console.WriteLine("Checking path: " + line);
-                CheckIGT(line, hp, hp, gbs, numThreads, minClusterSize:3, igtFrameCluster:4, offset60fps:0,wantQA:(12 <= hp && hp <= 20)||(32 <= hp), wantTackle:hp>20);
+                CheckIGT(line, hp, hp, gbs, numThreads, minClusterSize:3, igtFrameCluster:4, offset60fps:0,wantQA:(12 <= hp && hp <= 20)||(32 <= hp), wantSonicboom:hp>20);
                 //GC.Collect();
             }
         }
@@ -276,14 +276,14 @@ class Surge
         gb.Execute(SpacePath("RD"));
         Console.WriteLine("wFirstLockTrashCanIndex: " + gb.CpuRead("wFirstLockTrashCanIndex"));
     }
-    public static void CheckIGT(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantTackle = false)
+    public static void CheckIGT(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantSonicboom = false)
     {
         StringBuilder trace = new StringBuilder();
         List<IGTResult> results = null;
         trace.AppendLine("https://gunnermaniac.com/pokeworld?local=92#7/12/" + path);
         if(gbs==null)
             gbs = MultiThread.MakeThreads<RedCb>(numThreads);
-        if (!wantTackle)
+        if (!wantSonicboom)
         {
             results = CheckFight(path, minhp, maxhp, gbs, numThreads, numFrames, verbose, targetFrames, targetSecs, minClusterSize, offset60fps: offset60fps, wantQA: wantQA);
         }
@@ -333,7 +333,7 @@ class Surge
             if (targetCluster.Count >= igtFrameCluster)
             {
                 List<RbyIGTChecker<Red>.IGTResult> igtSecResults = null;
-                if (!wantTackle)
+                if (!wantSonicboom)
                 {
                     igtSecResults = CheckFight(path, minhp, maxhp, gbs, numThreads, numFrames: 3600, verbose, targetFrames: targetCluster, targetSecs, minClusterSize, offset60fps, wantQA: wantQA);
                 }
@@ -740,26 +740,26 @@ class Surge
                     var retV = gb.Hold(Joypad.A,gb.SYM["HandleEnemyMonFainted"],gb.SYM["MoveHitTest.moveMissed"],gb.SYM["CriticalHitTest.SkipHighCritical"]+0xB,gb.SYM["CheckIfEnemyNeedsToChargeUp"],gb.SYM["WaitForTextScrollButtonPress"],gb.SYM["StatModifierDownEffect.recalculateStat"]);
                     if (retV == (int)gb.SYM["StatModifierDownEffect.recalculateStat"])
                     {
-                        Console.WriteLine("speedfall");
+                        //Console.WriteLine("speedfall");
                         gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         gb.Press(Joypad.B);
                     }
                     else if (retV != (int)gb.SYM["CheckIfEnemyNeedsToChargeUp"])
                     {
-                        Console.WriteLine(((int)retV).ToString());
+                        //Console.WriteLine(((int)retV).ToString());
                         gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         return;
                     }
                     if (gb.CpuRead("wEnemySelectedMove") != 49) // sonicboom manip. (0x31 = sonicboom | 0x67 = screech | 0x21 = tackle)
                     {
-                        Console.WriteLine("screech or tackle");
+                        //Console.WriteLine("screech or tackle");
                         //gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         return;
                     }
                     var tackleHit = gb.Hold(Joypad.B,gb.SYM["HandleMenuInput"],gb.SYM["CriticalHitTest.SkipHighCritical"]+0xB,gb.SYM["MoveHitTest.moveMissed"],gb.SYM["WaitForTextScrollButtonPress"]);
                     if (tackleHit != (int)gb.SYM["HandleMenuInput"])
                     {
-                        Console.WriteLine("sonicboom error");
+                        //Console.WriteLine("sonicboom error");
                         //gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         return;
                     }
@@ -772,7 +772,7 @@ class Surge
                         return;
                     }
                     else if (gb.CpuRead("wPlayerNumAttacksLeft")==2){
-                        Console.WriteLine("3turn thrash");
+                        //Console.WriteLine("3turn thrash");
                         return;
                     }
                     gb.Hold(Joypad.A,gb.SYM["WaitForTextScrollButtonPress"]);

@@ -23,11 +23,20 @@ class Program {
         //List<int> successList = new List<int>();
         //List<int> targetIGT = Enumerable.Range(43, 4).ToList();
         
-        //Surge.Search(1,1,42,numThreads:12,minClusterSize:3,igtFrameCluster:4, offset60fps:0, wantQA:false, wantTackle:false);
+        //Surge.Search(maxcost:42,numThreads:12,minClusterSize:3,igtFrameCluster:4);
 
         int hp = 1;
         int numThreads = 12;
         Surge.CheckPathsInFile(hp,"surgepaths.txt",numThreads);
+
+        //// Code to check if hp clusters
+        //int minhp = 2;
+        //int maxhp = 5;
+        //string path = "";
+        //bool wantQA = false;
+        //bool wantSonicboom = false;
+        //Surge.CheckIGT(path,minhp,maxhp,numThreads:numThreads,wantQA:wantQA,wantSonicboom:wantSonicboom);
+        
         Console.WriteLine(DateTime.Now);
     }
 }
