@@ -229,6 +229,7 @@ class Surge
     }
     public static void CheckPathsInFile(int hp, string filename, int numThreads=12)
     {
+        BuildStates();
         RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         using (var reader = new StreamReader(filename))
         {
