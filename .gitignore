@@ -22,5 +22,6 @@ SDL2.dll
 *.txt
 *.bin
 *.gqs
+!surge.gqs
 movies/*
 rng-cache/*
