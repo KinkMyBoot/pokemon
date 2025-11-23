@@ -147,13 +147,19 @@ class Surge
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 1, secondCanTile, actions, blockedTiles.ToArray());
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, firstCanTile, actions, blockedTiles.ToArray());
         Pathfinding.GenerateEdges<RbyMap, RbyTile>(gb, 0, vermilion[12,20], actions,blockedTiles.ToArray());
-        vermilion[12,20].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = gym[4, 17], NextEdgeset = 0, Cost = 2 });
+        vermilion[12,20].AddEdge(0, new Edge<RbyMap, RbyTile>() { Action = Action.Up, NextTile = gym[4, 17], NextEdgeset = 0, Cost = 0 });
 
 
-        gym[5, 3].RemoveEdge(0, Action.A);
         firstCanTile.RemoveEdge(0, Action.A);
-        gym[7, 13].RemoveEdge(0, Action.A);
-        secondCanTile.RemoveEdge(0, Action.A);
+        gym[5, 13].RemoveEdge(0, Action.A); //tile before the can
+        
+        //firstCanTile.RemoveEdge(1, Action.A); //
+        secondCanTile.RemoveEdge(1, Action.A);
+        //gym[7, 12].RemoveEdge(1, Action.A);
+
+        //gym[7, 12].RemoveEdge(2, Action.A);
+        gym[5, 3].RemoveEdge(2, Action.A);
+
         firstCanTile.JoinEdgeset(0, Action.Right, 1, gym[6, 12]);
         secondCanTile.JoinEdgeset(1, Action.Left, 2, gym[6, 12]);
         Pathfinding.DebugDrawEdges<RbyMap, RbyTile>(gb, gym, 2);
@@ -173,7 +179,7 @@ class Surge
                                                                       (secondCanTile, gb => DoSecondCan(gb))},
             FoundCallback = state =>
             {
-                //if(state.WastedFrames == maxcost)
+                //if(state.WastedFrames >= 44)
                 //{
                 //    Trace.WriteLine(path+state.Log);
                 //}
@@ -219,6 +225,7 @@ class Surge
         gb.Press(Joypad.B);
         gb.Hold(Joypad.A, "WaitForTextScrollButtonPress");
         gb.Press(Joypad.B);
+        gb.Maps[92][7,12].RemoveEdge(1, Action.A); // remove can edge
         return true;
     }
     private static bool CheckEventFlag(Red gb, int flag) {
@@ -281,7 +288,7 @@ class Surge
     {
         StringBuilder trace = new StringBuilder();
         List<IGTResult> results = null;
-        trace.AppendLine("https://gunnermaniac.com/pokeworld?local=92#7/12/" + path);
+        trace.AppendLine("https://gunnermaniac.com/pokeworld?local=92#7/17/" + path);
         if(gbs==null)
             gbs = MultiThread.MakeThreads<RedCb>(numThreads);
         if (!wantSonicboom)
@@ -414,7 +421,8 @@ class Surge
                     gb.SaveState("basesaves/red/manip/surge" + res.IGTSec + "_" + res.IGTFrame + "_" + currentHP + ".gqs");
                     //gb.Record("test");
                 }
-                int address = gb.Execute(SpacePath(path), (firstCanTile, gb.DoFirstCan),(secondCanTile, gb.DoSecondCan));
+                var tryPath = gb.TryExecute(SpacePath(path), (firstCanTile, ()=>gb.DoFirstCan()),(secondCanTile, ()=>gb.DoSecondCan()));  
+                if(!tryPath){return;}   
                 gb.Press(Joypad.A);
                 for(int i =0; i<9;i++){
                     gb.Hold(Joypad.A,"WaitForTextScrollButtonPress");
@@ -693,6 +701,7 @@ class Surge
 
             if(targetFrames!=null && !targetFrames.Contains(f % 60)){return;}
             if(targetSecs!=null && !targetSecs.Contains(f / 60)){return;}
+            //Console.WriteLine($"Checking IGT Sec {f / 60} Frame {f % 60}");
             IGTResult res = new IGTResult();
             res.Crits=0;
             res.qaDeaths=0;
@@ -714,7 +723,8 @@ class Surge
                     gb.SaveState("basesaves/red/manip/surge" + res.IGTSec + "_" + res.IGTFrame + "_" + currentHP + ".gqs");
                     //gb.Record("test");
                 }
-                int address = gb.Execute(SpacePath(path), (firstCanTile, gb.DoFirstCan),(secondCanTile, gb.DoSecondCan));         
+                var tryPath = gb.TryExecute(SpacePath(path), (firstCanTile, ()=>gb.DoFirstCan()),(secondCanTile, ()=>gb.DoSecondCan()));  
+                if(!tryPath){return;}       
                 gb.Press(Joypad.A);
                 for(int i =0; i<9;i++){
                     gb.Hold(Joypad.A,"WaitForTextScrollButtonPress");
@@ -828,7 +838,7 @@ class Surge
                         gb.Press(Joypad.B);
 
                         var retR = gb.Hold(Joypad.A, gb.SYM["HandleEnemyMonFainted"], gb.SYM["MoveHitTest.moveMissed"], gb.SYM["CriticalHitTest.SkipHighCritical"] + 0xB, gb.SYM["CheckIfEnemyNeedsToChargeUp"], gb.SYM["WaitForTextScrollButtonPress"]);
-                        //Console.WriteLine("retR: " + retR);
+                        //Console.WriteLine(f + " retR: " + retR);
                         
                         gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         

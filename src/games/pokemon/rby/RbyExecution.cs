@@ -23,6 +23,9 @@ public partial class Rby {
     public int Execute(string path, params (RbyTile, System.Action)[] tileCallbacks) {
         return Execute(path.Split(" ").Select(a => a.ToAction()).ToArray(), tileCallbacks);
     }
+    public bool TryExecute(string path, params (RbyTile, Func<bool>)[] funcCallbacks) {
+        return TryExecute(path.Split(" ").Select(a => a.ToAction()).ToArray(), funcCallbacks);
+    }
 
     public virtual int Execute(Action[] actions, params (RbyTile Tile, System.Action Function)[] tileCallbacks) {
         int ret = 0;
@@ -76,6 +79,60 @@ public partial class Rby {
 
         return ret;
     }
+    public virtual bool TryExecute(Action[] actions, params (RbyTile Tile, Func<bool> Function)[] funcCallbacks) {
+        int ret = 0;
+
+        foreach(Action action in actions) {
+            switch(action) {
+                case Action.Left:
+                case Action.Right:
+                case Action.Up:
+                case Action.Down:
+                    Joypad joypad = (Joypad) action;
+                    do {
+                        RunUntil("JoypadOverworld");
+                        Inject(joypad);
+                        ret = Hold(joypad, SYM["HandleLedges.foundMatch"], SYM["CollisionCheckOnLand.collision"], SYM["CollisionCheckOnWater.collision"], SYM["TryDoWildEncounter.CanEncounter"] + 6, SYM["OverworldLoopLessDelay.newBattle"] + 3);
+                        if(ret == SYM["TryDoWildEncounter.CanEncounter"] + 6) {
+                            RunUntil("CalcStats");
+                            return false;
+                        } else if(ret == SYM["CollisionCheckOnLand.collision"] || ret == SYM["CollisionCheckOnWater.collision"]) {
+                            return false;
+                        }
+
+                        ret = RunUntil("JoypadOverworld");
+                    } while(((CpuRead("wd736") & 0x40) != 0) || ((CpuRead("wd736") & 0x2) != 0 && CpuRead("wJoyIgnore") > 0xfc) || ((CpuRead("wd730") & 0x80) > 0));
+
+                    RbyTile tile = Tile;
+                    foreach(var callback in funcCallbacks) {
+                        if(callback.Tile == tile) {
+                            if(!callback.Function())
+                                return false;
+                        }
+                    }
+
+                    break;
+                case Action.A:
+                    Inject(Joypad.A);
+                    RunFor(1);
+                    ret = Hold(Joypad.A, "JoypadOverworld", "PrintLetterDelay");
+                    break;
+                case Action.StartB:
+                    Press(Joypad.Start, Joypad.B);
+                    ret = RunUntil("JoypadOverworld");
+                    break;
+                case Action.PokedexFlash:
+                    Press(Joypad.Start, Joypad.A, Joypad.B, Joypad.Start);
+                    ret = RunUntil("JoypadOverworld");
+                    break;
+                default:
+                    Debug.Assert(false, "Unknown Action: {0}", action);
+                    break;
+            }
+        }
+
+        return true;
+    }
 
     public virtual bool Yoloball(int ballSlot = 0, Joypad hold = Joypad.None) {
         throw new NotImplementedException();
@@ -93,10 +150,10 @@ public partial class Rby {
         Inject(Joypad.A);
         Hold(Joypad.A, SYM["PlaySound"]);
     }
-    public void DoFirstCan()
+    public bool DoFirstCan()
     {
         if (CheckEventFlag(352))
-            return;
+            return true;
         Press(Joypad.A);
         Hold(Joypad.A, "WaitForTextScrollButtonPress");
         Press(Joypad.B);
@@ -106,16 +163,18 @@ public partial class Rby {
         Press(Joypad.B);
         Hold(Joypad.A, "WaitForTextScrollButtonPress");
         Press(Joypad.B);
+        return CpuRead("wSecondLockTrashCanIndex") == 11;
     }
-    public void DoSecondCan()
+    public bool DoSecondCan()
     {
         if (CheckEventFlag(352))
-            return;
+            return true;
         Execute("U A");
         Hold(Joypad.A, "WaitForTextScrollButtonPress");
         Press(Joypad.B);
         Hold(Joypad.A, "WaitForTextScrollButtonPress");
         Press(Joypad.B);
+        return true;
     }
     public bool CheckEventFlag(int flag) {
         int offs = flag / 8;
