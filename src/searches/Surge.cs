@@ -370,7 +370,7 @@ class Surge
                         if (successcount >= 0)
                         {
                             string badSecs = string.Join(", ", seconds);
-                            trace.AppendLine("Frame: " + i + " Success: " + successcount + $"/60 IGT seconds ({badSecs}). Raichu crits: " + crits + $"/{successcount * 3 * (maxhp - minhp + 1)} QA deaths: " + qaDeaths + " Avg Dmg taken: " + (float)dmgTaken / (float)(successcount * minClusterSize * (maxhp - minhp + 1)) + " 3turnthrash: " + threeturns);
+                            trace.AppendLine("Frame: " + i + " Success: " + successcount + $"/60 IGT seconds ({badSecs}). Raichu crits: " + crits + $"/{successcount * 3 * (maxhp - minhp + 1)} QA crits: " + qaDeaths + " Avg Dmg taken: " + (float)dmgTaken / (float)(successcount * minClusterSize * (maxhp - minhp + 1)));
 
                         }
                     }
