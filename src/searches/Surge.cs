@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using System.Text;
+using System.Text.Json;
 using static SearchCommon;
 using static RbyIGTChecker<Red>;
 using System.Runtime.InteropServices;
@@ -252,6 +253,58 @@ class Surge
             }
         }
     }
+    public static void GenerateJsonFromFile(string filename, int numThreads=12){
+        BuildStates();
+        RedCb[] gbs = MultiThread.MakeThreads<RedCb>(numThreads);
+        var jsonObj = new SurgeJson();
+        using (var reader = new StreamReader(filename))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line)) {
+                    continue;
+                }
+                List<string> lineElements = line.Split(' ').ToList();
+                int hp = int.TryParse(lineElements[0], out int hpValue) ? hpValue : 0;
+                string path = lineElements[1] ?? "";
+                string igts = lineElements[2] ?? "";
+                if(hp <= 0 || string.IsNullOrEmpty(path) || string.IsNullOrEmpty(igts)){
+                    continue;
+                }
+                List<int> igtList = new List<int>();
+                for(int i = int.TryParse(igts.Split('-')[0], out int start) ? start : 0; i <= (int.TryParse(igts.Split('-')[1], out int end) ? end : 0); i++){
+                    igtList.Add(i);
+                }
+                if(!igtList.Any() || igtList==null){
+                    continue;
+                }
+                List<IGTResult> igtResults = CheckIGT(path, hp, hp, gbs, numThreads, minClusterSize:3, igtFrameCluster:4, offset60fps:0,wantQA:(12 <= hp && hp <= 20)||(32 <= hp), wantSonicboom:hp>20, targetFrames:igtList);
+                List<int> seconds = Enumerable.Range(0, 60).ToList();
+                int successcount = 0;
+                var logs = new Dictionary<string, string>();
+                foreach (var res2 in igtResults.Where(res2 => igtList.Contains(res2.IGTFrame)))
+                {
+                    successcount++;
+                    seconds.Remove(res2.IGTSec);
+                    logs[res2.IGTFrame.ToString()] = res2.Info;
+                }
+                jsonObj[hp.ToString()] = new SurgePath{
+                    path = path,
+                    igtSecs = seconds,
+                    frames = igtList,
+                    logs = logs
+                };
+            }
+        }
+        
+        // Serialize the generated SurgeJson to a .json file (same name as the input, .json extension)
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        string outpath = System.IO.Path.ChangeExtension(filename, ".json");
+        string json = JsonSerializer.Serialize(jsonObj, options);
+        File.WriteAllText(outpath, json);
+        Console.WriteLine("Wrote JSON to " + outpath);
+    }
     public static void CheckExe()
     {
         RedCb gb = new RedCb();
@@ -284,7 +337,7 @@ class Surge
         gb.Execute(SpacePath("RD"));
         Console.WriteLine("wFirstLockTrashCanIndex: " + gb.CpuRead("wFirstLockTrashCanIndex"));
     }
-    public static void CheckIGT(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantSonicboom = false)
+    public static List<IGTResult> CheckIGT(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 56, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int igtFrameCluster = 5, int offset60fps = 0, bool wantQA = false, bool wantSonicboom = false)
     {
         StringBuilder trace = new StringBuilder();
         List<IGTResult> results = null;
@@ -376,10 +429,11 @@ class Surge
                     }
 
                 Trace.WriteLine(trace.ToString());
-
+                return igtSecResults;
                 //Trace.WriteLine(startTile.PokeworldLink + "/" + state.Log);
             }
         }
+        return results;
     }
     
     public static List<IGTResult> CheckFight(string path, int minhp, int maxhp, RedCb[] gbs = null, int numThreads = 12, int numFrames = 60, bool verbose = true, List<int> targetFrames = null, List<int> targetSecs = null, int minClusterSize = 3, int offset60fps = 0, bool wantQA = false){
@@ -408,13 +462,14 @@ class Surge
             res.threeTurn= 0;
             res.IGTSec = (byte) (f / 60);
             res.IGTFrame = (byte) (f % 60);
-            
+            res.Info = "";
             string state = "basesaves/red/manip/surge/surge" + res.IGTSec + "_" + res.IGTFrame + ".gqs";
             
             for(byte currentHP=(byte)minhp;currentHP<=maxhp;currentHP++)
             {   
                 if(System.IO.File.Exists(state)){gb.LoadState(state);}
                 else{return;} 
+                res.Info+= $"HP:{currentHP}. ";
                 gb.CpuWriteBE<ushort>("wPartyMon1HP", (byte)currentHP);
                 if (res.IGTSec == 0 && res.IGTFrame == 32 && currentHP == 14)
                 {
@@ -435,6 +490,7 @@ class Surge
 
                 for (byte i = 0; i < minClusterSize; i++)
                 {
+                    res.Info += $"60FpsFrame{i+offset60fps}. ";
                     gb.LoadState(initialState);
                     gb.AdvanceFrames(i+offset60fps);
                     gb.Press(Joypad.B);
@@ -482,8 +538,11 @@ class Surge
                                 res.qaDeaths++; // using this to count crits
                                 gb.Hold(Joypad.A, gb.SYM["WaitForTextScrollButtonPress"]);
                                 res.dmgTaken[0] += currentHP - gb.CpuReadBE<ushort>(gb.SYM["wBattleMonHP"]);
+                                res.Info += "Pikachu QA Crit. ";
                                 continue; // got crit, still ok
                             }
+                            res.Info += "Pikachu QA ";
+
                         }
                         else if (wantQA)
                         {
@@ -491,6 +550,7 @@ class Surge
                         }
                         else
                         {
+                            res.Info += "Pikachu XSpeed. ";
                             //Console.WriteLine("xspeed");
                         }
                     }
@@ -501,10 +561,14 @@ class Surge
                         }
                         var retP = gb.Hold(Joypad.A, gb.SYM["HandleEnemyMonFainted"], gb.SYM["MoveHitTest.moveMissed"], gb.SYM["CriticalHitTest.SkipHighCritical"] + 0xB, gb.SYM["CheckIfEnemyNeedsToChargeUp"], gb.SYM["WaitForTextScrollButtonPress"]);
                         res.dmgTaken[0] += currentHP - gb.CpuReadBE<ushort>(gb.SYM["wBattleMonHP"]);
-                        if (retP != gb.SYM["HandleEnemyMonFainted"])
+                        if (retP == gb.SYM["CriticalHitTest.SkipHighCritical"] + 0xB)
                         {
-                            //Console.WriteLine("bad retP: " + retP);
+                            res.Info += "Thrash Pikachu Crit. ";
                             continue;
+                        }
+                        else if(retP != gb.SYM["HandleEnemyMonFainted"])
+                        {
+                            return;
                         }
                         gb.Hold(Joypad.A, gb.SYM["WaitForTextScrollButtonPress"]);
                         gb.Press(Joypad.B);
@@ -513,13 +577,27 @@ class Surge
 
                         var retR = gb.Hold(Joypad.A, gb.SYM["HandleEnemyMonFainted"], gb.SYM["MoveHitTest.moveMissed"], gb.SYM["CriticalHitTest.SkipHighCritical"] + 0xB, gb.SYM["CheckIfEnemyNeedsToChargeUp"], gb.SYM["WaitForTextScrollButtonPress"]);
                         //Console.WriteLine("retR: " + retR);
-                        
+                        var move = gb.CpuRead("wEnemySelectedMove");
+
                         gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                         
                         if (retR == gb.SYM["CriticalHitTest.SkipHighCritical"] + 0xB)
                         {
                             gb.RunUntil(gb.SYM["WaitForTextScrollButtonPress"]);
                             res.Crits++;
+                            res.Info += "Thrash Raichu Crit. ";
+                        }
+                        switch (move)
+                        {
+                            case 84:
+                                res.Info += "Raichu Thunder Shock. ";
+                                break;
+                            case 86:
+                                res.Info += "Raichu Quick Attack. ";
+                                break;
+                            case 87:
+                                res.Info += "Raichu Double Team. ";
+                                break;
                         }
                     }
 
@@ -969,6 +1047,17 @@ class Surge
         }
 
         return result;
+    }
+
+    private class SurgeJson : Dictionary<string, SurgePath> { }
+    private class SurgePath
+    {
+        //public string hp { get; set; }
+        public string path { get; set; }
+        //public string link { get; set; }
+        public List<int> frames { get; set; }    
+        public List<int> igtSecs { get; set; }
+        public Dictionary<string, string> logs { get; set; }
     }
 }
 
